@@ -1,0 +1,639 @@
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성</title>
+
+    <!-- QR Code generation powered by qr-code-styling.js (MIT License) by Denys Kozak -->
+    <!-- LICENSE: https://github.com/kozakdenys/qr-code-styling/blob/master/LICENSE ----->
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <!----------------------------------------------------------------------------------->
+
+    <script type="text/javascript" src="/api.js"></script>
+    <link rel="stylesheet" href="/app.css">
+
+    <meta name="naver-site-verification" content="c78c9ea07f82de562ffab18982769037eab8edfd" />
+
+    <meta name="title" content="QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성">
+    <meta name="description" content="텍스트, 와이파이, URL, 이메일, 전화번호, 연락처, 일정, 위치까지 9가지 종류의 QR 코드를 무료로 만들 수 있는 사이트입니다. 색상·로고·모양 등 디자인을 자유롭게 커스터마이징하고 PNG, JPEG, WEBP, SVG로 다운로드하세요.">
+    <meta name="author" content="김민찬">
+    <meta name="language" content="Korean">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="robots" content="index">
+    <link rel="canonical" href="https://qr.minchan.app/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="QR Code 생성기">
+    <meta property="og:title" content="QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성">
+    <meta property="og:description" content="텍스트, 와이파이, URL, 이메일, 전화번호, 일정 등등 9가지 종류의 QR 코드를 무료로 만들고 커스터마이징까지 할 수 있는 사이트입니다.">
+    <meta property="og:url" content="https://minchan.app/">
+    <meta property="og:image" content="https://qr.minchan.app/og-image.png">
+    <meta property="og:locale" content="ko_KR">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성">
+    <meta name="twitter:description" content="텍스트, 와이파이, URL, 이메일, 전화번호, 일정 등등 9가지 종류의 QR 코드를 무료로 만들고 커스터마이징까지 할 수 있는 사이트입니다.">
+    <meta name="twitter:image" content="https://qr.minchan.app/og-image.png">
+  </head>
+  <body>
+    <div class="page-content">
+      <header class="page-header">
+        <h1 id="title">QR Code 생성기</h1>
+        <p class="lead">생성할 QR Code의 유형을 선택하세요.</p>
+        <p class="engine-credit">
+          사용된 QR 코드 생성 엔진:
+          <a href="https://github.com/kozakdenys/qr-code-styling" target="_blank" rel="noopener">qr-code-styling</a>
+          (MIT License) by Denys Kozak | 폰트: 나눔스퀘어 - 네이버
+        </p>
+      </header>
+
+      <div class="app-layout">
+        <!-- ===================== 좌측(데스크톱)/하단(모바일): 히스토리 ===================== -->
+        <aside class="panel-history">
+          <div class="accordion-group" data-group="history">
+            <div class="accordion" id="history-panel">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">히스토리</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <div class="history-toolbar">
+                    <button id="btn-clear-history" type="button">
+                      전체 삭제
+                    </button>
+                  </div>
+                  <div id="history-list"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion" id="history-settings">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">히스토리 설정</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <label class="toggle-row">
+                    <input id="history-enabled-toggle" type="checkbox">
+                    히스토리 기록 사용
+                  </label>
+
+                  <p class="settings-note">
+                    아래 항목은 개인정보 보호를 위해 기본적으로 기록되지
+                    않습니다. 필요한 항목만 켜주세요.<br>
+                    (모든 히스토리 정보는 외부로 전송되지 않으며, 사용자에
+                    브라우저에만 저장됩니다.)
+                  </p>
+
+                  <label class="toggle-row">
+                    <input id="privacy-wifi-password" type="checkbox" data-field="wifi-password">
+                    와이파이 비밀번호 기록
+                  </label>
+                  <label class="toggle-row">
+                    <input id="privacy-vcard-name" type="checkbox" data-field="vcard-name">
+                    연락처 이름 기록
+                  </label>
+                  <label class="toggle-row">
+                    <input id="privacy-vcard-phone" type="checkbox" data-field="vcard-phone">
+                    연락처 전화번호 기록
+                  </label>
+                  <label class="toggle-row">
+                    <input id="privacy-vcard-email" type="checkbox" data-field="vcard-email">
+                    연락처 이메일 기록
+                  </label>
+                  <label class="toggle-row">
+                    <input id="privacy-tel-number" type="checkbox" data-field="tel-number">
+                    전화번호(전화) 기록
+                  </label>
+                  <label class="toggle-row">
+                    <input id="privacy-sms-number" type="checkbox" data-field="sms-number">
+                    전화번호(문자) 번호 기록
+                  </label>
+                  <label class="toggle-row">
+                    <input id="privacy-email-address" type="checkbox" data-field="email-address">
+                    이메일 주소 기록
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ===================== 중앙: QR 생성 본문 ===================== -->
+        <main class="panel-main">
+          <select id="qr-type-select">
+            <option value="text" selected>텍스트</option>
+            <option value="wifi">와이파이</option>
+            <option value="url">URL</option>
+            <option value="email">이메일</option>
+            <option value="tel">전화번호(전화)</option>
+            <option value="sms">전화번호(문자)</option>
+            <option value="vcard">연락처</option>
+            <option value="event">일정</option>
+            <option value="geo">위치</option>
+          </select>
+
+          <!-- 텍스트 -->
+          <div class="type-fields-section" id="type-fields-text">
+            <textarea id="text-content" placeholder="여기에 텍스트 입력..."></textarea>
+          </div>
+
+          <!-- 와이파이 -->
+          <div class="type-fields-section" id="type-fields-wifi" style="display: none">
+            <label>
+              네트워크 이름 (SSID)
+              <input id="wifi-ssid" type="text" placeholder="My_WiFi">
+            </label>
+            <label>
+              비밀번호
+              <input id="wifi-password" type="text" placeholder="비밀번호">
+            </label>
+            <label>
+              암호화 방식
+              <select id="wifi-encryption">
+                <option value="WPA" selected>WPA/WPA2</option>
+                <option value="WEP">WEP</option>
+                <option value="nopass">암호화 없음</option>
+              </select>
+            </label>
+            <label>
+              <input id="wifi-hidden" type="checkbox">
+              숨겨진 네트워크
+            </label>
+          </div>
+
+          <!-- URL -->
+          <div class="type-fields-section" id="type-fields-url" style="display: none">
+            <label>
+              URL
+              <input id="url-input" type="text" placeholder="https://example.com">
+            </label>
+          </div>
+
+          <!-- 이메일 -->
+          <div class="type-fields-section" id="type-fields-email" style="display: none">
+            <label>
+              받는 사람 이메일
+              <input id="email-address" type="email" placeholder="example@email.com">
+            </label>
+            <label>
+              제목 (선택)
+              <input id="email-subject" type="text">
+            </label>
+            <label>
+              내용 (선택)
+              <textarea id="email-body"></textarea>
+            </label>
+          </div>
+
+          <!-- 전화번호(전화) -->
+          <div class="type-fields-section" id="type-fields-tel" style="display: none">
+            <label>
+              전화번호
+              <input id="tel-number" type="tel" placeholder="010-1234-5678">
+            </label>
+          </div>
+
+          <!-- 전화번호(문자) -->
+          <div class="type-fields-section" id="type-fields-sms" style="display: none">
+            <label>
+              전화번호
+              <input id="sms-number" type="tel" placeholder="010-1234-5678">
+            </label>
+            <label>
+              문자 내용 (선택)
+              <textarea id="sms-message"></textarea>
+            </label>
+          </div>
+
+          <!-- 연락처 -->
+          <div class="type-fields-section" id="type-fields-vcard" style="display: none">
+            <label>
+              이름
+              <input id="vcard-name" type="text">
+            </label>
+            <label>
+              전화번호 (선택)
+              <input id="vcard-phone" type="tel">
+            </label>
+            <label>
+              이메일 (선택)
+              <input id="vcard-email" type="email">
+            </label>
+            <label>
+              회사/소속 (선택)
+              <input id="vcard-org" type="text">
+            </label>
+          </div>
+
+          <!-- 일정 -->
+          <div class="type-fields-section" id="type-fields-event" style="display: none">
+            <label>
+              제목
+              <input id="event-title" type="text">
+            </label>
+            <label>
+              시작 일시
+              <input id="event-start" type="datetime-local">
+            </label>
+            <label>
+              종료 일시 (선택)
+              <input id="event-end" type="datetime-local">
+            </label>
+            <label>
+              장소 (선택)
+              <input id="event-location" type="text">
+            </label>
+            <label>
+              설명 (선택)
+              <textarea id="event-description"></textarea>
+            </label>
+          </div>
+
+          <!-- 위치 -->
+          <div class="type-fields-section" id="type-fields-geo" style="display: none">
+            <label>
+              위도
+              <input id="geo-lat" type="number" step="any" placeholder="37.5665">
+            </label>
+            <label>
+              경도
+              <input id="geo-lng" type="number" step="any" placeholder="126.978">
+            </label>
+          </div>
+
+          <div id="qr-preview"></div>
+
+          <button id="btn-convert">생성</button>
+          <button id="btn-export">내보내기</button>
+        </main>
+
+        <!-- ===================== 우측(데스크톱)/하단(모바일): 디자인 설정 ===================== -->
+        <aside class="panel-design">
+          <h2 class="panel-title">디자인 설정</h2>
+
+          <div class="accordion-group" data-group="design">
+            <div class="accordion">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">스타일 저장/불러오기</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <label>
+                    스타일 이름
+                    <input id="preset-name-input" type="text" placeholder="예: 블루 그라데이션">
+                  </label>
+                  <div class="preset-actions">
+                    <button id="btn-save-preset" type="button">
+                      현재 디자인 저장
+                    </button>
+                  </div>
+
+                  <label>
+                    저장된 스타일
+                    <select id="preset-select">
+                      <option value="">저장된 스타일 없음</option>
+                    </select>
+                  </label>
+                  <div class="preset-actions">
+                    <button id="btn-load-preset" type="button">불러오기</button>
+                    <button id="btn-delete-preset" type="button">삭제</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">기본 설정</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <label>
+                    모양
+                    <select id="shape-select">
+                      <option value="square" selected>사각형</option>
+                      <option value="circle">원형</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    너비 (px)
+                    <input id="width-input" type="number" min="50" value="300">
+                  </label>
+
+                  <label>
+                    높이 (px)
+                    <input id="height-input" type="number" min="50" value="300">
+                  </label>
+
+                  <label>
+                    전체 여백 (px)
+                    <input id="margin-input" type="number" min="0" value="0">
+                  </label>
+
+                  <label>
+                    오류 복원율
+                    <select id="error-corr-select">
+                      <option value="L">L (약 7% 복원)</option>
+                      <option value="M">M (약 15% 복원)</option>
+                      <option value="Q" selected>Q (약 25% 복원)</option>
+                      <option value="H">H (약 30% 복원)</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">로고 이미지</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <label>
+                    로고 이미지 URL
+                    <input id="logo-url-input" type="text" placeholder="https://...">
+                  </label>
+
+                  <label>
+                    로고 크기 (0 ~ 0.5)
+                    <input id="image-size-input" type="number" min="0" max="0.5" step="0.01" value="0.4">
+                  </label>
+
+                  <label>
+                    로고 마진 (px)
+                    <input id="image-margin-input" type="number" min="0" value="0">
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">도트(점) 스타일</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <small>주의: 배경색과 비슷한 밝기의 색을 선택할 경우 인식이 잘
+                    안될수도 있습니다.</small>
+                  <label>
+                    색상
+                    <input id="dots-color-input" type="color" value="#000000">
+                  </label>
+
+                  <label>
+                    스타일
+                    <select id="dots-type-select">
+                      <option value="square" selected>사각형</option>
+                      <option value="rounded">둥근 사각형</option>
+                      <option value="extra-rounded">매우 둥근 사각형</option>
+                      <option value="dots">점 패턴</option>
+                      <option value="classy">클래식</option>
+                      <option value="classy-rounded">둥근 클래식</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <input id="dots-gradient-toggle" type="checkbox">
+                    그라데이션 사용
+                  </label>
+
+                  <div id="dots-gradient-fields">
+                    <label>
+                      그라데이션 종류
+                      <select id="dots-gradient-type-select">
+                        <option value="linear" selected>선형</option>
+                        <option value="radial">원형</option>
+                      </select>
+                    </label>
+
+                    <label>
+                      회전 (도)
+                      <input id="dots-gradient-rotation-input" type="number" value="0">
+                    </label>
+
+                    <label>
+                      색상 1
+                      <input id="dots-gradient-color1-input" type="color" value="#000000">
+                    </label>
+
+                    <label>
+                      색상 2
+                      <input id="dots-gradient-color2-input" type="color" value="#ffffff">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">배경 스타일</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <label>
+                    색상
+                    <input id="bg-color-input" type="color" value="#ffffff">
+                  </label>
+
+                  <label>
+                    <input id="bg-gradient-toggle" type="checkbox">
+                    그라데이션 사용
+                  </label>
+
+                  <div id="bg-gradient-fields">
+                    <label>
+                      그라데이션 종류
+                      <select id="bg-gradient-type-select">
+                        <option value="linear" selected>선형</option>
+                        <option value="radial">원형</option>
+                      </select>
+                    </label>
+
+                    <label>
+                      회전 (도)
+                      <input id="bg-gradient-rotation-input" type="number" value="0">
+                    </label>
+
+                    <label>
+                      색상 1
+                      <input id="bg-gradient-color1-input" type="color" value="#ffffff">
+                    </label>
+
+                    <label>
+                      색상 2
+                      <input id="bg-gradient-color2-input" type="color" value="#000000">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">모서리 사각형 스타일</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <small>주의: 배경색과 비슷한 밝기의 색을 선택할 경우 인식이 잘
+                    안될수도 있습니다.</small>
+                  <label>
+                    색상
+                    <input id="corners-square-color-input" type="color" value="#000000">
+                  </label>
+
+                  <label>
+                    스타일
+                    <select id="corners-square-type-select">
+                      <option value="">(점 스타일 따라가기)</option>
+                      <option value="square">사각형</option>
+                      <option value="dot">원형</option>
+                      <option value="dots">점 패턴</option>
+                      <option value="rounded">둥근 사각형</option>
+                      <option value="extra-rounded">매우 둥근 사각형</option>
+                      <option value="classy">클래식</option>
+                      <option value="classy-rounded">둥근 클래식</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <input id="corners-square-gradient-toggle" type="checkbox">
+                    그라데이션 사용
+                  </label>
+
+                  <div id="corners-square-gradient-fields">
+                    <label>
+                      그라데이션 종류
+                      <select id="corners-square-gradient-type-select">
+                        <option value="linear" selected>선형</option>
+                        <option value="radial">원형</option>
+                      </select>
+                    </label>
+
+                    <label>
+                      회전 (도)
+                      <input id="corners-square-gradient-rotation-input" type="number" value="0">
+                    </label>
+
+                    <label>
+                      색상 1
+                      <input id="corners-square-gradient-color1-input" type="color" value="#000000">
+                    </label>
+
+                    <label>
+                      색상 2
+                      <input id="corners-square-gradient-color2-input" type="color" value="#ffffff">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">모서리 도트 스타일</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
+                  <small>주의: 배경색과 비슷한 밝기의 색을 선택할 경우 인식이 잘
+                    안될수도 있습니다.</small>
+                  <label>
+                    색상
+                    <input id="corners-dot-color-input" type="color" value="#000000">
+                  </label>
+
+                  <label>
+                    스타일
+                    <select id="corners-dot-type-select">
+                      <option value="">(점 스타일 따라가기)</option>
+                      <option value="square">사각형</option>
+                      <option value="dot">원형</option>
+                      <option value="dots">점 패턴</option>
+                      <option value="rounded">둥근 사각형</option>
+                      <option value="extra-rounded">매우 둥근 사각형</option>
+                      <option value="classy">클래식</option>
+                      <option value="classy-rounded">둥근 클래식</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <input id="corners-dot-gradient-toggle" type="checkbox">
+                    그라데이션 사용
+                  </label>
+
+                  <div id="corners-dot-gradient-fields">
+                    <label>
+                      그라데이션 종류
+                      <select id="corners-dot-gradient-type-select">
+                        <option value="linear" selected>선형</option>
+                        <option value="radial">원형</option>
+                      </select>
+                    </label>
+
+                    <label>
+                      회전 (도)
+                      <input id="corners-dot-gradient-rotation-input" type="number" value="0">
+                    </label>
+
+                    <label>
+                      색상 1
+                      <input id="corners-dot-gradient-color1-input" type="color" value="#000000">
+                    </label>
+
+                    <label>
+                      색상 2
+                      <input id="corners-dot-gradient-color2-input" type="color" value="#ffffff">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div id="export-modal">
+      <div class="modal-box">
+        <h2>QR 코드 내보내기</h2>
+        <select id="download-ext-select">
+          <option value="png" selected>.png</option>
+          <option value="jpeg">.jpeg</option>
+          <option value="webp">.webp</option>
+          <option value="svg">.svg</option>
+        </select>
+        <div class="modal-actions">
+          <button id="btn-download">다운로드</button>
+          <button id="modal-close-btn">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="page-footer">
+      <hr>
+      <small>Copyright 2026. <a href="https://minchan.app">김민찬</a> All rights
+        reserved.</small>
+      <small>
+        Contact: <a href="/cdn-cgi/l/email-protection#187a6d6b71767d6b6b587571767b70797636796868"><span class="__cf_email__" data-cfemail="264453554f48435555664b4f48454e474808475656">[email&#160;protected]</span></a>
+      </small>
+      <small>Created By Claude</small>
+      <br>
+      <small>
+        이 서비스에는 Denys Kozak이 제작한 qr-code-styling.js 라이브러리가
+        사용되었으며, 네이버에서 제공한 나눔글꼴(나눔스퀘어)이 적용되어
+        있습니다.
+      </small>
+    </footer>
+</body>
+</html>

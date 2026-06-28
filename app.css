@@ -1,0 +1,607 @@
+@import url("https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css");
+* {
+  box-sizing: border-box;
+  font-family: "NanumSquare";
+}
+
+html,
+body {
+  min-height: 100dvh;
+}
+
+body {
+  margin: 0;
+  padding: 6dvh 5dvw 8dvh;
+  font-family: "NanumSquare";
+  color: #111;
+  background: #fff;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 헤더+본문 전체가 화면 높이를 다 채우도록 강제 -&gt; 푸터는 항상 스크롤해야 보임 */
+.page-content {
+  min-height: 100dvh;
+}
+
+/* ---------- 헤더 ---------- */
+.page-header {
+  text-align: center;
+}
+
+h1#title {
+  font-size: clamp(26px, 6dvw, 40px);
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+p.lead {
+  margin: 0 0 8px;
+  font-size: clamp(14px, 2.2dvw, 16px);
+  color: #555;
+}
+
+.engine-credit {
+  margin: 0 0 28px;
+  font-size: 12px;
+  color: #999;
+}
+
+.engine-credit a {
+  color: #999;
+  text-decoration: underline;
+}
+
+.engine-credit a:hover {
+  color: #111;
+}
+
+/* ---------- 전체 레이아웃 ---------- */
+/* dvw/dvh는 "페이지 전체 폭/높이" 기준이라, 사이드바처럼 폭이 고정된
+   좁은 영역 안에서 패딩/간격을 줄 때 쓰면 화면이 넓어질수록 패딩이
+   같이 커져버린다. 그래서 아래부터는 컴포넌트 내부 간격은 모두 고정 px로,
+   페이지 단위의 폭/위치(90dvw, max-height:90dvh 등)만 dvw/dvh로 둔다. */
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "main"
+    "design"
+    "history";
+  gap: 28px;
+  align-items: start;
+}
+
+.panel-main {
+  grid-area: main;
+  text-align: center;
+}
+
+.panel-design {
+  grid-area: design;
+  width: 90dvw;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.panel-history {
+  grid-area: history;
+  width: 90dvw;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.panel-title {
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  font-size: clamp(15px, 2dvw, 16px);
+  font-weight: 700;
+  border-bottom: 1px solid #ddd;
+}
+
+/* ---------- QR 종류 선택 ---------- */
+select#qr-type-select {
+  display: block;
+  width: 90dvw;
+  max-width: 320px;
+  margin: 0 auto 28px;
+  padding: 10px 14px;
+  font-size: clamp(14px, 2dvw, 16px);
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* ---------- QR 종류별 입력 영역 ---------- */
+.type-fields-section {
+  width: 90dvw;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  text-align: left;
+}
+
+.type-fields-section label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin: 14px 0;
+  font-size: clamp(13px, 1.8dvw, 14px);
+}
+
+.type-fields-section label:has(input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.type-fields-section label:has(input[type="checkbox"]) input[type="checkbox"] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.type-fields-section textarea,
+.type-fields-section input[type="text"],
+.type-fields-section input[type="email"],
+.type-fields-section input[type="tel"],
+.type-fields-section input[type="number"],
+.type-fields-section input[type="datetime-local"],
+.type-fields-section select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  font-size: clamp(13px, 1.8dvw, 14px);
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.type-fields-section textarea {
+  min-height: 12dvh;
+  resize: vertical;
+}
+
+/* ---------- QR 미리보기 ---------- */
+#qr-preview {
+  width: min(90dvw, 360px);
+  margin: 24px auto;
+}
+
+#qr-preview svg,
+#qr-preview canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- 버튼 ---------- */
+button {
+  display: inline-block;
+  margin: 6px 6px;
+  padding: 12px 20px;
+  font-size: clamp(14px, 2dvw, 16px);
+  font-family: inherit;
+  color: #111;
+  background: #fff;
+  border: 1px solid #111;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #111;
+  color: #fff;
+}
+
+/* ---------- 아코디언 ---------- */
+.accordion-group .accordion {
+  margin-bottom: 10px;
+}
+
+.accordion-group .accordion:last-child {
+  margin-bottom: 0;
+}
+
+.accordion {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: left;
+  background: #fff;
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 12px 16px;
+  font-family: inherit;
+  color: #222;
+  background: #fafafa;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.accordion-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: clamp(13px, 1.8dvw, 14px);
+  font-weight: 600;
+}
+
+.accordion-icon {
+  flex: none;
+  margin-left: 12px;
+  color: #888;
+  font-size: 13px;
+  transition: transform 0.25s ease;
+}
+
+.accordion.open &gt; .accordion-header .accordion-icon {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.25s ease;
+}
+
+.accordion.open &gt; .accordion-body {
+  border-top: 1px solid #eee;
+}
+
+.accordion-body-inner {
+  padding: 16px;
+  background: #fff;
+}
+
+/* 아코디언 내부 공통 폼 스타일 */
+.accordion-body-inner label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin: 14px 0;
+  font-size: clamp(13px, 1.8dvw, 14px);
+}
+
+.accordion-body-inner label:has(input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.accordion-body-inner input[type="text"],
+.accordion-body-inner input[type="number"],
+.accordion-body-inner select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: clamp(13px, 1.8dvw, 14px);
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.accordion-body-inner input[type="color"] {
+  width: 40px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.accordion-body-inner input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+[id$="-gradient-fields"] {
+  margin-top: 4px;
+  padding-left: 12px;
+  border-left: 2px solid #eee;
+}
+
+.accordion-body-inner small {
+  display: block;
+  margin-bottom: 8px;
+  color: #888;
+  font-size: 12px;
+}
+
+/* ---------- 스타일 저장/불러오기 ---------- */
+.preset-actions {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 16px;
+}
+
+.preset-actions button {
+  flex: 1;
+  margin: 0;
+}
+
+/* ---------- 히스토리 ---------- */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: clamp(13px, 1.8dvw, 14px);
+  justify-content: flex-start;
+}
+
+.toggle-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.settings-note {
+  font-size: 12px;
+  color: #888;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+
+.history-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.history-toolbar button {
+  margin: 0;
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.history-empty {
+  color: #888;
+  font-size: 14px;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.history-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-top: 1px solid #eee;
+}
+
+.history-item:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.history-thumb {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.history-thumb svg {
+  width: 100%;
+  height: 100%;
+}
+
+.history-thumb-locked {
+  font-size: 22px;
+  color: #999;
+  background: #fafafa;
+}
+
+.history-info {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.history-info strong {
+  font-size: 14px;
+}
+
+.history-date {
+  display: inline-block;
+  margin-left: 8px;
+  color: #999;
+  font-size: 12px;
+}
+
+.history-info ul {
+  margin: 6px 0;
+  padding-left: 18px;
+  color: #555;
+}
+
+.history-info li {
+  word-break: break-all;
+}
+
+.history-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.history-actions button {
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* ---------- 모달 ---------- */
+#export-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 16px;
+}
+
+#export-modal .modal-box {
+  width: min(90dvw, 360px);
+  max-height: 90dvh;
+  overflow-y: auto;
+  background: #fff;
+  padding: 28px 24px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+#export-modal h2 {
+  margin: 0 0 20px;
+  font-size: clamp(17px, 2.4dvw, 20px);
+}
+
+#export-modal select#download-ext-select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: clamp(13px, 1.8dvw, 14px);
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#export-modal .modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* ---------- 푸터 ---------- */
+.page-footer {
+  text-align: left;
+}
+
+.page-footer hr {
+  width: 90dvw;
+  max-width: 600px;
+  margin: 40px 0 16px;
+  border: none;
+  border-top: 1px solid #eee;
+}
+
+.page-footer small {
+  display: block;
+  color: #999;
+  font-size: 12px;
+  margin: 4px 0;
+}
+
+.page-footer a {
+  color: #999;
+  text-decoration: underline;
+}
+
+.page-footer a:hover {
+  color: #111;
+}
+
+/* ---------- 모바일 대응 ---------- */
+@media (max-width: 600px) {
+  body {
+    padding: 5dvh 4dvw 6dvh;
+  }
+
+  .accordion-body-inner input[type="checkbox"],
+  .type-fields-section input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  button {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  .preset-actions {
+    flex-direction: column;
+  }
+
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .history-thumb {
+    width: 56px;
+    height: 56px;
+  }
+
+  .history-actions {
+    width: 100%;
+  }
+
+  .history-actions button {
+    flex: 1;
+  }
+
+  #export-modal .modal-actions {
+    flex-direction: column;
+  }
+}
+
+/* ---------- 데스크톱 대응: 3단 사이드바 레이아웃 ---------- */
+@media (min-width: 900px) {
+  body {
+    padding: 6dvh 4dvw 8dvh;
+  }
+
+  .app-layout {
+    grid-template-columns: 260px minmax(0, 1fr) 260px;
+    grid-template-areas: "history main design";
+    max-width: 1180px;
+    margin: 0 auto;
+    gap: 32px;
+  }
+
+  .panel-history,
+  .panel-design {
+    position: sticky;
+    top: 4dvh;
+    width: 100%;
+    max-width: none;
+  }
+
+  select#qr-type-select,
+  .type-fields-section,
+  #qr-preview {
+    width: 100%;
+    max-width: none;
+  }
+
+  .history-item {
+    flex-direction: column;
+  }
+
+  .history-thumb {
+    width: 56px;
+    height: 56px;
+  }
+}
