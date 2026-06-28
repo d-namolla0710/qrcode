@@ -2,6 +2,8 @@
 // (ES 모듈 import 아님 — 브라우저 전역 스크립트 방식)
 
 let currentQrCode = null;
+let logoDataUrl = null;
+let autoPreviewTimer = null;
 
 const QR_TYPES = [
   "text",
@@ -119,12 +121,12 @@ function formatICalDate(datetimeLocalValue) {
  * 선택된 QR 종류와 화면 입력값을 바탕으로 QR에 실제로 인코딩할 데이터 문자열을 생성.
  * 필수값이 비어있으면 alert를 띄우고 null을 반환한다.
  */
-function buildDataString(type) {
+function buildDataString(type, { silent = false } = {}) {
   switch (type) {
     case "text": {
       const text = document.getElementById("text-content").value.trim();
       if (!text) {
-        alert("텍스트를 입력해주세요.");
+        if (!silent) alert("텍스트를 입력해주세요.");
         return null;
       }
       return text;
@@ -137,7 +139,7 @@ function buildDataString(type) {
       const hidden = document.getElementById("wifi-hidden").checked;
 
       if (!ssid) {
-        alert("네트워크 이름(SSID)을 입력해주세요.");
+        if (!silent) alert("네트워크 이름(SSID)을 입력해주세요.");
         return null;
       }
 
@@ -155,7 +157,7 @@ function buildDataString(type) {
     case "url": {
       let url = document.getElementById("url-input").value.trim();
       if (!url) {
-        alert("URL을 입력해주세요.");
+        if (!silent) alert("URL을 입력해주세요.");
         return null;
       }
       if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(url)) {
@@ -170,7 +172,7 @@ function buildDataString(type) {
       const body = document.getElementById("email-body").value.trim();
 
       if (!address) {
-        alert("받는 사람 이메일을 입력해주세요.");
+        if (!silent) alert("받는 사람 이메일을 입력해주세요.");
         return null;
       }
 
@@ -184,7 +186,7 @@ function buildDataString(type) {
     case "tel": {
       const number = document.getElementById("tel-number").value.trim();
       if (!number) {
-        alert("전화번호를 입력해주세요.");
+        if (!silent) alert("전화번호를 입력해주세요.");
         return null;
       }
       return `tel:${number.replace(/[\s-]/g, "")}`;
@@ -195,7 +197,7 @@ function buildDataString(type) {
       const message = document.getElementById("sms-message").value.trim();
 
       if (!number) {
-        alert("전화번호를 입력해주세요.");
+        if (!silent) alert("전화번호를 입력해주세요.");
         return null;
       }
 
@@ -212,7 +214,7 @@ function buildDataString(type) {
       const org = document.getElementById("vcard-org").value.trim();
 
       if (!name) {
-        alert("이름을 입력해주세요.");
+        if (!silent) alert("이름을 입력해주세요.");
         return null;
       }
 
@@ -242,7 +244,7 @@ function buildDataString(type) {
         .value.trim();
 
       if (!title || !start) {
-        alert("제목과 시작 일시를 입력해주세요.");
+        if (!silent) alert("제목과 시작 일시를 입력해주세요.");
         return null;
       }
 
@@ -272,7 +274,7 @@ function buildDataString(type) {
       const lng = document.getElementById("geo-lng").value.trim();
 
       if (!lat || !lng) {
-        alert("위도와 경도를 입력해주세요.");
+        if (!silent) alert("위도와 경도를 입력해주세요.");
         return null;
       }
 
@@ -291,6 +293,101 @@ function buildDataString(type) {
  * @param {object} settings - 사용자 커스터마이징 옵션
  * @returns {QRCodeStyling} 생성된 QRCodeStyling 인스턴스
  */
+/* ==================== 명도 대비 검사 (WCAG relative luminance) ==================== */
+
+function sRGBToLinear(c) {
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+function getRelativeLuminance(hex) {
+  hex = hex.replace(/^#/, "");
+  if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
+  const r = sRGBToLinear(parseInt(hex.slice(0, 2), 16) / 255);
+  const g = sRGBToLinear(parseInt(hex.slice(2, 4), 16) / 255);
+  const b = sRGBToLinear(parseInt(hex.slice(4, 6), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function getContrastRatio(hex1, hex2) {
+  const L1 = getRelativeLuminance(hex1);
+  const L2 = getRelativeLuminance(hex2);
+  const lighter = Math.max(L1, L2);
+  const darker = Math.min(L1, L2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function getFormColors(colorId, toggleId, c1Id, c2Id) {
+  if (document.getElementById(toggleId)?.checked) {
+    return [
+      document.getElementById(c1Id).value,
+      document.getElementById(c2Id).value,
+    ];
+  }
+  return [document.getElementById(colorId).value];
+}
+
+function computeMinContrastRatio() {
+  const bgColors = getFormColors(
+    "bg-color-input", "bg-gradient-toggle",
+    "bg-gradient-color1-input", "bg-gradient-color2-input"
+  );
+  const fgColorGroups = [
+    getFormColors("dots-color-input", "dots-gradient-toggle",
+      "dots-gradient-color1-input", "dots-gradient-color2-input"),
+    getFormColors("corners-square-color-input", "corners-square-gradient-toggle",
+      "corners-square-gradient-color1-input", "corners-square-gradient-color2-input"),
+    getFormColors("corners-dot-color-input", "corners-dot-gradient-toggle",
+      "corners-dot-gradient-color1-input", "corners-dot-gradient-color2-input"),
+  ];
+
+  let minRatio = 21;
+  for (const bg of bgColors) {
+    for (const fgColors of fgColorGroups) {
+      for (const fg of fgColors) {
+        try {
+          minRatio = Math.min(minRatio, getContrastRatio(bg, fg));
+        } catch {
+          // 유효하지 않은 색상 무시
+        }
+      }
+    }
+  }
+  return minRatio;
+}
+
+function applyContrastWarning(warningEl, textEl, ratio) {
+  if (!warningEl) return;
+  const boxEl = warningEl.querySelector(".contrast-warning-box");
+  let level = null;
+  let msg = "";
+  if (ratio < 1.5) {
+    level = "severe";
+    msg = `명도 대비 ${ratio.toFixed(1)}:1 — 배경색과 QR 색상이 거의 구별되지 않아 대부분의 기기에서 인식이 불가능합니다.`;
+  } else if (ratio < 3) {
+    level = "moderate";
+    msg = `명도 대비 ${ratio.toFixed(1)}:1 — 대비가 낮아 일부 기기(구형·저가형·카메라 품질이 낮은 기기)에서 인식이 잘 안될 수 있습니다.`;
+  }
+  if (level) {
+    if (textEl) textEl.textContent = msg;
+    if (boxEl) boxEl.className = `contrast-warning-box warning-${level}`;
+    warningEl.style.display = "";
+  } else {
+    warningEl.style.display = "none";
+  }
+}
+
+function updateContrastWarning() {
+  const ratio = computeMinContrastRatio();
+  applyContrastWarning(
+    document.getElementById("qr-contrast-warning"),
+    document.getElementById("contrast-warning-text"),
+    ratio
+  );
+  return ratio;
+}
+
+/* ==================== QR 코드 생성 ==================== */
+
 function generate(data, settings = {}) {
   const {
     errorCorrLvl = "Q",
@@ -364,14 +461,32 @@ function makeQrSvgResponsive(container) {
   const svgEl = container.querySelector("svg");
   if (!svgEl) return;
 
-  const width = svgEl.getAttribute("width");
-  const height = svgEl.getAttribute("height");
+  const width = svgEl.getAttribute("width") || svgEl.style.width.replace("px", "");
+  const height = svgEl.getAttribute("height") || svgEl.style.height.replace("px", "");
 
   if (width && height) {
     svgEl.setAttribute("viewBox", `0 0 ${width} ${height}`);
     svgEl.removeAttribute("width");
     svgEl.removeAttribute("height");
+    svgEl.style.width = "";
+    svgEl.style.height = "";
   }
+}
+
+/**
+ * 새 QR을 생성해 기존 SVG와 원자적으로 교체한다 (replaceChildren).
+ * innerHTML 초기화를 하지 않으므로 깜빡임이 없다.
+ */
+function renderQrPreviewAuto(data, settings) {
+  const newQrCode = generate(data, settings);
+  const temp = document.createElement("div");
+  newQrCode.append(temp);
+  makeQrSvgResponsive(temp);
+  const newEl = temp.firstElementChild;
+  if (!newEl) return;
+  document.getElementById("qr-preview").replaceChildren(newEl);
+  currentQrCode = newQrCode;
+  updateContrastWarning();
 }
 
 /**
@@ -441,10 +556,16 @@ function collectSettingsFromForm() {
   const cornersDotType = document.getElementById(
     "corners-dot-type-select",
   ).value;
+  const logoSource =
+    document.querySelector('input[name="logo-source"]:checked')?.value ?? "url";
+  const image =
+    logoSource === "upload"
+      ? logoDataUrl || undefined
+      : document.getElementById("logo-url-input").value || undefined;
 
   return {
     errorCorrLvl: document.getElementById("error-corr-select").value,
-    image: document.getElementById("logo-url-input").value || undefined,
+    image,
     margin: Number(document.getElementById("margin-input").value),
     shape: document.getElementById("shape-select").value,
     width: Number(document.getElementById("width-input").value),
@@ -488,6 +609,11 @@ function applySettingsToForm(settings) {
   document.getElementById("error-corr-select").value =
     settings.errorCorrLvl ?? "Q";
   document.getElementById("logo-url-input").value = settings.image ?? "";
+  document.querySelector('input[name="logo-source"][value="url"]').checked = true;
+  document.getElementById("logo-url-area").style.display = "";
+  document.getElementById("logo-upload-area").style.display = "none";
+  logoDataUrl = null;
+  document.getElementById("logo-file-preview").style.display = "none";
   document.getElementById("margin-input").value = settings.margin ?? 0;
   document.getElementById("shape-select").value = settings.shape ?? "square";
   document.getElementById("width-input").value = settings.width ?? 300;
@@ -536,37 +662,52 @@ function syncTypeFields() {
 }
 
 /**
- * "생성" 버튼 클릭 시: 입력값으로 QR 생성 후 미리보기 영역에 렌더링
+ * "생성" 버튼 클릭 시: 입력값으로 QR 생성 후 미리보기 갱신 및 히스토리 기록
  */
 function renderQrPreview() {
+  clearTimeout(autoPreviewTimer);
   const type = document.getElementById("qr-type-select").value;
   const data = buildDataString(type);
-
-  if (!data) {
-    return; // buildDataString에서 이미 alert 처리함
-  }
+  if (!data) return;
 
   const settings = collectSettingsFromForm();
-  currentQrCode = generate(data, settings);
-
-  const previewContainer = document.getElementById("qr-preview");
-  previewContainer.innerHTML = ""; // 이전 QR 코드 제거
-  currentQrCode.append(previewContainer);
-  makeQrSvgResponsive(previewContainer);
-
+  renderQrPreviewAuto(data, settings);
   recordHistoryEntry(type, data, settings);
 }
 
 /**
- * "내보내기" 버튼 클릭 시: 아직 생성된 QR이 없으면 먼저 생성하고, 다운로드 모달을 띔
+ * 입력값 또는 디자인 설정 변경 시 300ms 디바운스 후 자동으로 미리보기를 갱신한다.
+ */
+function scheduleAutoPreview() {
+  clearTimeout(autoPreviewTimer);
+  autoPreviewTimer = setTimeout(() => {
+    const type = document.getElementById("qr-type-select").value;
+    const data = buildDataString(type, { silent: true });
+    if (!data) return;
+    const settings = collectSettingsFromForm();
+    renderQrPreviewAuto(data, settings);
+  }, 300);
+}
+
+/**
+ * "내보내기" 버튼 클릭 시: 현재 입력값/스타일로 QR을 갱신한 뒤 다운로드 모달을 띔
  */
 function openExportModal() {
-  if (!currentQrCode) {
-    renderQrPreview();
-    if (!currentQrCode) {
-      return; // 필수 입력값이 비어있어서 생성 실패한 경우
-    }
-  }
+  const type = document.getElementById("qr-type-select").value;
+  const data = buildDataString(type);
+  if (!data) return;
+
+  const settings = collectSettingsFromForm();
+  renderQrPreviewAuto(data, settings); // 내부에서 updateContrastWarning() 호출됨
+
+  // 내보내기 모달에도 동일한 대비 경고 표시
+  const ratio = computeMinContrastRatio();
+  applyContrastWarning(
+    document.getElementById("export-contrast-warning"),
+    document.getElementById("export-contrast-warning-text"),
+    ratio
+  );
+
   document.getElementById("export-modal").style.display = "flex";
 }
 
@@ -842,9 +983,20 @@ function renderHistoryList() {
           ...entry.settings,
           width: 90,
           height: 90,
+          image: undefined, // 썸네일은 로고 없이 생성 (CORS 문제 방지)
         });
-        thumbQr.append(thumb);
-        makeQrSvgResponsive(thumb);
+        const tempDiv = document.createElement("div");
+        thumbQr.append(tempDiv);
+        const svgEl = tempDiv.querySelector("svg");
+        if (svgEl) {
+          // 인라인 SVG 대신 data URL img로 변환 → 문서 내 SVG id 충돌 방지
+          const svgStr = new XMLSerializer().serializeToString(svgEl);
+          const b64 = btoa(unescape(encodeURIComponent(svgStr)));
+          const img = new Image();
+          img.src = `data:image/svg+xml;base64,${b64}`;
+          img.style.cssText = "width:100%;height:100%;object-fit:contain;";
+          thumb.appendChild(img);
+        }
       } catch {
         thumb.classList.add("history-thumb-locked");
         thumb.textContent = "?";
@@ -1049,4 +1201,53 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("btn-clear-history")
     .addEventListener("click", clearHistory);
+
+  // 자동 미리보기: 입력값/디자인 변경 시 디바운스 후 갱신
+  ["input", "change"].forEach((eventName) => {
+    document.addEventListener(eventName, (e) => {
+      const t = e.target;
+      if (t.id === "logo-file-input") return;
+
+      if (t.name === "logo-source") {
+        const isUpload = t.value === "upload";
+        document.getElementById("logo-url-area").style.display = isUpload ? "none" : "";
+        document.getElementById("logo-upload-area").style.display = isUpload ? "" : "none";
+      }
+
+      if (
+        t.closest(".type-fields-section") ||
+        t.closest(".panel-design") ||
+        t.id === "qr-type-select"
+      ) {
+        scheduleAutoPreview();
+      }
+    });
+  });
+
+  // 로고 파일 업로드: FileReader로 data URL 변환 후 자동 미리보기
+  document.getElementById("logo-file-input").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      logoDataUrl = null;
+      document.getElementById("logo-file-preview").style.display = "none";
+      scheduleAutoPreview();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      logoDataUrl = ev.target.result;
+      document.getElementById("logo-file-thumb").src = logoDataUrl;
+      document.getElementById("logo-file-preview").style.display = "flex";
+      scheduleAutoPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // 로고 이미지 제거 버튼
+  document.getElementById("logo-file-clear").addEventListener("click", () => {
+    logoDataUrl = null;
+    document.getElementById("logo-file-input").value = "";
+    document.getElementById("logo-file-preview").style.display = "none";
+    scheduleAutoPreview();
+  });
 });
