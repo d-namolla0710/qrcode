@@ -301,7 +301,11 @@ function sRGBToLinear(c) {
 
 function getRelativeLuminance(hex) {
   hex = hex.replace(/^#/, "");
-  if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
+  if (hex.length === 3)
+    hex = hex
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const r = sRGBToLinear(parseInt(hex.slice(0, 2), 16) / 255);
   const g = sRGBToLinear(parseInt(hex.slice(2, 4), 16) / 255);
   const b = sRGBToLinear(parseInt(hex.slice(4, 6), 16) / 255);
@@ -328,16 +332,30 @@ function getFormColors(colorId, toggleId, c1Id, c2Id) {
 
 function computeMinContrastRatio() {
   const bgColors = getFormColors(
-    "bg-color-input", "bg-gradient-toggle",
-    "bg-gradient-color1-input", "bg-gradient-color2-input"
+    "bg-color-input",
+    "bg-gradient-toggle",
+    "bg-gradient-color1-input",
+    "bg-gradient-color2-input",
   );
   const fgColorGroups = [
-    getFormColors("dots-color-input", "dots-gradient-toggle",
-      "dots-gradient-color1-input", "dots-gradient-color2-input"),
-    getFormColors("corners-square-color-input", "corners-square-gradient-toggle",
-      "corners-square-gradient-color1-input", "corners-square-gradient-color2-input"),
-    getFormColors("corners-dot-color-input", "corners-dot-gradient-toggle",
-      "corners-dot-gradient-color1-input", "corners-dot-gradient-color2-input"),
+    getFormColors(
+      "dots-color-input",
+      "dots-gradient-toggle",
+      "dots-gradient-color1-input",
+      "dots-gradient-color2-input",
+    ),
+    getFormColors(
+      "corners-square-color-input",
+      "corners-square-gradient-toggle",
+      "corners-square-gradient-color1-input",
+      "corners-square-gradient-color2-input",
+    ),
+    getFormColors(
+      "corners-dot-color-input",
+      "corners-dot-gradient-toggle",
+      "corners-dot-gradient-color1-input",
+      "corners-dot-gradient-color2-input",
+    ),
   ];
 
   let minRatio = 21;
@@ -381,7 +399,7 @@ function updateContrastWarning() {
   applyContrastWarning(
     document.getElementById("qr-contrast-warning"),
     document.getElementById("contrast-warning-text"),
-    ratio
+    ratio,
   );
   return ratio;
 }
@@ -461,8 +479,10 @@ function makeQrSvgResponsive(container) {
   const svgEl = container.querySelector("svg");
   if (!svgEl) return;
 
-  const width = svgEl.getAttribute("width") || svgEl.style.width.replace("px", "");
-  const height = svgEl.getAttribute("height") || svgEl.style.height.replace("px", "");
+  const width =
+    svgEl.getAttribute("width") || svgEl.style.width.replace("px", "");
+  const height =
+    svgEl.getAttribute("height") || svgEl.style.height.replace("px", "");
 
   if (width && height) {
     svgEl.setAttribute("viewBox", `0 0 ${width} ${height}`);
@@ -609,7 +629,8 @@ function applySettingsToForm(settings) {
   document.getElementById("error-corr-select").value =
     settings.errorCorrLvl ?? "Q";
   document.getElementById("logo-url-input").value = settings.image ?? "";
-  document.querySelector('input[name="logo-source"][value="url"]').checked = true;
+  document.querySelector('input[name="logo-source"][value="url"]').checked =
+    true;
   document.getElementById("logo-url-area").style.display = "";
   document.getElementById("logo-upload-area").style.display = "none";
   logoDataUrl = null;
@@ -705,7 +726,7 @@ function openExportModal() {
   applyContrastWarning(
     document.getElementById("export-contrast-warning"),
     document.getElementById("export-contrast-warning-text"),
-    ratio
+    ratio,
   );
 
   document.getElementById("export-modal").style.display = "flex";
@@ -795,6 +816,14 @@ function loadSelectedStylePreset() {
   if (!preset) return;
 
   applySettingsToForm(preset);
+
+  // 미리보기 업데이트
+  const type = document.getElementById("qr-type-select").value;
+  const data = buildDataString(type);
+  if (!data) return;
+
+  const settings = collectSettingsFromForm();
+  renderQrPreviewAuto(data, settings);
 }
 
 function deleteSelectedStylePreset() {
@@ -1210,8 +1239,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (t.name === "logo-source") {
         const isUpload = t.value === "upload";
-        document.getElementById("logo-url-area").style.display = isUpload ? "none" : "";
-        document.getElementById("logo-upload-area").style.display = isUpload ? "" : "none";
+        document.getElementById("logo-url-area").style.display = isUpload
+          ? "none"
+          : "";
+        document.getElementById("logo-upload-area").style.display = isUpload
+          ? ""
+          : "none";
       }
 
       if (
@@ -1250,4 +1283,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("logo-file-preview").style.display = "none";
     scheduleAutoPreview();
   });
-});
+});
