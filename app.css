@@ -1,4 +1,4 @@
-@import url('https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/nanumsquare.css');
+@import url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/nanumsquare.css");
 * {
   box-sizing: border-box;
   font-family: "NanumSquare";
@@ -17,6 +17,15 @@ body {
   background: #fff;
   word-break: keep-all;
   overflow-wrap: break-word;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 /* 헤더+본문 전체가 화면 높이를 다 채우도록 강제 -&gt; 푸터는 항상 스크롤해야 보임 */
@@ -44,11 +53,11 @@ p.lead {
 .engine-credit {
   margin: 0 0 28px;
   font-size: 12px;
-  color: #999;
+  color: #595959;
 }
 
 .engine-credit a {
-  color: #999;
+  color: #595959;
   text-decoration: underline;
 }
 
@@ -246,7 +255,7 @@ button:hover {
   transition: transform 0.25s ease;
 }
 
-.accordion.open &gt; .accordion-header .accordion-icon {
+.accordion.open > .accordion-header .accordion-icon {
   transform: rotate(180deg);
 }
 
@@ -256,7 +265,7 @@ button:hover {
   transition: height 0.25s ease;
 }
 
-.accordion.open &gt; .accordion-body {
+.accordion.open > .accordion-body {
   border-top: 1px solid #eee;
 }
 
@@ -508,13 +517,13 @@ button:hover {
 
 .page-footer small {
   display: block;
-  color: #999;
+  color: #595959;
   font-size: 12px;
   margin: 4px 0;
 }
 
 .page-footer a {
-  color: #999;
+  color: #595959;
   text-decoration: underline;
 }
 
@@ -724,4 +733,4 @@ button:hover {
     width: 56px;
     height: 56px;
   }
-}
+}
