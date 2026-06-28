@@ -181,9 +181,9 @@
         <!-- ===================== 중앙: QR 생성 본문 ===================== -->
         <main class="panel-main">
           <select id="qr-type-select">
-            <option value="text" selected>텍스트</option>
+            <option value="url" selected>URL</option>
             <option value="wifi">와이파이</option>
-            <option value="url">URL</option>
+            <option value="text">텍스트</option>
             <option value="email">이메일</option>
             <option value="tel">전화번호(전화)</option>
             <option value="sms">전화번호(문자)</option>
@@ -374,17 +374,21 @@
             </label>
           </div>
 
-          <div id="qr-contrast-warning" style="display:none">
+          <div id="qr-contrast-warning" style="display: none">
             <div class="contrast-warning-box">
               <span id="contrast-warning-text"></span>
               <details class="contrast-tip">
                 <summary>해결 방법 보기</summary>
                 <div class="contrast-tip-body">
-                  <p>배경색과 도트(점)·모서리 색상 사이의 명도 차이가 부족합니다.</p>
+                  <p>
+                    배경색과 도트(점)·모서리 색상 사이의 명도 차이가 부족합니다.
+                  </p>
                   <ul>
                     <li>배경색을 더 밝게, 도트·모서리 색상을 더 어둡게 조정</li>
                     <li>또는 반대로 어두운 배경에 밝은 도트·모서리</li>
-                    <li>그라데이션 사용 시 양 끝 색상 모두 배경과 충분한 대비 유지</li>
+                    <li>
+                      그라데이션 사용 시 양 끝 색상 모두 배경과 충분한 대비 유지
+                    </li>
                   </ul>
                 </div>
               </details>
@@ -875,17 +879,21 @@
           <option value="webp">.webp</option>
           <option value="svg">.svg</option>
         </select>
-        <div id="export-contrast-warning" style="display:none">
+        <div id="export-contrast-warning" style="display: none">
           <div class="contrast-warning-box">
             <span id="export-contrast-warning-text"></span>
             <details class="contrast-tip">
               <summary>해결 방법 보기</summary>
               <div class="contrast-tip-body">
-                <p>배경색과 도트(점)·모서리 색상 사이의 명도 차이가 부족합니다.</p>
+                <p>
+                  배경색과 도트(점)·모서리 색상 사이의 명도 차이가 부족합니다.
+                </p>
                 <ul>
                   <li>배경색을 더 밝게, 도트·모서리 색상을 더 어둡게 조정</li>
                   <li>또는 반대로 어두운 배경에 밝은 도트·모서리</li>
-                  <li>그라데이션 사용 시 양 끝 색상 모두 배경과 충분한 대비 유지</li>
+                  <li>
+                    그라데이션 사용 시 양 끝 색상 모두 배경과 충분한 대비 유지
+                  </li>
                 </ul>
               </div>
             </details>
