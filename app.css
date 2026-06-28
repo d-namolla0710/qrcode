@@ -367,8 +367,15 @@ button:hover {
 
 .history-toolbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-bottom: 12px;
+}
+.history-toolbar small {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  width: fit-content;
+  margin: 0;
 }
 
 .history-toolbar button {
