@@ -1,7 +1,8 @@
 @import url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/nanumsquare.css");
 * {
   box-sizing: border-box;
-  font-family: "NanumSquare";
+  font-family: "NanumSquare", system-ui;
+  font-display: swap;
 }
 
 html,
@@ -12,7 +13,7 @@ body {
 body {
   margin: 0;
   padding: 6dvh 5dvw 8dvh;
-  font-family: "NanumSquare";
+  font-family: "NanumSquare", system-ui;
   color: #111;
   background: #fff;
   word-break: keep-all;
