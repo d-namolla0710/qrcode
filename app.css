@@ -1,4 +1,19 @@
-@import url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/nanumsquare.css");
+@font-face {
+  font-family: "NanumSquare";
+  font-weight: 400;
+  src:
+    local("☺"),
+    url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2")
+      format("woff2");
+}
+@font-face {
+  font-family: "NanumSquare";
+  font-weight: 700;
+  src:
+    local("☺"),
+    url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2")
+      format("woff2");
+}
 * {
   box-sizing: border-box;
   font-family: "NanumSquare", system-ui;
