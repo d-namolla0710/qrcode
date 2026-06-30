@@ -5,20 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성</title>
 
-    <!-- QR Code generation powered by qr-code-styling.js (MIT License) by Denys Kozak -->
-    <!-- LICENSE: https://github.com/kozakdenys/qr-code-styling/blob/master/LICENSE ----->
-    <script
-      type="text/javascript"
-      src="https://unpkg.com/qr-code-styling@1.9.2/lib/qr-code-styling.js"
-    ></script>
-    <!----------------------------------------------------------------------------------->
+    <!-- 외부 도메인 미리 연결 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
 
+    <!-- 헤더에 바로 쓰이는 폰트는 preload -->
+    <link
+      rel="preload"
+      href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- 인증 관련 -->
     <meta
       name="naver-site-verification"
       content="c78c9ea07f82de562ffab18982769037eab8edfd"
     />
     <meta name="google-adsense-account" content="ca-pub-9976228668134956" />
+    <!-- 인증 관련 END-->
 
+    <!-- 검색엔진 메타데이터 -->
     <meta
       name="title"
       content="QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성"
@@ -32,7 +40,9 @@
     <meta name="theme-color" content="#ffffff" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://qr.minchan.app/" />
+    <!-- 검색엔진 메타데이터 END -->
 
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="QR Code 생성기" />
     <meta
@@ -46,7 +56,9 @@
     <meta property="og:url" content="https://qr.minchan.app/" />
     <meta property="og:image" content="https://qr.minchan.app/og-image.png" />
     <meta property="og:locale" content="ko_KR" />
+    <!-- Open Graph END -->
 
+    <!-- SNS-Twitter 메타데이터 -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
@@ -57,11 +69,13 @@
       content="텍스트, 와이파이, URL, 이메일, 전화번호, 일정 등등 9가지 종류의 QR 코드를 무료로 만들고 커스터마이징까지 할 수 있는 사이트입니다."
     />
     <meta name="twitter:image" content="https://qr.minchan.app/og-image.png" />
+    <!-- SNS-Twitter 메타데이터 END -->
 
     <style>
       @font-face {
         font-family: "NanumSquare";
         font-weight: 400;
+        font-display: swap; /* 추가 */
         src:
           local("☺"),
           url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2")
@@ -70,14 +84,26 @@
       @font-face {
         font-family: "NanumSquare";
         font-weight: 700;
+        font-display: swap; /* 추가 */
         src:
           local("☺"),
           url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2")
             format("woff2");
       }
     </style>
-    <script type="text/javascript" src="/api.js"></script>
+
     <link rel="stylesheet" href="/app.css" />
+
+    <!-- 렌더링 막지 않도록 defer -->
+    <script defer src="/api.js"></script>
+
+    <!-- QR Code generation powered by qr-code-styling.js (MIT License) by Denys Kozak -->
+    <!-- LICENSE: https://github.com/kozakdenys/qr-code-styling/blob/master/LICENSE ----->
+    <script
+      defer
+      src="https://unpkg.com/qr-code-styling@1.9.2/lib/qr-code-styling.js"
+    ></script>
+    <!----------------------------------------------------------------------------------->
   </head>
   <body>
     <div class="page-content">
