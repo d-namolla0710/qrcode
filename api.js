@@ -1151,8 +1151,56 @@ function initAccordions() {
   });
 }
 
+/* ==================== 브라우저 호환성 경고 ==================== */
+
+const BROWSER_WARNING_DISMISSED_KEY = "qrgen-browser-warning-dismissed";
+
+function isChromeBrowser() {
+  const ua = navigator.userAgent;
+  // CriOS = Chrome on iOS
+  if (/CriOS\//.test(ua)) return true;
+  // Chrome on desktop/Android: "Chrome/" 있고 Edge·Opera·Samsung 아님
+  return (
+    /Chrome\//.test(ua) &&
+    !/Edg\//.test(ua) &&
+    !/OPR\//.test(ua) &&
+    !/SamsungBrowser\//.test(ua)
+  );
+}
+
+function initBrowserWarning() {
+  if (isChromeBrowser()) return;
+  if (localStorage.getItem(BROWSER_WARNING_DISMISSED_KEY) === "true") return;
+
+  const warningEl = document.getElementById("browser-warning");
+  warningEl.style.display = "";
+
+  // 플랫폼별 Chrome으로 열기 링크 설정
+  const currentUrl = window.location.href;
+  const chromeLink = document.getElementById("browser-warning-chrome-link");
+  const ua = navigator.userAgent;
+
+  if (/iPhone|iPad|iPod/.test(ua)) {
+    chromeLink.href = `googlechrome://navigate?url=${encodeURIComponent(currentUrl)}`;
+  } else if (/Android/.test(ua)) {
+    const host = currentUrl.replace(/^https?:\/\//, "");
+    chromeLink.href = `intent://${host}#Intent;scheme=https;package=com.android.chrome;end`;
+  } else {
+    // 데스크톱: 원클릭으로 열 수 없으므로 링크 숨김
+    chromeLink.style.display = "none";
+  }
+
+  document.getElementById("browser-warning-close").addEventListener("click", () => {
+    if (document.getElementById("browser-warning-noshow").checked) {
+      localStorage.setItem(BROWSER_WARNING_DISMISSED_KEY, "true");
+    }
+    warningEl.style.display = "none";
+  });
+}
+
 // DOM 로드 후 이벤트 연결
 document.addEventListener("DOMContentLoaded", () => {
+  initBrowserWarning();
   initAccordions();
   document
     .getElementById("qr-type-select")
