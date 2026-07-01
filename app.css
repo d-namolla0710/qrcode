@@ -1,3 +1,146 @@
+/* ===================================================================
+   테마 변수  —  @media (prefers-color-scheme) 를 쓰면 시스템 설정을
+   자동으로 따르지만, JS 가 <html data-theme="..."> 를 설정한 순간부터
+   그 명시값이 우선합니다. 인라인 스크립트로 FOUC 를 방지합니다.
+=================================================================== */
+:root {
+  color-scheme: light;
+
+  /* 배경 */
+  --bg: #ffffff;
+  --bg-2: #fafafa;
+  --bg-3: #f0f0f0;
+
+  /* 텍스트 */
+  --fg: #111111;
+  --fg-2: #333333;
+  --fg-3: #595959;
+  --fg-4: #888888;
+  --fg-5: #aaaaaa;
+
+  /* 테두리 */
+  --border: #dddddd;
+  --border-2: #eeeeee;
+  --border-input: #cccccc;
+
+  /* 경고 — 중간 */
+  --warn-mod-bg: #fff8e1;
+  --warn-mod-border: #f9a825;
+  --warn-mod-fg: #4e3600;
+
+  /* 경고 — 심각 */
+  --warn-sev-bg: #ffebee;
+  --warn-sev-border: #e53935;
+  --warn-sev-fg: #7f0000;
+
+  /* 브라우저 경고 */
+  --bwarn-bg: #fff8e1;
+  --bwarn-border: #f9a825;
+  --bwarn-fg: #4e3600;
+  --bwarn-link: #0057b7;
+  --bwarn-link-hover: #003d82;
+
+  /* 즐겨찾기 */
+  --fav: #f5a623;
+  --fav-bg: #fff8ee;
+  --fav-item-bg: #fffdf5;
+
+  /* 패치노트 */
+  --pn-border: #111111;
+
+  /* 스크롤바 */
+  --scrollbar-track: #f0f0f0;
+  --scrollbar-thumb: #cccccc;
+  --scrollbar-thumb-hover: #aaaaaa;
+
+  /* 파일 인풋 */
+  --file-bg: #f8f9fa;
+  --file-border: #cccccc;
+  --file-border-hover: #888888;
+  --file-fg: #595959;
+}
+
+/* 다크 모드: 시스템 설정 (명시적 override 없을 때) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #141414;
+    --bg-2: #1e1e1e;
+    --bg-3: #2c2c2c;
+    --fg: #e2e2e2;
+    --fg-2: #c0c0c0;
+    --fg-3: #909090;
+    --fg-4: #636363;
+    --fg-5: #666666;
+    --border: #383838;
+    --border-2: #2c2c2c;
+    --border-input: #4a4a4a;
+    --warn-mod-bg: #2a1f00;
+    --warn-mod-border: #c68a00;
+    --warn-mod-fg: #ffd54f;
+    --warn-sev-bg: #240000;
+    --warn-sev-border: #b71c1c;
+    --warn-sev-fg: #ef9a9a;
+    --bwarn-bg: #2a1f00;
+    --bwarn-border: #c68a00;
+    --bwarn-fg: #ffd54f;
+    --bwarn-link: #64b5f6;
+    --bwarn-link-hover: #90caf9;
+    --fav: #f5a623;
+    --fav-bg: #2a1f00;
+    --fav-item-bg: #1e1a00;
+    --pn-border: #e2e2e2;
+    --scrollbar-track: #1e1e1e;
+    --scrollbar-thumb: #444444;
+    --scrollbar-thumb-hover: #636363;
+    --file-bg: #1e1e1e;
+    --file-border: #4a4a4a;
+    --file-border-hover: #636363;
+    --file-fg: #909090;
+  }
+}
+
+/* 다크 모드: 사용자가 명시적으로 선택 */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #141414;
+  --bg-2: #1e1e1e;
+  --bg-3: #2c2c2c;
+  --fg: #e2e2e2;
+  --fg-2: #c0c0c0;
+  --fg-3: #909090;
+  --fg-4: #636363;
+  --fg-5: #666666;
+  --border: #383838;
+  --border-2: #2c2c2c;
+  --border-input: #4a4a4a;
+  --warn-mod-bg: #2a1f00;
+  --warn-mod-border: #c68a00;
+  --warn-mod-fg: #ffd54f;
+  --warn-sev-bg: #240000;
+  --warn-sev-border: #b71c1c;
+  --warn-sev-fg: #ef9a9a;
+  --bwarn-bg: #2a1f00;
+  --bwarn-border: #c68a00;
+  --bwarn-fg: #ffd54f;
+  --bwarn-link: #64b5f6;
+  --bwarn-link-hover: #90caf9;
+  --fav: #f5a623;
+  --fav-bg: #2a1f00;
+  --fav-item-bg: #1e1a00;
+  --pn-border: #e2e2e2;
+  --scrollbar-track: #1e1e1e;
+  --scrollbar-thumb: #444444;
+  --scrollbar-thumb-hover: #636363;
+  --file-bg: #1e1e1e;
+  --file-border: #4a4a4a;
+  --file-border-hover: #636363;
+  --file-fg: #909090;
+}
+
+/* ===================================================================
+   기본 리셋 & 폰트
+=================================================================== */
 * {
   box-sizing: border-box;
   font-family: "NanumSquare", system-ui;
@@ -12,8 +155,8 @@ body {
   margin: 0;
   padding: 6dvh 5dvw 8dvh;
   font-family: "NanumSquare";
-  color: #111;
-  background: #fff;
+  color: var(--fg);
+  background: var(--bg);
   word-break: keep-all;
   overflow-wrap: break-word;
 }
@@ -27,13 +170,13 @@ body {
   white-space: nowrap;
 }
 
-/* 헤더+본문 전체가 화면 높이를 다 채우도록 강제 -&gt; 푸터는 항상 스크롤해야 보임 */
 .page-content {
   min-height: 100dvh;
 }
 
 /* ---------- 헤더 ---------- */
 .page-header {
+  position: relative;
   text-align: center;
 }
 
@@ -46,22 +189,51 @@ h1#title {
 p.lead {
   margin: 0 0 8px;
   font-size: clamp(14px, 2.2dvw, 16px);
-  color: #555;
+  color: var(--fg-4);
 }
 
 .engine-credit {
   margin: 0 0 28px;
   font-size: 12px;
-  color: #595959;
+  color: var(--fg-3);
 }
 
 .engine-credit a {
-  color: #595959;
+  color: var(--fg-3);
   text-decoration: underline;
 }
 
 .engine-credit a:hover {
-  color: #111;
+  color: var(--fg);
+}
+
+/* ---------- 다크/라이트 모드 토글 버튼 ---------- */
+.theme-toggle-btn {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 38px !important;
+  height: 38px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 50% !important;
+  background: var(--bg-2) !important;
+  color: var(--fg) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition:
+    background 0.15s,
+    border-color 0.15s !important;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg-3) !important;
+  border-color: var(--border-input) !important;
 }
 
 /* ---------- 브라우저 호환성 경고 ---------- */
@@ -71,11 +243,11 @@ p.lead {
 }
 
 .browser-warning-box {
-  background: #fff8e1;
-  border: 1px solid #f9a825;
+  background: var(--bwarn-bg);
+  border: 1px solid var(--bwarn-border);
   border-radius: 8px;
   padding: 12px 16px;
-  color: #4e3600;
+  color: var(--bwarn-fg);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -85,7 +257,7 @@ p.lead {
 }
 
 .browser-warning-content a {
-  color: #0057b7;
+  color: var(--bwarn-link);
   font-weight: 600;
   text-decoration: underline;
   margin-left: 8px;
@@ -93,7 +265,7 @@ p.lead {
 }
 
 .browser-warning-content a:hover {
-  color: #003d82;
+  color: var(--bwarn-link-hover);
 }
 
 .browser-warning-footer {
@@ -167,7 +339,7 @@ p.lead {
   padding-bottom: 10px;
   font-size: clamp(15px, 2dvw, 16px);
   font-weight: 700;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
 }
 
 /* ---------- QR 종류 선택 ---------- */
@@ -179,9 +351,10 @@ select#qr-type-select {
   padding: 10px 14px;
   font-size: clamp(14px, 2dvw, 16px);
   font-family: inherit;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-input);
   border-radius: 8px;
-  background: #fff;
+  background: var(--bg);
+  color: var(--fg);
   cursor: pointer;
 }
 
@@ -226,8 +399,10 @@ select#qr-type-select {
   padding: 10px 12px;
   font-size: clamp(13px, 1.8dvw, 14px);
   font-family: inherit;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-input);
   border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
 }
 
 .type-fields-section textarea {
@@ -255,16 +430,16 @@ button {
   padding: 12px 20px;
   font-size: clamp(14px, 2dvw, 16px);
   font-family: inherit;
-  color: #111;
-  background: #fff;
-  border: 1px solid #111;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--fg);
   border-radius: 8px;
   cursor: pointer;
 }
 
 button:hover {
-  background: #111;
-  color: #fff;
+  background: var(--fg);
+  color: var(--bg);
 }
 
 /* ---------- 아코디언 ---------- */
@@ -278,11 +453,11 @@ button:hover {
 
 .accordion {
   width: 100%;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
   text-align: left;
-  background: #fff;
+  background: var(--bg);
 }
 
 .accordion-header {
@@ -292,8 +467,8 @@ button:hover {
   margin: 0;
   padding: 12px 16px;
   font-family: inherit;
-  color: #222;
-  background: #fafafa;
+  color: var(--fg-2);
+  background: var(--bg-2);
   border: none;
   text-align: left;
   cursor: pointer;
@@ -309,7 +484,7 @@ button:hover {
 .accordion-icon {
   flex: none;
   margin-left: 12px;
-  color: #888;
+  color: var(--fg-4);
   font-size: 13px;
   transition: transform 0.25s ease;
 }
@@ -325,12 +500,12 @@ button:hover {
 }
 
 .accordion.open > .accordion-body {
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-2);
 }
 
 .accordion-body-inner {
   padding: 16px;
-  background: #fff;
+  background: var(--bg);
 }
 
 /* 아코디언 내부 공통 폼 스타일 */
@@ -356,18 +531,19 @@ button:hover {
   padding: 8px 10px;
   font-size: clamp(13px, 1.8dvw, 14px);
   font-family: inherit;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-input);
   border-radius: 6px;
-  background: #fff;
+  background: var(--bg);
+  color: var(--fg);
 }
 
 .accordion-body-inner input[type="color"] {
   width: 40px;
   height: 30px;
   padding: 0;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-input);
   border-radius: 6px;
-  background: #fff;
+  background: var(--bg);
 }
 
 .accordion-body-inner input[type="checkbox"] {
@@ -379,13 +555,13 @@ button:hover {
 [id$="-gradient-fields"] {
   margin-top: 4px;
   padding-left: 12px;
-  border-left: 2px solid #eee;
+  border-left: 2px solid var(--border-2);
 }
 
 .accordion-body-inner small {
   display: block;
   margin-bottom: 8px;
-  color: #888;
+  color: var(--fg-4);
   font-size: 12px;
 }
 
@@ -399,6 +575,34 @@ button:hover {
 .preset-actions button {
   flex: 1;
   margin: 0;
+}
+
+/* ---------- 디자인 초기값 리셋 버튼 ---------- */
+.label-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.input-reset-btn {
+  display: inline-block !important;
+  width: auto !important;
+  margin: 0 0 0 6px !important;
+  padding: 1px 5px !important;
+  font-size: 13px !important;
+  border: 1px solid var(--border) !important;
+  background: none !important;
+  cursor: pointer !important;
+  color: var(--fg-5) !important;
+  border-radius: 4px !important;
+  line-height: 1.5 !important;
+  flex: none !important;
+}
+
+.input-reset-btn:hover {
+  color: var(--fg-2) !important;
+  background: var(--bg-3) !important;
+  border-color: var(--border-input) !important;
 }
 
 /* ---------- 히스토리 ---------- */
@@ -419,7 +623,7 @@ button:hover {
 
 .settings-note {
   font-size: 12px;
-  color: #888;
+  color: var(--fg-4);
   margin: 12px 0;
   line-height: 1.5;
 }
@@ -429,12 +633,14 @@ button:hover {
   justify-content: space-between;
   margin-bottom: 12px;
 }
+
 .history-toolbar small {
   display: flex;
   align-items: center;
   text-align: left;
   width: fit-content;
   margin: 0;
+  color: var(--fg-4);
 }
 
 .history-toolbar button {
@@ -444,7 +650,7 @@ button:hover {
 }
 
 .history-empty {
-  color: #888;
+  color: var(--fg-4);
   font-size: 14px;
   text-align: center;
   margin: 16px 0;
@@ -455,7 +661,7 @@ button:hover {
   gap: 12px;
   align-items: flex-start;
   padding: 16px 0;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-2);
 }
 
 .history-item:first-child {
@@ -470,7 +676,7 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-2);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -482,8 +688,8 @@ button:hover {
 
 .history-thumb-locked {
   font-size: 22px;
-  color: #999;
-  background: #fafafa;
+  color: var(--fg-4);
+  background: var(--bg-2);
 }
 
 .history-info {
@@ -496,17 +702,24 @@ button:hover {
   font-size: 14px;
 }
 
+.history-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
 .history-date {
   display: inline-block;
   margin-left: 8px;
-  color: #999;
+  color: var(--fg-4);
   font-size: 12px;
 }
 
 .history-info ul {
   margin: 6px 0;
   padding-left: 18px;
-  color: #555;
+  color: var(--fg-3);
 }
 
 .history-info li {
@@ -522,6 +735,123 @@ button:hover {
   margin: 0;
   padding: 6px 12px;
   font-size: 12px;
+}
+
+.history-fav-btn {
+  display: inline-block !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 6px 8px !important;
+  font-size: 14px !important;
+  border: 1px solid var(--border) !important;
+  background: none !important;
+  cursor: pointer !important;
+  color: var(--fg-5) !important;
+  border-radius: 8px !important;
+}
+
+.history-fav-btn:hover {
+  color: var(--fav) !important;
+  background: var(--fav-bg) !important;
+}
+
+.history-fav-btn.favorited {
+  color: var(--fav) !important;
+  border-color: var(--fav) !important;
+  background: var(--fav-bg) !important;
+}
+
+.history-item.is-favorite {
+  background: var(--fav-item-bg);
+  border-radius: 6px;
+  padding: 12px;
+  margin: -4px -4px 0;
+}
+
+.history-max-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: clamp(13px, 1.8dvw, 14px);
+}
+
+.history-max-row input[type="number"] {
+  width: 80px;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid var(--border-input);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* ---------- 히스토리 페이지네이션 ---------- */
+#history-pagination {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-2);
+}
+
+.history-pagination-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.history-page-btn {
+  display: inline-block !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 4px 11px !important;
+  font-size: 17px !important;
+  line-height: 1.2 !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  background: var(--bg) !important;
+  color: var(--fg-2) !important;
+  cursor: pointer !important;
+}
+
+.history-page-btn:hover:not(:disabled) {
+  background: var(--fg) !important;
+  color: var(--bg) !important;
+  border-color: var(--fg) !important;
+}
+
+.history-page-btn:disabled {
+  color: var(--fg-5) !important;
+  border-color: var(--border-2) !important;
+  cursor: default !important;
+  background: var(--bg-2) !important;
+}
+
+.history-page-info {
+  min-width: 48px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--fg-2);
+  font-weight: 600;
+}
+
+.history-page-size-input {
+  width: 50px !important;
+  padding: 4px 6px !important;
+  font-size: 13px !important;
+  font-family: inherit !important;
+  border: 1px solid var(--border-input) !important;
+  border-radius: 6px !important;
+  text-align: center !important;
+  background: var(--bg) !important;
+  color: var(--fg) !important;
+}
+
+.history-page-size-label {
+  font-size: 13px;
+  color: var(--fg-3);
 }
 
 /* ---------- 모달 ---------- */
@@ -540,7 +870,8 @@ button:hover {
   width: min(90dvw, 360px);
   max-height: 90dvh;
   overflow-y: auto;
-  background: #fff;
+  background: var(--bg);
+  color: var(--fg);
   padding: 28px 24px;
   border-radius: 12px;
   text-align: center;
@@ -556,9 +887,11 @@ button:hover {
   padding: 8px 10px;
   font-size: clamp(13px, 1.8dvw, 14px);
   font-family: inherit;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-input);
   border-radius: 6px;
   cursor: pointer;
+  background: var(--bg);
+  color: var(--fg);
 }
 
 #export-modal .modal-actions {
@@ -578,23 +911,148 @@ button:hover {
   max-width: 600px;
   margin: 40px 0 16px;
   border: none;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-2);
 }
 
 .page-footer small {
   display: block;
-  color: #595959;
+  color: var(--fg-3);
   font-size: 12px;
   margin: 4px 0;
 }
 
 .page-footer a {
-  color: #595959;
+  color: var(--fg-3);
   text-decoration: underline;
 }
 
 .page-footer a:hover {
-  color: #111;
+  color: var(--fg);
+}
+
+.footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  width: 90dvw;
+  max-width: 600px;
+}
+
+.site-version {
+  font-size: 12px;
+  color: var(--fg-5);
+}
+
+.footer-btn {
+  display: inline-block !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 5px 12px !important;
+  font-size: 12px !important;
+  border-radius: 6px !important;
+}
+
+.footer-bar-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-link-btn {
+  text-decoration: none !important;
+  color: var(--fg) !important;
+  border: 1px solid var(--fg) !important;
+  background: var(--bg) !important;
+}
+
+.footer-link-btn:hover {
+  background: var(--fg) !important;
+  color: var(--bg) !important;
+}
+
+/* ---------- 패치노트 모달 ---------- */
+#patch-notes-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 16px;
+}
+
+#patch-notes-modal .patch-notes-box {
+  display: flex;
+  flex-direction: column;
+  width: min(90dvw, 560px);
+  max-height: 90dvh;
+  background: var(--bg);
+  color: var(--fg);
+  padding: 28px 24px;
+  border-radius: 12px;
+  text-align: left;
+}
+
+#patch-notes-modal h2 {
+  flex: none;
+  margin: 0 0 20px;
+  font-size: clamp(17px, 2.4dvw, 20px);
+  text-align: center;
+}
+
+.patch-notes-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.patch-note-entry {
+  border-left: 3px solid var(--pn-border);
+  padding-left: 14px;
+}
+
+.patch-note-version {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.patch-note-date {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--fg-4);
+  margin-left: 6px;
+}
+
+.patch-note-label {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--fg-3);
+  font-weight: 600;
+}
+
+.patch-notes-content ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--fg-2);
+  line-height: 1.8;
+}
+
+#patch-notes-modal .modal-actions {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-2);
 }
 
 /* ---------- 모바일 대응 ---------- */
@@ -656,15 +1114,15 @@ button:hover {
 }
 
 .contrast-warning-box.warning-moderate {
-  background: #fff8e1;
-  border: 1px solid #f9a825;
-  color: #4e3600;
+  background: var(--warn-mod-bg);
+  border: 1px solid var(--warn-mod-border);
+  color: var(--warn-mod-fg);
 }
 
 .contrast-warning-box.warning-severe {
-  background: #ffebee;
-  border: 1px solid #e53935;
-  color: #7f0000;
+  background: var(--warn-sev-bg);
+  border: 1px solid var(--warn-sev-border);
+  color: var(--warn-sev-fg);
 }
 
 .contrast-tip {
@@ -731,10 +1189,43 @@ button:hover {
 
 .accordion-body-inner input[type="file"] {
   width: 100%;
-  padding: 6px 0;
+  padding: 10px 12px;
   font-size: clamp(13px, 1.8dvw, 14px);
   font-family: inherit;
-  border: none;
+  color: var(--file-fg);
+  background: var(--file-bg);
+  border: 1.5px dashed var(--file-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.accordion-body-inner input[type="file"]:hover {
+  border-color: var(--file-border-hover);
+}
+
+.accordion-body-inner input[type="file"]:focus {
+  outline: none;
+  border-color: var(--file-border-hover);
+}
+
+.accordion-body-inner input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--fg-2);
+  background: var(--bg-3);
+  border: 1px solid var(--border-input);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.accordion-body-inner input[type="file"]::file-selector-button:hover {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
 }
 
 #logo-file-preview {
@@ -743,7 +1234,7 @@ button:hover {
   gap: 12px;
   margin-top: 8px;
   padding: 8px;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-2);
   border-radius: 6px;
 }
 
@@ -752,13 +1243,45 @@ button:hover {
   height: 48px;
   object-fit: contain;
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
 }
 
 #logo-file-clear {
   margin: 0;
   padding: 4px 10px;
   font-size: 12px;
+}
+
+/* ---------- 스크롤바 ---------- */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Chrome / Safari / Edge */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
 }
 
 /* ---------- 데스크톱 대응: 3단 사이드바 레이아웃 ---------- */

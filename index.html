@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 테마 FOUC 방지: CSS 로드 전에 data-theme 속성을 즉시 적용 -->
+    <script>
+      (function () {
+        var t =
+          localStorage.getItem("qrgen-theme") ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
     <title>QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성</title>
 
     <!-- 외부 도메인 미리 연결 -->
@@ -186,6 +197,14 @@
   <body>
     <div class="page-content">
       <header class="page-header">
+        <button
+          id="theme-toggle"
+          type="button"
+          class="theme-toggle-btn"
+          title="다크 모드로 전환"
+        >
+          🌙
+        </button>
         <h1 id="title">QR Code 생성기</h1>
         <p class="lead">생성할 QR Code의 유형을 선택하세요.</p>
         <p class="engine-credit">
@@ -237,14 +256,13 @@
               <div class="accordion-body">
                 <div class="accordion-body-inner">
                   <div class="history-toolbar">
-                    <small
-                      >(생성 버튼을 눌러야만<br />히스토리에 추가됩니다)</small
-                    >
+                    <small id="history-count-label"></small>
                     <button id="btn-clear-history" type="button">
                       전체 삭제
                     </button>
                   </div>
                   <div id="history-list"></div>
+                  <div id="history-pagination"></div>
                 </div>
               </div>
             </div>
@@ -260,6 +278,21 @@
                     <input id="history-enabled-toggle" type="checkbox" />
                     히스토리 기록 사용
                   </label>
+
+                  <label class="history-max-row">
+                    히스토리 최대 개수
+                    <input
+                      id="history-max-input"
+                      type="number"
+                      min="1"
+                      max="500"
+                      value="50"
+                    />
+                  </label>
+                  <p class="settings-note">
+                    설정한 개수를 초과하면 오래된 기록부터 자동 삭제됩니다.
+                    (즐겨찾기는 마지막에 삭제)
+                  </p>
 
                   <p class="settings-note">
                     아래 항목은 개인정보 보호를 위해 기본적으로 기록되지
@@ -550,7 +583,6 @@
 
           <div id="qr-preview"></div>
 
-          <button id="btn-convert">생성</button>
           <button id="btn-export">내보내기</button>
         </main>
 
@@ -1059,6 +1091,70 @@
       </div>
     </div>
 
+    <div id="patch-notes-modal">
+      <div class="modal-box patch-notes-box">
+        <h2>패치노트</h2>
+        <div class="patch-notes-content">
+          <!--
+          <div class="patch-note-entry">
+            <h3 class="patch-note-version">
+              v. 1.1.0 <span class="patch-note-date">2026. 07.</span>
+            </h3>
+            <p class="patch-note-label">[버전 제목]</p>
+            <ul>
+              <li></li>
+              <li></li>
+            </ul>
+          </div>
+          -->
+          <div class="patch-note-entry">
+            <h3 class="patch-note-version">
+              v. 1.1.0 <span class="patch-note-date">2026. 07. 01.</span>
+            </h3>
+            <p class="patch-note-label">
+              히스토리 기능 개편 및 편의성 기능 추가
+            </p>
+            <ul>
+              <li>민감정보가 모자이크된 히스토리도 불러올 수 있게 수정</li>
+              <li>생성 버튼 삭제 및 자동 히스토리 등록</li>
+              <li>히스토리 즐겨찾기 기능 추가</li>
+              <li>오래된 히스토리 자동 삭제 기능 추가</li>
+              <li>커스텀한 디자인 초기값으로 되돌리기 기능 추가</li>
+              <li>
+                마지막으로 생성한 QR 코드 유형을 다음 방문시 초기값으로 지정
+              </li>
+              <li>버그 제보, 건의 사항 등 의견을 듣기 위한 구글 폼 추가</li>
+              <li>다크/라이트 모드 추가</li>
+            </ul>
+          </div>
+          <div class="patch-note-entry">
+            <h3 class="patch-note-version">
+              v. 1.0.0 <span class="patch-note-date">2026. 06. 31.</span>
+            </h3>
+            <p class="patch-note-label">정식 출시</p>
+            <ul>
+              <li>
+                URL, 텍스트, 와이파이, 이메일, 전화번호(전화/문자), 연락처,
+                일정, 위치 등 9가지 유형의 QR Code 생성 지원
+              </li>
+              <li>QR Code의 색상·스타일·그라데이션·로고 커스터마이징</li>
+              <li>PNG / JPEG / WEBP / SVG 형식 내보내기</li>
+              <li>스타일 프리셋 저장 및 불러오기</li>
+              <li>생성 히스토리 기록 (개인정보 보호 설정 포함)</li>
+              <li>명도 대비 경고 (QR 인식률 저하 방지)</li>
+              <li>모바일·데스크톱 반응형 디자인</li>
+              <li>폰트 및 페이지 로딩 최적화</li>
+              <li>Favicon 설정 추가</li>
+              <li>패치노트 추가 및 현제 버전표기</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="patch-notes-close-btn">닫기</button>
+        </div>
+      </div>
+    </div>
+
     <footer class="page-footer">
       <hr />
       <small
@@ -1075,6 +1171,21 @@
         사용되었으며, 네이버에서 제공한 나눔글꼴(나눔스퀘어)이 적용되어
         있습니다.
       </small>
+      <div class="footer-bar">
+        <span class="site-version">v. 1.1.0</span>
+        <div class="footer-bar-links">
+          <a
+            href="https://forms.gle/BvHiWuuexWZ9Sm5x8"
+            target="_blank"
+            rel="noopener"
+            class="footer-btn footer-link-btn"
+            >💬 의견 보내기</a
+          >
+          <button id="btn-patch-notes" type="button" class="footer-btn">
+            패치노트
+          </button>
+        </div>
+      </div>
     </footer>
   </body>
 </html>

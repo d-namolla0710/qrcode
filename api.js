@@ -4,6 +4,9 @@
 let currentQrCode = null;
 let logoDataUrl = null;
 let autoPreviewTimer = null;
+let autoHistoryTimer = null;
+let suppressHistoryRecord = false;
+let historyCurrentPage = 1;
 
 const QR_TYPES = [
   "text",
@@ -683,24 +686,13 @@ function syncTypeFields() {
 }
 
 /**
- * "생성" 버튼 클릭 시: 입력값으로 QR 생성 후 미리보기 갱신 및 히스토리 기록
- */
-function renderQrPreview() {
-  clearTimeout(autoPreviewTimer);
-  const type = document.getElementById("qr-type-select").value;
-  const data = buildDataString(type);
-  if (!data) return;
-
-  const settings = collectSettingsFromForm();
-  renderQrPreviewAuto(data, settings);
-  recordHistoryEntry(type, data, settings);
-}
-
-/**
- * 입력값 또는 디자인 설정 변경 시 300ms 디바운스 후 자동으로 미리보기를 갱신한다.
+ * 입력값 또는 디자인 설정 변경 시 300ms 디바운스 후 자동으로 미리보기를 갱신하고,
+ * 2000ms 후 히스토리에 기록한다.
  */
 function scheduleAutoPreview() {
   clearTimeout(autoPreviewTimer);
+  clearTimeout(autoHistoryTimer);
+
   autoPreviewTimer = setTimeout(() => {
     const type = document.getElementById("qr-type-select").value;
     const data = buildDataString(type, { silent: true });
@@ -708,6 +700,15 @@ function scheduleAutoPreview() {
     const settings = collectSettingsFromForm();
     renderQrPreviewAuto(data, settings);
   }, 300);
+
+  autoHistoryTimer = setTimeout(() => {
+    if (suppressHistoryRecord) return;
+    const type = document.getElementById("qr-type-select").value;
+    const data = buildDataString(type, { silent: true });
+    if (!data) return;
+    const settings = collectSettingsFromForm();
+    recordHistoryEntry(type, data, settings);
+  }, 2000);
 }
 
 /**
@@ -734,6 +735,14 @@ function openExportModal() {
 
 function closeExportModal() {
   document.getElementById("export-modal").style.display = "none";
+}
+
+function openPatchNotesModal() {
+  document.getElementById("patch-notes-modal").style.display = "flex";
+}
+
+function closePatchNotesModal() {
+  document.getElementById("patch-notes-modal").style.display = "none";
 }
 
 /**
@@ -816,14 +825,7 @@ function loadSelectedStylePreset() {
   if (!preset) return;
 
   applySettingsToForm(preset);
-
-  // 미리보기 업데이트
-  const type = document.getElementById("qr-type-select").value;
-  const data = buildDataString(type);
-  if (!data) return;
-
-  const settings = collectSettingsFromForm();
-  renderQrPreviewAuto(data, settings);
+  scheduleAutoPreview();
 }
 
 function deleteSelectedStylePreset() {
@@ -847,7 +849,70 @@ function deleteSelectedStylePreset() {
 const HISTORY_KEY = "qrgen-history";
 const HISTORY_ENABLED_KEY = "qrgen-history-enabled";
 const HISTORY_PRIVACY_KEY = "qrgen-history-privacy";
-const HISTORY_MAX_ITEMS = 50;
+const HISTORY_MAX_KEY = "qrgen-history-max";
+const HISTORY_MAX_DEFAULT = 50;
+const HISTORY_PAGE_SIZE_KEY = "qrgen-history-page-size";
+const HISTORY_PAGE_SIZE_DEFAULT = 5;
+const LAST_QR_TYPE_KEY = "qrgen-last-type";
+const THEME_KEY = "qrgen-theme";
+
+/* ==================== 테마 ==================== */
+
+function initTheme() {
+  updateThemeBtn(document.documentElement.getAttribute("data-theme") || "light");
+
+  // 시스템 설정 변경 시 명시적 override 없으면 자동 반영
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", (e) => {
+      if (!localStorage.getItem(THEME_KEY)) {
+        applyTheme(e.matches ? "dark" : "light", false);
+      }
+    });
+}
+
+function applyTheme(theme, save = true) {
+  document.documentElement.setAttribute("data-theme", theme);
+  if (save) {
+    localStorage.setItem(THEME_KEY, theme);
+  }
+  updateThemeBtn(theme);
+}
+
+function updateThemeBtn(theme) {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+  if (theme === "dark") {
+    btn.textContent = "☀️";
+    btn.title = "라이트 모드로 전환";
+  } else {
+    btn.textContent = "🌙";
+    btn.title = "다크 모드로 전환";
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme") || "light";
+  applyTheme(current === "dark" ? "light" : "dark");
+}
+
+function getHistoryMaxItems() {
+  const v = parseInt(localStorage.getItem(HISTORY_MAX_KEY), 10);
+  return isNaN(v) || v < 1 ? HISTORY_MAX_DEFAULT : v;
+}
+
+function setHistoryMaxItems(value) {
+  localStorage.setItem(HISTORY_MAX_KEY, String(value));
+}
+
+function getHistoryPageSize() {
+  const v = parseInt(localStorage.getItem(HISTORY_PAGE_SIZE_KEY), 5);
+  return isNaN(v) || v < 1 ? HISTORY_PAGE_SIZE_DEFAULT : v;
+}
+
+function setHistoryPageSize(value) {
+  localStorage.setItem(HISTORY_PAGE_SIZE_KEY, String(value));
+}
 
 function getHistoryEnabled() {
   const v = localStorage.getItem(HISTORY_ENABLED_KEY);
@@ -879,10 +944,26 @@ function getHistory() {
 }
 
 function saveHistory(list) {
-  localStorage.setItem(
-    HISTORY_KEY,
-    JSON.stringify(list.slice(-HISTORY_MAX_ITEMS)),
-  );
+  const max = getHistoryMaxItems();
+  let trimmed = [...list];
+
+  if (trimmed.length > max) {
+    const excess = trimmed.length - max;
+    let removed = 0;
+    for (let i = 0; i < trimmed.length && removed < excess; ) {
+      if (!trimmed[i].favorite) {
+        trimmed.splice(i, 1);
+        removed++;
+      } else {
+        i++;
+      }
+    }
+    while (trimmed.length > max) {
+      trimmed.shift();
+    }
+  }
+
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
 }
 
 /**
@@ -914,7 +995,7 @@ function buildHistoryFieldsSnapshot(type) {
 }
 
 function recordHistoryEntry(type, data, settings) {
-  if (!getHistoryEnabled()) return;
+  if (!getHistoryEnabled() || suppressHistoryRecord) return;
 
   const disallowed = typeHasDisallowedSensitiveField(type);
 
@@ -925,6 +1006,7 @@ function recordHistoryEntry(type, data, settings) {
     fields: buildHistoryFieldsSnapshot(type),
     data: disallowed ? null : data,
     settings,
+    favorite: false,
   };
 
   const history = getHistory();
@@ -946,6 +1028,15 @@ function deleteHistoryEntry(id) {
   renderHistoryList();
 }
 
+function toggleFavorite(id) {
+  const history = getHistory();
+  const entry = history.find((item) => item.id === id);
+  if (!entry) return;
+  entry.favorite = !entry.favorite;
+  saveHistory(history);
+  renderHistoryList();
+}
+
 function clearHistory() {
   if (!confirm("모든 히스토리를 삭제할까요?")) return;
   saveHistory([]);
@@ -953,8 +1044,8 @@ function clearHistory() {
 }
 
 /**
- * 히스토리 항목을 입력 폼에 다시 채워줌 (비공개로 기록된 항목은 비워둠 -> 직접 재입력 필요).
- * 자동으로 QR을 생성하지는 않음 (중복 히스토리 방지 + 사용자가 내용 확인 후 직접 생성하도록).
+ * 히스토리 항목을 입력 폼에 다시 채워줌.
+ * 비공개(redacted) 항목은 빈 값으로 채워 사용자가 재입력할 수 있도록 함.
  */
 function loadHistoryEntry(id) {
   const history = getHistory();
@@ -963,12 +1054,19 @@ function loadHistoryEntry(id) {
 
   document.getElementById("qr-type-select").value = entry.type;
   syncTypeFields();
+  localStorage.setItem(LAST_QR_TYPE_KEY, entry.type);
 
   const defs = TYPE_FIELD_DEFS[entry.type] || [];
   defs.forEach((def, index) => {
     const snapshot = entry.fields[index];
     const el = document.getElementById(def.id);
-    if (!el || !snapshot || snapshot.redacted) return;
+    if (!el || !snapshot) return;
+
+    if (snapshot.redacted) {
+      if (def.isCheckbox) el.checked = false;
+      else el.value = "";
+      return;
+    }
 
     if (def.isCheckbox) {
       el.checked = snapshot.value === "예";
@@ -979,29 +1077,55 @@ function loadHistoryEntry(id) {
 
   applySettingsToForm(entry.settings);
 
+  suppressHistoryRecord = true;
+  clearTimeout(autoHistoryTimer);
+  scheduleAutoPreview();
+  setTimeout(() => {
+    suppressHistoryRecord = false;
+  }, 2500);
+
   const hasRedacted = entry.fields.some((field) => field.redacted);
   if (hasRedacted) {
     alert(
-      "개인정보 보호 설정으로 기록되지 않은 항목이 있어 직접 다시 입력해야 합니다.",
+      "개인정보 보호 설정으로 기록되지 않은 항목은 비워져 있습니다. 직접 입력해 주세요.",
     );
   }
 }
 
 function renderHistoryList() {
   const container = document.getElementById("history-list");
-  const history = getHistory().slice().reverse(); // 최신순
+  const paginationEl = document.getElementById("history-pagination");
+  const countLabel = document.getElementById("history-count-label");
+  const allHistory = getHistory();
+
+  if (countLabel) countLabel.textContent = `총 ${allHistory.length}개`;
+
+  const reversed = allHistory.slice().reverse();
+  const favorites = reversed.filter((e) => e.favorite);
+  const nonFavorites = reversed.filter((e) => !e.favorite);
+  const sorted = [...favorites, ...nonFavorites];
 
   container.innerHTML = "";
 
-  if (history.length === 0) {
+  if (sorted.length === 0) {
     container.innerHTML =
       '<p class="history-empty">아직 생성 기록이 없습니다.</p>';
+    if (paginationEl) paginationEl.innerHTML = "";
     return;
   }
 
-  history.forEach((entry) => {
+  const pageSize = getHistoryPageSize();
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+
+  if (historyCurrentPage > totalPages) historyCurrentPage = totalPages;
+  if (historyCurrentPage < 1) historyCurrentPage = 1;
+
+  const startIdx = (historyCurrentPage - 1) * pageSize;
+  const pageItems = sorted.slice(startIdx, startIdx + pageSize);
+
+  pageItems.forEach((entry) => {
     const item = document.createElement("div");
-    item.className = "history-item";
+    item.className = "history-item" + (entry.favorite ? " is-favorite" : "");
 
     const thumb = document.createElement("div");
     thumb.className = "history-thumb";
@@ -1012,13 +1136,12 @@ function renderHistoryList() {
           ...entry.settings,
           width: 90,
           height: 90,
-          image: undefined, // 썸네일은 로고 없이 생성 (CORS 문제 방지)
+          image: undefined,
         });
         const tempDiv = document.createElement("div");
         thumbQr.append(tempDiv);
         const svgEl = tempDiv.querySelector("svg");
         if (svgEl) {
-          // 인라인 SVG 대신 data URL img로 변환 → 문서 내 SVG id 충돌 방지
           const svgStr = new XMLSerializer().serializeToString(svgEl);
           const b64 = btoa(unescape(encodeURIComponent(svgStr)));
           const img = new Image();
@@ -1038,12 +1161,18 @@ function renderHistoryList() {
     const info = document.createElement("div");
     info.className = "history-info";
 
+    const titleRow = document.createElement("div");
+    titleRow.className = "history-title-row";
+
     const title = document.createElement("strong");
     title.textContent = QR_TYPE_LABELS[entry.type] || entry.type;
 
     const date = document.createElement("span");
     date.className = "history-date";
     date.textContent = formatHistoryDate(entry.createdAt);
+
+    titleRow.appendChild(title);
+    titleRow.appendChild(date);
 
     const fieldList = document.createElement("ul");
     entry.fields.forEach((field) => {
@@ -1055,6 +1184,13 @@ function renderHistoryList() {
     const actions = document.createElement("div");
     actions.className = "history-actions";
 
+    const favBtn = document.createElement("button");
+    favBtn.type = "button";
+    favBtn.className = "history-fav-btn" + (entry.favorite ? " favorited" : "");
+    favBtn.title = entry.favorite ? "즐겨찾기 해제" : "즐겨찾기";
+    favBtn.textContent = "★";
+    favBtn.addEventListener("click", () => toggleFavorite(entry.id));
+
     const loadBtn = document.createElement("button");
     loadBtn.type = "button";
     loadBtn.textContent = "불러오기";
@@ -1065,17 +1201,163 @@ function renderHistoryList() {
     deleteBtn.textContent = "삭제";
     deleteBtn.addEventListener("click", () => deleteHistoryEntry(entry.id));
 
+    actions.appendChild(favBtn);
     actions.appendChild(loadBtn);
     actions.appendChild(deleteBtn);
 
-    info.appendChild(title);
-    info.appendChild(date);
+    info.appendChild(titleRow);
     info.appendChild(fieldList);
     info.appendChild(actions);
 
     item.appendChild(thumb);
     item.appendChild(info);
     container.appendChild(item);
+  });
+
+  // 페이지네이션 컨트롤 렌더링
+  if (!paginationEl) return;
+  paginationEl.innerHTML = "";
+
+  const row = document.createElement("div");
+  row.className = "history-pagination-row";
+
+  const prevBtn = document.createElement("button");
+  prevBtn.type = "button";
+  prevBtn.className = "history-page-btn";
+  prevBtn.textContent = "‹";
+  prevBtn.disabled = historyCurrentPage <= 1;
+  prevBtn.addEventListener("click", () => {
+    historyCurrentPage--;
+    renderHistoryList();
+  });
+
+  const pageInfo = document.createElement("span");
+  pageInfo.className = "history-page-info";
+  pageInfo.textContent = `${historyCurrentPage} / ${totalPages}`;
+
+  const nextBtn = document.createElement("button");
+  nextBtn.type = "button";
+  nextBtn.className = "history-page-btn";
+  nextBtn.textContent = "›";
+  nextBtn.disabled = historyCurrentPage >= totalPages;
+  nextBtn.addEventListener("click", () => {
+    historyCurrentPage++;
+    renderHistoryList();
+  });
+
+  const pageSizeInput = document.createElement("input");
+  pageSizeInput.type = "number";
+  pageSizeInput.className = "history-page-size-input";
+  pageSizeInput.value = pageSize;
+  pageSizeInput.min = 1;
+  pageSizeInput.max = 100;
+  pageSizeInput.addEventListener("change", (e) => {
+    const v = parseInt(e.target.value, 5);
+    if (!isNaN(v) && v >= 1) {
+      setHistoryPageSize(v);
+      historyCurrentPage = 1;
+      renderHistoryList();
+    }
+  });
+
+  const pageSizeLabel = document.createElement("span");
+  pageSizeLabel.className = "history-page-size-label";
+  pageSizeLabel.textContent = "개 씩 표시";
+
+  row.appendChild(prevBtn);
+  row.appendChild(pageInfo);
+  row.appendChild(nextBtn);
+  row.appendChild(document.createElement("br"));
+  row.appendChild(pageSizeInput);
+  row.appendChild(pageSizeLabel);
+  paginationEl.appendChild(row);
+}
+
+/* ==================== 디자인 초기값 리셋 버튼 ==================== */
+
+const DESIGN_DEFAULTS = {
+  "shape-select": "square",
+  "width-input": "300",
+  "height-input": "300",
+  "margin-input": "0",
+  "error-corr-select": "Q",
+  "logo-url-input": "",
+  "image-size-input": "0.4",
+  "image-margin-input": "0",
+  "dots-color-input": "#000000",
+  "dots-type-select": "square",
+  "dots-gradient-toggle": false,
+  "dots-gradient-type-select": "linear",
+  "dots-gradient-rotation-input": "0",
+  "dots-gradient-color1-input": "#000000",
+  "dots-gradient-color2-input": "#ffffff",
+  "bg-color-input": "#ffffff",
+  "bg-gradient-toggle": false,
+  "bg-gradient-type-select": "linear",
+  "bg-gradient-rotation-input": "0",
+  "bg-gradient-color1-input": "#ffffff",
+  "bg-gradient-color2-input": "#000000",
+  "corners-square-color-input": "#000000",
+  "corners-square-type-select": "",
+  "corners-square-gradient-toggle": false,
+  "corners-square-gradient-type-select": "linear",
+  "corners-square-gradient-rotation-input": "0",
+  "corners-square-gradient-color1-input": "#000000",
+  "corners-square-gradient-color2-input": "#ffffff",
+  "corners-dot-color-input": "#000000",
+  "corners-dot-type-select": "",
+  "corners-dot-gradient-toggle": false,
+  "corners-dot-gradient-type-select": "linear",
+  "corners-dot-gradient-rotation-input": "0",
+  "corners-dot-gradient-color1-input": "#000000",
+  "corners-dot-gradient-color2-input": "#ffffff",
+};
+
+function initDesignResetButtons() {
+  Object.entries(DESIGN_DEFAULTS).forEach(([id, defaultValue]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const label = el.closest("label");
+    if (!label) return;
+
+    const isCheckbox = typeof defaultValue === "boolean";
+
+    const resetBtn = document.createElement("button");
+    resetBtn.type = "button";
+    resetBtn.className = "input-reset-btn";
+    resetBtn.title = "초기값으로 되돌리기";
+    resetBtn.textContent = "↺";
+    resetBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (isCheckbox) {
+        el.checked = defaultValue;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      } else {
+        el.value = defaultValue;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      scheduleAutoPreview();
+    });
+
+    if (isCheckbox) {
+      label.appendChild(resetBtn);
+    } else {
+      let textNode = null;
+      for (const node of label.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+          textNode = node;
+          break;
+        }
+      }
+      if (textNode) {
+        const headerSpan = document.createElement("span");
+        headerSpan.className = "label-header";
+        headerSpan.textContent = textNode.textContent.trim();
+        headerSpan.appendChild(resetBtn);
+        label.replaceChild(headerSpan, textNode);
+      }
+    }
   });
 }
 
@@ -1190,26 +1472,36 @@ function initBrowserWarning() {
     chromeLink.style.display = "none";
   }
 
-  document.getElementById("browser-warning-close").addEventListener("click", () => {
-    if (document.getElementById("browser-warning-noshow").checked) {
-      localStorage.setItem(BROWSER_WARNING_DISMISSED_KEY, "true");
-    }
-    warningEl.style.display = "none";
-  });
+  document
+    .getElementById("browser-warning-close")
+    .addEventListener("click", () => {
+      if (document.getElementById("browser-warning-noshow").checked) {
+        localStorage.setItem(BROWSER_WARNING_DISMISSED_KEY, "true");
+      }
+      warningEl.style.display = "none";
+    });
 }
 
 // DOM 로드 후 이벤트 연결
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+  document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+
   initBrowserWarning();
   initAccordions();
-  document
-    .getElementById("qr-type-select")
-    .addEventListener("change", syncTypeFields);
-  syncTypeFields(); // 초기 상태 반영
+  initDesignResetButtons();
 
-  document
-    .getElementById("btn-convert")
-    .addEventListener("click", renderQrPreview);
+  // 마지막으로 사용한 QR 유형 복원
+  const savedType = localStorage.getItem(LAST_QR_TYPE_KEY) || "url";
+  const typeSelect = document.getElementById("qr-type-select");
+  typeSelect.value = savedType;
+  syncTypeFields();
+
+  typeSelect.addEventListener("change", (e) => {
+    syncTypeFields();
+    localStorage.setItem(LAST_QR_TYPE_KEY, e.target.value);
+  });
+
   document
     .getElementById("btn-export")
     .addEventListener("click", openExportModal);
@@ -1226,6 +1518,21 @@ document.addEventListener("DOMContentLoaded", () => {
       closeExportModal();
     }
   });
+
+  // 패치노트 모달
+  document
+    .getElementById("btn-patch-notes")
+    .addEventListener("click", openPatchNotesModal);
+  document
+    .getElementById("patch-notes-close-btn")
+    .addEventListener("click", closePatchNotesModal);
+  document
+    .getElementById("patch-notes-modal")
+    .addEventListener("click", (event) => {
+      if (event.target.id === "patch-notes-modal") {
+        closePatchNotesModal();
+      }
+    });
 
   // 그라데이션 체크박스 4개: 체크 안 되어 있으면 관련 입력 숨김
   ["dots", "bg", "corners-square", "corners-dot"].forEach((prefix) => {
@@ -1259,6 +1566,19 @@ document.addEventListener("DOMContentLoaded", () => {
     setHistoryEnabled(event.target.checked);
   });
 
+  // 히스토리 최대 개수 설정
+  const historyMaxInput = document.getElementById("history-max-input");
+  historyMaxInput.value = getHistoryMaxItems();
+  historyMaxInput.addEventListener("change", (e) => {
+    const v = parseInt(e.target.value, 10);
+    if (!isNaN(v) && v >= 1) {
+      setHistoryMaxItems(v);
+      const history = getHistory();
+      saveHistory(history);
+      renderHistoryList();
+    }
+  });
+
   // 개인정보 항목별 기록 허용 토글
   const privacySettings = getPrivacySettings();
   document
@@ -1284,6 +1604,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener(eventName, (e) => {
       const t = e.target;
       if (t.id === "logo-file-input") return;
+      if (t.id === "history-max-input") return;
 
       if (t.name === "logo-source") {
         const isUpload = t.value === "upload";
