@@ -386,7 +386,7 @@ function applyContrastWarning(warningEl, textEl, ratio) {
     msg = `명도 대비 ${ratio.toFixed(1)}:1 — 배경색과 QR 색상이 거의 구별되지 않아 대부분의 기기에서 인식이 불가능합니다.`;
   } else if (ratio < 3) {
     level = "moderate";
-    msg = `명도 대비 ${ratio.toFixed(1)}:1 — 대비가 낮아 일부 기기(구형·저가형·카메라 품질이 낮은 기기)에서 인식이 잘 안될 수 있습니다.`;
+    msg = `명도 대비 ${ratio.toFixed(1)}:1 — 대비가 낮아 일부 기기(구형·저가형·카메라 품질이 낮은 기기)에서 인식이 잘 안 될 수 있습니다.`;
   }
   if (level) {
     if (textEl) textEl.textContent = msg;
