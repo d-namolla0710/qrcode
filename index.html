@@ -2,8 +2,24 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- 재방문자 즉시 리다이렉트: "사용해보기"를 눌러본 적 있으면
+         소개 페이지를 그릴 필요 없이 바로 서비스 화면으로 보냄.
+         렌더링 전에 최대한 빨리 실행되도록 head 맨 앞에 둠. -->
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("qrgen-visited") === "true") {
+            location.replace("/app");
+          }
+        } catch (e) {
+          // localStorage를 못 쓰는 환경이면 그냥 소개 페이지를 보여줌
+        }
+      })();
+    </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- 테마 FOUC 방지: CSS 로드 전에 data-theme 속성을 즉시 적용 -->
+    <!-- 테마 FOUC 방지: 메인 페이지와 동일한 로직 -->
     <script>
       (function () {
         var t =
@@ -14,157 +30,88 @@
         document.documentElement.setAttribute("data-theme", t);
       })();
     </script>
-    <title>QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성</title>
+    <title>
+      QR 코드 생성기 소개 | 와이파이·연락처·일정 QR코드 무료 생성 도구
+    </title>
 
-    <!-- 외부 도메인 미리 연결 -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
 
-    <!-- 헤더에 바로 쓰이는 폰트는 preload -->
+    <!-- "사용해보기"를 누르면 이동할 app.html을 미리 백그라운드에서
+         받아둠. 실제로 열릴 때는 이미 캐시돼 있어 체감 로딩이 거의 없음. -->
+    <link rel="prefetch" href="/app.html" />
+    <link rel="preload" href="/app.css" as="style" />
+    <link rel="preload" href="/app.js" as="script" />
     <link
       rel="preload"
-      href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2"
-      as="font"
-      type="font/woff2"
+      href="https://unpkg.com/qr-code-styling@1.9.2/lib/qr-code-styling.js"
+      as="script"
       crossorigin
     />
 
-    <!-- 인증 관련 -->
-    <meta
-      name="naver-site-verification"
-      content="c78c9ea07f82de562ffab18982769037eab8edfd"
-    />
-    <meta name="google-adsense-account" content="ca-pub-9976228668134956" />
-    <!-- 인증 관련 END-->
+    <!-- Speculation Rules API: 크로미움 계열 브라우저에서는 버튼에
+         마우스를 올리는 순간 app.html을 미리 렌더링해둠(프리렌더).
+         지원하지 않는 브라우저는 이 태그를 그냥 무시하므로 안전함. -->
+    <script type="speculationrules">
+      {
+        "prerender": [
+          {
+            "source": "list",
+            "urls": ["/app.html"],
+            "eagerness": "moderate"
+          }
+        ]
+      }
+    </script>
 
-    <!-- 검색엔진 메타데이터 -->
-    <meta
-      name="title"
-      content="QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성"
-    />
     <meta
       name="description"
-      content="텍스트, 와이파이, URL, 이메일, 전화번호, 연락처, 일정, 위치까지 9가지 종류의 QR 코드를 무료로 만들 수 있는 사이트입니다. 색상·로고·모양 등 디자인을 자유롭게 커스터마이징하고 PNG, JPEG, WEBP, SVG로 다운로드하세요."
+      content="QR Code 생성기는 URL, 와이파이, 연락처, 일정 등 9가지 유형의 QR 코드를 무료로 만들 수 있는 웹 서비스입니다. 색상·로고·모양을 자유롭게 커스터마이징하고, 개인정보는 브라우저 밖으로 나가지 않습니다. 어떤 기능이 있는지, 어떻게 사용하는지 소개합니다."
     />
     <meta name="author" content="김민찬" />
     <meta name="language" content="Korean" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://qr.minchan.app/" />
-    <!-- 검색엔진 메타데이터 END -->
 
-    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="QR Code 생성기" />
     <meta
       property="og:title"
-      content="QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성"
+      content="QR Code 생성기 소개 | 와이파이·연락처·일정 QR코드 무료 생성 도구"
     />
     <meta
       property="og:description"
-      content="텍스트, 와이파이, URL, 이메일, 전화번호, 일정 등등 9가지 종류의 QR 코드를 무료로 만들고 커스터마이징까지 할 수 있는 사이트입니다."
+      content="9가지 유형의 QR 코드를 무료로 만들고, 색상·로고·모양까지 자유롭게 꾸밀 수 있는 웹 서비스를 소개합니다."
     />
     <meta property="og:url" content="https://qr.minchan.app/" />
     <meta property="og:image" content="https://qr.minchan.app/og-image.png" />
     <meta property="og:locale" content="ko_KR" />
-    <!-- Open Graph END -->
 
-    <!-- SNS-Twitter 메타데이터 -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="QR Code 생성기 | 와이파이·연락처·일정 QR코드 무료 생성"
+      content="QR Code 생성기 소개 | 와이파이·연락처·일정 QR코드 무료 생성 도구"
     />
     <meta
       name="twitter:description"
-      content="텍스트, 와이파이, URL, 이메일, 전화번호, 일정 등등 9가지 종류의 QR 코드를 무료로 만들고 커스터마이징까지 할 수 있는 사이트입니다."
+      content="9가지 유형의 QR 코드를 무료로 만들고, 색상·로고·모양까지 자유롭게 꾸밀 수 있는 웹 서비스를 소개합니다."
     />
     <meta name="twitter:image" content="https://qr.minchan.app/og-image.png" />
-    <!-- SNS-Twitter 메타데이터 END -->
 
-    <!-- Favicon 설정 -->
-    <link
-      rel="apple-touch-icon"
-      sizes="57x57"
-      href="/favicon/apple-icon-57x57.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="60x60"
-      href="/favicon/apple-icon-60x60.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="72x72"
-      href="/favicon/apple-icon-72x72.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="76x76"
-      href="/favicon/apple-icon-76x76.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="114x114"
-      href="/favicon/apple-icon-114x114.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="120x120"
-      href="/favicon/apple-icon-120x120.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="144x144"
-      href="/favicon/apple-icon-144x144.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="152x152"
-      href="/favicon/apple-icon-152x152.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/favicon/apple-icon-180x180.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="/favicon/android-icon-192x192.png"
-    />
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
       href="/favicon/favicon-32x32.png"
     />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="96x96"
-      href="/favicon/favicon-96x96.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="/favicon/favicon-16x16.png"
-    />
     <link rel="manifest" href="/favicon/manifest.json" />
-    <meta name="msapplication-TileColor" content="#ffffff" />
-    <meta
-      name="msapplication-TileImage"
-      content="/favicon/ms-icon-144x144.png"
-    />
     <meta name="theme-color" content="#ffffff" />
-    <!-- Favicon 설정 END -->
 
     <style>
       @font-face {
         font-family: "NanumSquare";
         font-weight: 400;
-        font-display: swap; /* 추가 */
+        font-display: swap;
         src:
           local("☺"),
           url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2")
@@ -173,7 +120,7 @@
       @font-face {
         font-family: "NanumSquare";
         font-weight: 700;
-        font-display: swap; /* 추가 */
+        font-display: swap;
         src:
           local("☺"),
           url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2")
@@ -182,997 +129,401 @@
     </style>
 
     <link rel="stylesheet" href="/app.css" />
+    <link rel="stylesheet" href="/landing.css" />
 
-    <!-- 렌더링 막지 않도록 defer -->
-    <script defer src="/api.js"></script>
-
-    <!-- QR Code generation powered by qr-code-styling.js (MIT License) by Denys Kozak -->
-    <!-- LICENSE: https://github.com/kozakdenys/qr-code-styling/blob/master/LICENSE ----->
-    <script
-      defer
-      src="https://unpkg.com/qr-code-styling@1.9.2/lib/qr-code-styling.js"
-    ></script>
-    <!----------------------------------------------------------------------------------->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "QR 코드 생성기",
+        "url": "https://qr.minchan.app/app.html",
+        "description": "URL, 와이파이, 연락처, 일정 등 9가지 유형의 QR 코드를 무료로 생성하고 색상·로고·모양을 커스터마이징할 수 있는 웹 애플리케이션입니다.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "KRW"
+        },
+        "inLanguage": "ko"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "QR 코드 생성기는 무료인가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "네, 회원가입이나 결제 없이 모든 기능을 무료로 사용할 수 있습니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "만든 QR 코드에 유효기간이 있나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "없습니다. QR 코드에는 입력한 정보가 그대로 인코딩되므로, 서버에 만료 처리를 요청하는 방식이 아니라 반영구적으로 동일하게 인식됩니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "로고를 넣으면 QR 코드 인식이 안 되나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "오류 복원율을 Q 이상으로 설정하면 로고가 QR 코드 일부를 가려도 대부분 정상적으로 인식됩니다. 다만 로고 크기가 너무 크거나 배경과 색상 대비가 낮으면 인식률이 떨어질 수 있어, 실시간 대비 경고 기능으로 이를 미리 알려줍니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "입력한 와이파이 비밀번호나 연락처 정보가 저장되나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "히스토리 기능을 사용하더라도 와이파이 비밀번호, 연락처 이름·전화번호·이메일 같은 민감한 항목은 기본적으로 기록되지 않습니다. 모든 기록은 서버로 전송되지 않고 사용하는 브라우저에만 저장됩니다."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div class="page-content">
-      <header class="page-header">
-        <button
-          id="theme-toggle"
-          type="button"
-          class="theme-toggle-btn"
-          title="다크 모드로 전환"
-        >
-          🌙
-        </button>
-        <h1 id="title">QR Code 생성기</h1>
-        <p class="lead">생성할 QR Code의 유형을 선택하세요.</p>
-        <p class="engine-credit">
-          사용된 QR 코드 생성 엔진:
-          <a
-            href="https://github.com/kozakdenys/qr-code-styling"
-            target="_blank"
-            rel="noopener"
-            >qr-code-styling</a
+    <div class="about-page">
+      <!-- ===================== 상단 바 ===================== -->
+      <header class="about-topbar">
+        <a href="/" class="about-brand">QR 코드 생성기</a>
+        <div class="about-topbar-actions">
+          <button
+            id="theme-toggle"
+            type="button"
+            class="theme-toggle-btn"
+            title="다크 모드로 전환"
           >
-          (MIT License) by Denys Kozak | 폰트:
-          <a
-            href="https://hangeul.naver.com/fonts/search?f=nanum"
-            target="_blank"
-            rel="noopener"
-            >나눔글꼴</a
-          >(나눔스퀘어, 오픈 라이선스) by 네이버
-        </p>
+            🌙
+          </button>
+          <a href="/app" class="about-cta-small">사용해보기</a>
+        </div>
       </header>
 
-      <!-- 비 크롬 브라우저 경고 -->
-      <div id="browser-warning" style="display: none">
-        <div class="browser-warning-box">
-          <div class="browser-warning-content">
-            <h3 style="text-align: center">⚠️ 다른 브라우저 감지 됨 ⚠️</h3>
-            Google Chrome이 아닌 브라우저에서 사용 시 일부 기능(내보내기,
-            미리보기 실시간 반영 등)이 정상적으로 동작하지 않을 수 있습니다.
-            <a
-              id="browser-warning-chrome-link"
-              href="#"
-              target="_self"
-              rel="noopener"
-              >Chrome으로 열기</a
-            >
-          </div>
-          <div class="browser-warning-footer">
-            <label class="browser-warning-label">
-              <input type="checkbox" id="browser-warning-noshow" />
-              이 경고 다시는 보지않기
-            </label>
-            <button id="browser-warning-close" type="button">닫기</button>
-          </div>
+      <!-- ===================== 히어로 ===================== -->
+      <section class="about-hero">
+        <div class="about-hero-text">
+          <p class="about-eyebrow">무료 · 설치 없음 · 개인정보 보호 설계</p>
+          <h1>
+            네모 칸들이 모여 만드는<br />
+            여러가지 정보들
+          </h1>
+          <p class="about-hero-desc">
+            QR 코드 생성기는 URL부터 와이파이, 연락처, 일정까지 9가지 유형의 QR
+            코드를 브라우저에서 바로 만들 수 있는 무료 웹서비스입니다. 색상,
+            모양 그리고 로고를 원하는 대로 꾸미고, PNG·SVG 등 원하는 형식으로
+            내려받으세요.
+          </p>
+          <a href="/app" class="about-cta-large">사용해보기</a>
         </div>
-      </div>
 
-      <div class="app-layout">
-        <!-- ===================== 좌측(데스크톱)/하단(모바일): 히스토리 ===================== -->
-        <aside class="panel-history">
-          <div class="accordion-group" data-group="history">
-            <div class="accordion" id="history-panel">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">히스토리</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <div class="history-toolbar">
-                    <small id="history-count-label"></small>
-                    <button id="btn-clear-history" type="button">
-                      전체 삭제
-                    </button>
-                  </div>
-                  <div id="history-list"></div>
-                  <div id="history-pagination"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion" id="history-settings">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">히스토리 설정</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <label class="toggle-row">
-                    <input id="history-enabled-toggle" type="checkbox" />
-                    히스토리 기록 사용
-                  </label>
-
-                  <label class="history-max-row">
-                    히스토리 최대 개수
-                    <input
-                      id="history-max-input"
-                      type="number"
-                      min="1"
-                      max="500"
-                      value="50"
-                    />
-                  </label>
-                  <p class="settings-note">
-                    설정한 개수를 초과하면 오래된 기록부터 자동으로 삭제됩니다.
-                    (즐겨찾기된 항목은 우선 순위가 가장 낮습니다.)
-                  </p>
-
-                  <p class="settings-note">
-                    아래 항목은 개인정보 보호를 위해 기본적으로 기록되지
-                    않습니다. 필요한 항목만 활성화 해주시기 바랍니다.<br />
-                    (모든 히스토리 정보는 외부로 전송되지 않으며, 사용자의
-                    브라우저에만 저장됩니다. 여러명이 사용하는 기기인 경우
-                    활성화 하지 않는 것을 추천합니다.)
-                  </p>
-
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-wifi-password"
-                      type="checkbox"
-                      data-field="wifi-password"
-                    />
-                    와이파이 비밀번호 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-vcard-name"
-                      type="checkbox"
-                      data-field="vcard-name"
-                    />
-                    연락처 이름 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-vcard-phone"
-                      type="checkbox"
-                      data-field="vcard-phone"
-                    />
-                    연락처 전화번호 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-vcard-email"
-                      type="checkbox"
-                      data-field="vcard-email"
-                    />
-                    연락처 이메일 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-tel-number"
-                      type="checkbox"
-                      data-field="tel-number"
-                    />
-                    전화번호(전화) 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-sms-number"
-                      type="checkbox"
-                      data-field="sms-number"
-                    />
-                    전화번호(문자) 번호 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-email-address"
-                      type="checkbox"
-                      data-field="email-address"
-                    />
-                    이메일 주소 기록
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <!-- ===================== 중앙: QR 생성 본문 ===================== -->
-        <main class="panel-main">
-          <label for="qr-type-select" class="sr-only">QR 코드 종류 선택</label>
-          <select id="qr-type-select">
-            <option value="url" selected>URL</option>
-            <option value="wifi">와이파이</option>
-            <option value="text">텍스트</option>
-            <option value="email">이메일</option>
-            <option value="tel">전화번호(전화)</option>
-            <option value="sms">전화번호(문자)</option>
-            <option value="vcard">연락처</option>
-            <option value="event">일정</option>
-            <option value="geo">위치</option>
-          </select>
-
-          <!-- 텍스트 -->
-          <div class="type-fields-section" id="type-fields-text">
-            <textarea
-              id="text-content"
-              placeholder="여기에 텍스트 입력..."
-            ></textarea>
-          </div>
-
-          <!-- 와이파이 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-wifi"
-            style="display: none"
-          >
-            <label>
-              네트워크 이름 (SSID)
-              <input id="wifi-ssid" type="text" placeholder="My_WiFi" />
-            </label>
-            <label>
-              비밀번호
-              <input id="wifi-password" type="text" placeholder="비밀번호" />
-            </label>
-            <label>
-              암호화 방식
-              <select id="wifi-encryption">
-                <option value="WPA" selected>WPA/WPA2</option>
-                <option value="WEP">WEP</option>
-                <option value="nopass">암호화 없음</option>
-              </select>
-            </label>
-            <label>
-              <input id="wifi-hidden" type="checkbox" />
-              숨겨진 네트워크
-            </label>
-          </div>
-
-          <!-- URL -->
-          <div
-            class="type-fields-section"
-            id="type-fields-url"
-            style="display: none"
-          >
-            <label>
-              URL
-              <input
-                id="url-input"
-                type="text"
-                placeholder="https://example.com"
-              />
-            </label>
-          </div>
-
-          <!-- 이메일 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-email"
-            style="display: none"
-          >
-            <label>
-              받는 사람 이메일
-              <input
-                id="email-address"
-                type="email"
-                placeholder="example@email.com"
-              />
-            </label>
-            <label>
-              제목 (선택)
-              <input id="email-subject" type="text" />
-            </label>
-            <label>
-              내용 (선택)
-              <textarea id="email-body"></textarea>
-            </label>
-          </div>
-
-          <!-- 전화번호(전화) -->
-          <div
-            class="type-fields-section"
-            id="type-fields-tel"
-            style="display: none"
-          >
-            <label>
-              전화번호
-              <input id="tel-number" type="tel" placeholder="010-1234-5678" />
-            </label>
-          </div>
-
-          <!-- 전화번호(문자) -->
-          <div
-            class="type-fields-section"
-            id="type-fields-sms"
-            style="display: none"
-          >
-            <label>
-              전화번호
-              <input id="sms-number" type="tel" placeholder="010-1234-5678" />
-            </label>
-            <label>
-              문자 내용 (선택)
-              <textarea id="sms-message"></textarea>
-            </label>
-          </div>
-
-          <!-- 연락처 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-vcard"
-            style="display: none"
-          >
-            <label>
-              이름
-              <input id="vcard-name" type="text" />
-            </label>
-            <label>
-              전화번호 (선택)
-              <input id="vcard-phone" type="tel" />
-            </label>
-            <label>
-              이메일 (선택)
-              <input id="vcard-email" type="email" />
-            </label>
-            <label>
-              회사/소속 (선택)
-              <input id="vcard-org" type="text" />
-            </label>
-          </div>
-
-          <!-- 일정 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-event"
-            style="display: none"
-          >
-            <label>
-              제목
-              <input id="event-title" type="text" />
-            </label>
-            <label>
-              시작 일시
-              <input id="event-start" type="datetime-local" />
-            </label>
-            <label>
-              종료 일시 (선택)
-              <input id="event-end" type="datetime-local" />
-            </label>
-            <label>
-              장소 (선택)
-              <input id="event-location" type="text" />
-            </label>
-            <label>
-              설명 (선택)
-              <textarea id="event-description"></textarea>
-            </label>
-          </div>
-
-          <!-- 위치 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-geo"
-            style="display: none"
-          >
-            <label>
-              위도
-              <input
-                id="geo-lat"
-                type="number"
-                step="any"
-                placeholder="37.5665"
-              />
-            </label>
-            <label>
-              경도
-              <input
-                id="geo-lng"
-                type="number"
-                step="any"
-                placeholder="126.978"
-              />
-            </label>
-          </div>
-
-          <div id="qr-contrast-warning" style="display: none">
-            <div class="contrast-warning-box">
-              <span id="contrast-warning-text"></span>
-              <details class="contrast-tip">
-                <summary>해결 방법 보기</summary>
-                <div class="contrast-tip-body">
-                  <p>
-                    배경색과 도트(점)·모서리 색상 사이의 명도 차이가 부족합니다.
-                  </p>
-                  <ul>
-                    <li>
-                      배경색을 더 밝게, 도트·모서리 색상을 더 어둡게 디자인하기
-                    </li>
-                    <li>
-                      또는 반대로 어두운 배경에 밝은 도트·모서리로 디자인하기
-                    </li>
-                    <li>
-                      그라데이션 사용 시 양 끝 색상 모두 배경과 충분한 대비
-                      유지하기
-                    </li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <div id="qr-preview"></div>
-
-          <button id="btn-export">내보내기</button>
-        </main>
-
-        <!-- ===================== 우측(데스크톱)/하단(모바일): 디자인 설정 ===================== -->
-        <aside class="panel-design">
-          <h2 class="panel-title">디자인 설정</h2>
-
-          <div class="accordion-group" data-group="design">
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">스타일 저장/불러오기</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <label>
-                    스타일 이름
-                    <input
-                      id="preset-name-input"
-                      type="text"
-                      placeholder="예: 블루 그라데이션"
-                    />
-                  </label>
-                  <div class="preset-actions">
-                    <button id="btn-save-preset" type="button">
-                      현재 디자인 저장
-                    </button>
-                  </div>
-
-                  <label>
-                    저장된 스타일
-                    <select id="preset-select">
-                      <option value="">저장된 스타일 없음</option>
-                    </select>
-                  </label>
-                  <div class="preset-actions">
-                    <button id="btn-load-preset" type="button">불러오기</button>
-                    <button id="btn-delete-preset" type="button">삭제</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">기본 설정</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <label>
-                    모양
-                    <select id="shape-select">
-                      <option value="square" selected>사각형</option>
-                      <option value="circle">원형</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    너비 (px)
-                    <input
-                      id="width-input"
-                      type="number"
-                      min="50"
-                      value="300"
-                    />
-                  </label>
-
-                  <label>
-                    높이 (px)
-                    <input
-                      id="height-input"
-                      type="number"
-                      min="50"
-                      value="300"
-                    />
-                  </label>
-
-                  <label>
-                    전체 여백 (px)
-                    <input id="margin-input" type="number" min="0" value="0" />
-                  </label>
-
-                  <label>
-                    오류 복원율
-                    <select id="error-corr-select">
-                      <option value="L">L (약 7% 복원)</option>
-                      <option value="M">M (약 15% 복원)</option>
-                      <option value="Q" selected>Q (약 25% 복원)</option>
-                      <option value="H">H (약 30% 복원)</option>
-                    </select>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">로고 이미지</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <div class="logo-source-field">
-                    <span>입력 방식</span>
-                    <div class="logo-source-options">
-                      <label
-                        ><input
-                          type="radio"
-                          name="logo-source"
-                          value="url"
-                          checked
-                        />
-                        URL</label
-                      >
-                      <label
-                        ><input
-                          type="radio"
-                          name="logo-source"
-                          value="upload"
-                        />
-                        파일 업로드</label
-                      >
-                    </div>
-                  </div>
-
-                  <div id="logo-url-area">
-                    <label>
-                      로고 이미지 URL
-                      <input
-                        id="logo-url-input"
-                        type="text"
-                        placeholder="https://..."
-                      />
-                    </label>
-                  </div>
-
-                  <div id="logo-upload-area" style="display: none">
-                    <label>
-                      로고 이미지 파일
-                      <input
-                        id="logo-file-input"
-                        type="file"
-                        accept="image/*"
-                      />
-                    </label>
-                    <div id="logo-file-preview" style="display: none">
-                      <img id="logo-file-thumb" src="" alt="" />
-                      <button id="logo-file-clear" type="button">제거</button>
-                    </div>
-                  </div>
-
-                  <label>
-                    로고 크기 (0 ~ 0.5)
-                    <input
-                      id="image-size-input"
-                      type="number"
-                      min="0"
-                      max="0.5"
-                      step="0.01"
-                      value="0.4"
-                    />
-                  </label>
-
-                  <label>
-                    로고 마진 (px)
-                    <input
-                      id="image-margin-input"
-                      type="number"
-                      min="0"
-                      value="0"
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">도트(점) 스타일</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <small
-                    >주의: 배경색과 비슷한 밝기의 색을 선택할 경우 인식이 잘 안
-                    될 수도 있습니다.</small
-                  >
-                  <label>
-                    색상
-                    <input id="dots-color-input" type="color" value="#000000" />
-                  </label>
-
-                  <label>
-                    스타일
-                    <select id="dots-type-select">
-                      <option value="square" selected>사각형</option>
-                      <option value="rounded">둥근 사각형</option>
-                      <option value="extra-rounded">매우 둥근 사각형</option>
-                      <option value="dots">점 패턴</option>
-                      <option value="classy">클래식</option>
-                      <option value="classy-rounded">둥근 클래식</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    <input id="dots-gradient-toggle" type="checkbox" />
-                    그라데이션 사용
-                  </label>
-
-                  <div id="dots-gradient-fields">
-                    <label>
-                      그라데이션 종류
-                      <select id="dots-gradient-type-select">
-                        <option value="linear" selected>선형</option>
-                        <option value="radial">원형</option>
-                      </select>
-                    </label>
-
-                    <label>
-                      회전 (도)
-                      <input
-                        id="dots-gradient-rotation-input"
-                        type="number"
-                        value="0"
-                      />
-                    </label>
-
-                    <label>
-                      색상 1
-                      <input
-                        id="dots-gradient-color1-input"
-                        type="color"
-                        value="#000000"
-                      />
-                    </label>
-
-                    <label>
-                      색상 2
-                      <input
-                        id="dots-gradient-color2-input"
-                        type="color"
-                        value="#ffffff"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">배경 스타일</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <label>
-                    색상
-                    <input id="bg-color-input" type="color" value="#ffffff" />
-                  </label>
-
-                  <label>
-                    <input id="bg-gradient-toggle" type="checkbox" />
-                    그라데이션 사용
-                  </label>
-
-                  <div id="bg-gradient-fields">
-                    <label>
-                      그라데이션 종류
-                      <select id="bg-gradient-type-select">
-                        <option value="linear" selected>선형</option>
-                        <option value="radial">원형</option>
-                      </select>
-                    </label>
-
-                    <label>
-                      회전 (도)
-                      <input
-                        id="bg-gradient-rotation-input"
-                        type="number"
-                        value="0"
-                      />
-                    </label>
-
-                    <label>
-                      색상 1
-                      <input
-                        id="bg-gradient-color1-input"
-                        type="color"
-                        value="#ffffff"
-                      />
-                    </label>
-
-                    <label>
-                      색상 2
-                      <input
-                        id="bg-gradient-color2-input"
-                        type="color"
-                        value="#000000"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">모서리 사각형 스타일</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <small
-                    >주의: 배경색과 비슷한 밝기의 색을 선택할 경우 인식이 잘 안
-                    될 수도 있습니다.</small
-                  >
-                  <label>
-                    색상
-                    <input
-                      id="corners-square-color-input"
-                      type="color"
-                      value="#000000"
-                    />
-                  </label>
-
-                  <label>
-                    스타일
-                    <select id="corners-square-type-select">
-                      <option value="">(점 스타일 따라가기)</option>
-                      <option value="square">사각형</option>
-                      <option value="dot">원형</option>
-                      <option value="dots">점 패턴</option>
-                      <option value="rounded">둥근 사각형</option>
-                      <option value="extra-rounded">매우 둥근 사각형</option>
-                      <option value="classy">클래식</option>
-                      <option value="classy-rounded">둥근 클래식</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    <input
-                      id="corners-square-gradient-toggle"
-                      type="checkbox"
-                    />
-                    그라데이션 사용
-                  </label>
-
-                  <div id="corners-square-gradient-fields">
-                    <label>
-                      그라데이션 종류
-                      <select id="corners-square-gradient-type-select">
-                        <option value="linear" selected>선형</option>
-                        <option value="radial">원형</option>
-                      </select>
-                    </label>
-
-                    <label>
-                      회전 (도)
-                      <input
-                        id="corners-square-gradient-rotation-input"
-                        type="number"
-                        value="0"
-                      />
-                    </label>
-
-                    <label>
-                      색상 1
-                      <input
-                        id="corners-square-gradient-color1-input"
-                        type="color"
-                        value="#000000"
-                      />
-                    </label>
-
-                    <label>
-                      색상 2
-                      <input
-                        id="corners-square-gradient-color2-input"
-                        type="color"
-                        value="#ffffff"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">모서리 도트 스타일</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <small
-                    >주의: 배경색과 비슷한 밝기의 색을 선택할 경우 인식이 잘 안
-                    될 수도 있습니다.</small
-                  >
-                  <label>
-                    색상
-                    <input
-                      id="corners-dot-color-input"
-                      type="color"
-                      value="#000000"
-                    />
-                  </label>
-
-                  <label>
-                    스타일
-                    <select id="corners-dot-type-select">
-                      <option value="">(점 스타일 따라가기)</option>
-                      <option value="square">사각형</option>
-                      <option value="dot">원형</option>
-                      <option value="dots">점 패턴</option>
-                      <option value="rounded">둥근 사각형</option>
-                      <option value="extra-rounded">매우 둥근 사각형</option>
-                      <option value="classy">클래식</option>
-                      <option value="classy-rounded">둥근 클래식</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    <input id="corners-dot-gradient-toggle" type="checkbox" />
-                    그라데이션 사용
-                  </label>
-
-                  <div id="corners-dot-gradient-fields">
-                    <label>
-                      그라데이션 종류
-                      <select id="corners-dot-gradient-type-select">
-                        <option value="linear" selected>선형</option>
-                        <option value="radial">원형</option>
-                      </select>
-                    </label>
-
-                    <label>
-                      회전 (도)
-                      <input
-                        id="corners-dot-gradient-rotation-input"
-                        type="number"
-                        value="0"
-                      />
-                    </label>
-
-                    <label>
-                      색상 1
-                      <input
-                        id="corners-dot-gradient-color1-input"
-                        type="color"
-                        value="#000000"
-                      />
-                    </label>
-
-                    <label>
-                      색상 2
-                      <input
-                        id="corners-dot-gradient-color2-input"
-                        type="color"
-                        value="#ffffff"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-      </div>
-    </div>
-
-    <div id="export-modal">
-      <div class="modal-box">
-        <h2>QR 코드 내보내기</h2>
-        <select id="download-ext-select">
-          <option value="png" selected>.png</option>
-          <option value="jpeg">.jpeg</option>
-          <option value="webp">.webp</option>
-          <option value="svg">.svg</option>
-        </select>
-        <div id="export-contrast-warning" style="display: none">
-          <div class="contrast-warning-box">
-            <span id="export-contrast-warning-text"></span>
-            <details class="contrast-tip">
-              <summary>해결 방법 보기</summary>
-              <div class="contrast-tip-body">
-                <p>
-                  배경색과 도트(점)·모서리 색상 사이의 명도 차이가 부족합니다.
-                </p>
-                <ul>
-                  <li>
-                    배경색을 더 밝게, 도트·모서리 색상을 더 어둡게 디자인하기
-                  </li>
-                  <li>
-                    또는 반대로 어두운 배경에 밝은 도트·모서리로 디자인하기
-                  </li>
-                  <li>
-                    그라데이션 사용 시 양 끝 색상 모두 배경과 충분한 대비
-                    유지하기
-                  </li>
-                </ul>
-              </div>
-            </details>
-          </div>
+        <div class="about-hero-grid" aria-hidden="true">
+          <div class="qr-module-grid" id="qr-module-grid"></div>
         </div>
-        <div class="modal-actions">
-          <button id="btn-download">다운로드</button>
-          <button id="modal-close-btn">닫기</button>
-        </div>
-      </div>
-    </div>
+      </section>
 
-    <div id="patch-notes-modal">
-      <div class="modal-box patch-notes-box">
-        <h2>패치노트</h2>
-        <div class="patch-notes-content">
-          <!--
-          <div class="patch-note-entry">
-            <h3 class="patch-note-version">
-              v. 1.1.0 <span class="patch-note-date">2026. 07.</span>
-            </h3>
-            <p class="patch-note-label">[버전 제목]</p>
-            <ul>
-              <li></li>
-              <li></li>
-            </ul>
-          </div>
-          -->
-          <div class="patch-note-entry">
-            <h3 class="patch-note-version">
-              v. 1.1.0 <span class="patch-note-date">2026. 07. 01.</span>
-            </h3>
-            <p class="patch-note-label">
-              히스토리 기능 개편 및 편의성 기능 추가
+      <!-- ===================== 왜 QR인가 ===================== -->
+      <section class="about-section">
+        <h2>이럴 때 QR 코드가 편해요!</h2>
+        <p>
+          QR 코드는 카메라만 있으면 누구나 즉시 읽을 수 있는 가장 단순한 정보
+          전달 수단입니다. 긴 와이파이 비밀번호를 직접 타이핑하게 하는 대신 QR
+          코드 한 장을 붙여두면 되고, 명함에 적힌 전화번호를 손으로 저장하는
+          대신 QR 코드 하나로 연락처 앱에 바로 등록할 수 있습니다. QR 코드
+          생성기는 이런 상황 외에도 여러 상황에 적합한 QR 코드를 누구나 몇 초
+          안에 만들 수 있도록 만든 도구입니다.
+        </p>
+      </section>
+
+      <!-- ===================== 9가지 유형 ===================== -->
+      <section class="about-section">
+        <h2>9가지 QR 코드 유형</h2>
+        <p class="about-section-lead">
+          단순 텍스트부터 스캔 즉시 동작이 실행되는 유형까지, 상황에 맞는 QR
+          코드를 선택할 수 있습니다.
+        </p>
+
+        <div class="type-card-grid">
+          <article class="type-card">
+            <h3>텍스트</h3>
+            <p>
+              메모, 안내 문구 등 어떤 내용이든 그대로 담습니다. 한글도 깨지지
+              않도록 별도로 처리했습니다.
             </p>
-            <ul>
-              <li>민감정보가 모자이크된 히스토리도 불러올 수 있게 수정</li>
-              <li>생성 버튼 삭제 및 자동 히스토리 등록</li>
-              <li>히스토리 즐겨찾기 기능 추가</li>
-              <li>오래된 히스토리 자동 삭제 기능 추가</li>
-              <li>커스텀한 디자인 초기값으로 되돌리기 기능 추가</li>
-              <li>
-                마지막으로 생성한 QR 코드 유형을 다음 방문시 초기값으로 지정
-              </li>
-              <li>버그 제보, 건의 사항 등 의견을 듣기 위한 구글 폼 추가</li>
-              <li>다크/라이트 모드 추가</li>
-            </ul>
+          </article>
+
+          <article class="type-card">
+            <h3>URL</h3>
+            <p>
+              웹사이트 주소를 입력하면 스캔 즉시 브라우저가 열립니다.
+              <code>https://</code>를 생략해도 자동으로 붙여줍니다.
+            </p>
+          </article>
+
+          <article class="type-card">
+            <h3>와이파이</h3>
+            <p>
+              네트워크 이름(SSID)과 비밀번호를 입력하면, 스캔한 사람의 기기가
+              비밀번호를 직접 입력하지 않아도 자동으로 접속합니다.
+              카페·매장·게스트룸 안내판에 자주 쓰입니다.
+            </p>
+          </article>
+
+          <article class="type-card">
+            <h3>이메일</h3>
+            <p>
+              받는 사람 주소는 물론, 제목과 본문까지 미리 채워진 메일 작성
+              화면을 바로 띄울 수 있습니다.
+            </p>
+          </article>
+
+          <article class="type-card">
+            <h3>전화번호(전화)</h3>
+            <p>스캔하면 바로 전화 걸기 화면으로 연결됩니다.</p>
+          </article>
+
+          <article class="type-card">
+            <h3>전화번호(문자)</h3>
+            <p>
+              받는 번호와 미리 작성된 문자 내용까지 채운 채로 문자 앱을 엽니다.
+            </p>
+          </article>
+
+          <article class="type-card">
+            <h3>연락처</h3>
+            <p>
+              이름, 전화번호, 이메일, 소속을 입력하면 스캔한 사람의 연락처 앱에
+              바로 저장할 수 있는 전자명함이 됩니다.
+            </p>
+          </article>
+
+          <article class="type-card">
+            <h3>일정</h3>
+            <p>
+              제목, 시작·종료 일시, 장소를 입력하면 스캔한 사람이 자신의 캘린더
+              앱에 바로 등록할 수 있습니다. 초대장, 포스터에 활용하기 좋습니다.
+            </p>
+          </article>
+
+          <article class="type-card">
+            <h3>위치</h3>
+            <p>
+              위도·경도를 입력하면 스캔 즉시 지도 앱에서 해당 위치를 보여줍니다.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===================== 디자인 ===================== -->
+      <section class="about-section">
+        <h2>자유롭게 꾸미고, 인식 실패는 미리 막고</h2>
+        <p class="about-section-lead">
+          QR 코드는 정보만 정확하면 그만이 아니라, 스캔이 되어야 의미가
+          있습니다. 디자인과 인식률, 두 가지를 함께 관리할 수 있습니다.
+        </p>
+
+        <div class="feature-row">
+          <div class="feature-text">
+            <h3>모양, 색상, 로고까지</h3>
+            <p>
+              QR 코드를 이루는 도트, 모서리 사각형, 모서리 도트를 각각 다른
+              색상과 스타일로 지정할 수 있고, 단색뿐 아니라 선형·원형
+              그라데이션도 적용됩니다. 중앙에 로고 이미지를 넣어 브랜드나 프로필
+              사진이 담긴 QR 코드를 만들 수도 있습니다.
+            </p>
           </div>
-          <div class="patch-note-entry">
-            <h3 class="patch-note-version">
-              v. 1.0.0 <span class="patch-note-date">2026. 06. 31.</span>
-            </h3>
-            <p class="patch-note-label">정식 출시</p>
-            <ul>
-              <li>
-                URL, 텍스트, 와이파이, 이메일, 전화번호(전화/문자), 연락처,
-                일정, 위치 등 9가지 유형의 QR Code 생성 지원
-              </li>
-              <li>QR Code의 색상·스타일·그라데이션·로고 커스터마이징</li>
-              <li>PNG / JPEG / WEBP / SVG 형식 내보내기</li>
-              <li>스타일 프리셋 저장 및 불러오기</li>
-              <li>생성 히스토리 기록 (개인정보 보호 설정 포함)</li>
-              <li>명도 대비 경고 (QR 인식률 저하 방지)</li>
-              <li>모바일·데스크톱 반응형 디자인</li>
-              <li>폰트 및 페이지 로딩 최적화</li>
-              <li>Favicon 설정 추가</li>
-              <li>패치노트 추가 및 현제 버전표기</li>
-            </ul>
+          <div class="feature-visual" aria-hidden="true">
+            <div class="mini-qr-demo mini-qr-demo-styled"></div>
           </div>
         </div>
+
+        <div class="feature-row feature-row-reverse">
+          <div class="feature-text">
+            <h3>
+              QR이 잘 보이는지, 실시간으로 검사
+              <button
+                type="button"
+                class="info-btn"
+                data-term="contrast"
+                aria-label="명도 대비가 뭔지 설명 보기"
+              >
+                ?
+              </button>
+            </h3>
+            <p>
+              배경색과 QR 색상이 너무 비슷하면 스캔이 잘 안 되는데, 디자인을
+              바꾸는 즉시 밝기 차이를 계산해서 경고를 보여줍니다. 예쁘게
+              꾸미다가 스캔되지 않는 QR 코드를 만드는 실수를 줄여줍니다.
+            </p>
+          </div>
+          <div class="feature-visual">
+            <div class="contrast-demo">
+              <div class="contrast-demo-row">
+                <div class="contrast-demo-swatch contrast-demo-bad">
+                  <span class="contrast-demo-dot"></span>
+                </div>
+                <span class="contrast-demo-label contrast-demo-label-bad">
+                  대비 부족 · 인식 어려움
+                </span>
+              </div>
+              <div class="contrast-demo-row">
+                <div class="contrast-demo-swatch contrast-demo-good">
+                  <span class="contrast-demo-dot"></span>
+                </div>
+                <span class="contrast-demo-label contrast-demo-label-good">
+                  충분한 대비 · 안정적 인식
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p>
+          완성한 디자인은 PNG, JPEG, WEBP, SVG 형식으로 내려받을 수 있고, 자주
+          쓰는 스타일은 이름을 붙여 저장해두었다가 다음에 바로 불러올 수도
+          있습니다.
+        </p>
+      </section>
+
+      <!-- ===================== 개인정보 ===================== -->
+      <section class="about-section about-section-privacy">
+        <h2>개인정보는 브라우저 밖으로 나가지 않습니다</h2>
+        <p>
+          만든 QR 코드를 기록해두는 히스토리 기능은 전적으로 사용 중인 브라우저
+          안에만 저장되며, 어떤 서버로도 전송되지 않습니다.
+        </p>
+        <ul class="privacy-list">
+          <li>
+            와이파이 비밀번호, 연락처 이름·전화번호·이메일처럼 민감한 항목은
+            사용자가 설정에서 직접 켜지 않는 한 기본적으로 기록되지 않습니다.
+          </li>
+          <li>
+            기록되지 않은 민감 항목이 하나라도 있으면, 스캔 시 정보가 노출될 수
+            있는 QR 이미지와 데이터 자체도 함께 저장하지 않고 🔒 표시로
+            남깁니다.
+          </li>
+          <li>
+            히스토리 최대 개수, 즐겨찾기, 항목별 기록 여부를 모두 직접 설정할 수
+            있습니다.
+          </li>
+        </ul>
+      </section>
+
+      <!-- ===================== 사용 방법 ===================== -->
+      <section class="about-section">
+        <h2>사용 방법</h2>
+        <ol class="howto-list">
+          <li>
+            <strong>유형 선택</strong>
+            <span
+              >URL, 와이파이, 연락처 등 9가지 중 원하는 QR 코드 유형을
+              고릅니다.</span
+            >
+          </li>
+          <li>
+            <strong>내용 입력</strong>
+            <span
+              >선택한 유형에 맞는 정보를 입력합니다. 입력과 동시에 미리보기가
+              갱신됩니다.</span
+            >
+          </li>
+          <li>
+            <strong>디자인 조정</strong>
+            <span
+              >색상, 모양, 로고, 그라데이션 등을 원하는 대로 바꿉니다. 스캔에
+              영향을 줄 수 있는 디자인일 경우 바로 알려줍니다.</span
+            >
+          </li>
+          <li>
+            <strong>다운로드</strong>
+            <span>원하는 파일 형식을 선택해 QR 코드를 내려받습니다.</span>
+          </li>
+        </ol>
+      </section>
+
+      <!-- ===================== FAQ ===================== -->
+      <section class="about-section">
+        <h2>자주 묻는 질문</h2>
+
+        <details class="faq-item">
+          <summary>QR 코드 생성기는 무료인가요?</summary>
+          <div class="faq-body">
+            <p>
+              네, 회원가입이나 결제 없이 모든 기능을 무료로 사용할 수 있습니다.
+            </p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>만든 QR 코드에 유효기간이 있나요?</summary>
+          <div class="faq-body">
+            <p>
+              없습니다. 입력한 정보가 QR 코드 안에 그대로 담기기 때문에, 서버
+              만료 처리 없이 반영구적으로 동일하게 인식됩니다.
+            </p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>로고를 넣으면 QR 코드 인식이 안 되나요?</summary>
+          <div class="faq-body">
+            <p>
+              QR 코드는 일부가 가려지거나 더러워져도 알아볼 수 있게 복구용
+              여유분을
+              <button
+                type="button"
+                class="info-btn"
+                data-term="ecc"
+                aria-label="오류 복원율이 뭔지 설명 보기"
+              >
+                ?
+              </button>
+              가지고 있는데, 이 여유분을 넉넉하게 설정하면 로고가 있어도 대부분
+              정상적으로 인식됩니다. 다만 로고가 너무 크거나 배경과 색상 차이가
+              작으면 인식률이 떨어질 수 있어, 실시간 대비 경고 기능이 이를 미리
+              알려줍니다.
+            </p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            히스토리에 입력한 와이파이 비밀번호나 연락처 정보가 저장되나요?
+          </summary>
+          <div class="faq-body">
+            <p>
+              히스토리 기능을 사용하더라도 와이파이 비밀번호, 연락처
+              이름·전화번호·이메일 같은 민감한 항목은 기본적으로 기록되지
+              않습니다. 또한 모든 기록은 서버로 전송되지 않고 사용하는
+              브라우저에만 저장됩니다.
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <div class="about-bottom-cta">
+        <a href="/app" class="about-cta-large">지금 사용해보기</a>
+      </div>
+    </div>
+
+    <div id="term-modal">
+      <div class="modal-box">
+        <h2 id="term-modal-title"></h2>
+        <div id="term-modal-body"></div>
         <div class="modal-actions">
-          <button id="patch-notes-close-btn">닫기</button>
+          <button id="term-modal-close-btn" type="button">닫기</button>
         </div>
       </div>
     </div>
 
-    <footer class="page-footer">
+    <footer class="page-footer about-footer">
       <hr />
       <small
         >Copyright 2026. <a href="https://minchan.app">김민찬</a> All rights
@@ -1181,39 +532,374 @@
       <small>
         Contact: <a href="mailto:business@minchan.app">business@minchan.app</a>
       </small>
-      <small>Created By Claude</small>
-      <br />
-      <small>
-        이 서비스에는 Denys Kozak이 제작한
-        <a
-          href="https://github.com/kozakdenys/qr-code-styling"
-          target="_blank"
-          rel="noopener"
-          >qr-code-styling</a
-        >
-        라이브러리가 사용되었으며, 네이버에서 제공한
-        <a
-          href="https://hangeul.naver.com/fonts/search?f=nanum"
-          target="_blank"
-          rel="noopener"
-          >나눔글꼴</a
-        >(나눔스퀘어)이 적용되어 있습니다.
-      </small>
-      <div class="footer-bar">
-        <span class="site-version">v. 1.1.1</span>
-        <div class="footer-bar-links">
-          <a
-            href="https://forms.gle/BvHiWuuexWZ9Sm5x8"
-            target="_blank"
-            rel="noopener"
-            class="footer-btn footer-link-btn"
-            >💬 의견 보내기</a
-          >
-          <button id="btn-patch-notes" type="button" class="footer-btn">
-            패치노트
-          </button>
-        </div>
-      </div>
+      <small> Created by Claude </small>
     </footer>
+
+    <script>
+      // "사용해보기" 클릭 기록: 다음 방문부터는 소개 페이지를 건너뛰고
+      // 바로 app.html로 이동시키기 위한 플래그. GSAP 로드 여부와
+      // 무관하게 항상 동작해야 하므로 별도 스크립트로 분리함.
+      (function () {
+        document.querySelectorAll('a[href="/app"]').forEach(function (link) {
+          link.addEventListener("click", function () {
+            try {
+              localStorage.setItem("qrgen-visited", "true");
+            } catch (e) {
+              // localStorage를 못 쓰는 환경이면 그냥 넘어감 (다음에도 소개 페이지가 보임)
+            }
+          });
+        });
+      })();
+    </script>
+
+    <script>
+      // 용어 설명 모달: 물음표 버튼을 누르면 쉬운 말로 설명을 보여줌
+      (function () {
+        var TERMS = {
+          contrast: {
+            title: "밝기 차이(명도 대비)가 뭔가요?",
+            body: "<p>QR 코드는 결국 카메라가 밝은 칸과 어두운 칸을 구분해서 읽는 방식이에요. 그래서 배경색과 QR 색상의 밝기 차이가 너무 작으면, 사람 눈에는 괜찮아 보여도 카메라는 두 색을 잘 구분하지 못해서 스캔이 안 될 수 있어요.</p><p>이 밝기 차이를 재는 국제 기준을 'WCAG 명도 대비'라고 부르는데, 원래는 시각장애가 있는 분들도 화면 글씨를 잘 읽을 수 있도록 만든 웹 접근성 기준이에요. QR 코드에도 같은 원리가 적용돼서, 이 기준으로 배경색과 QR 색상의 차이를 계산해 미리 알려드리는 거예요.</p>",
+          },
+          ecc: {
+            title: "오류 복원율이 뭔가요?",
+            body: "<p>QR 코드는 일부러 정보를 조금 중복해서 담아둬서, 코드의 일부가 가려지거나 지저분해져도 나머지 정보만으로 원래 내용을 복구할 수 있어요. 이 '여유분'의 비율을 오류 복원율이라고 불러요.</p><p>여유분을 많이 둘수록(L → M → Q → H 순으로 높아짐) 더 많이 가려져도 인식되지만, 그만큼 QR 코드 무늬가 조금 더 촘촘하고 복잡해져요. 로고를 넣을 계획이라면 Q 이상으로 설정하는 걸 추천해요.</p>",
+          },
+        };
+
+        var modal = document.getElementById("term-modal");
+        var titleEl = document.getElementById("term-modal-title");
+        var bodyEl = document.getElementById("term-modal-body");
+        var closeBtn = document.getElementById("term-modal-close-btn");
+
+        function openTermModal(key) {
+          var term = TERMS[key];
+          if (!term || !modal) return;
+          titleEl.textContent = term.title;
+          bodyEl.innerHTML = term.body;
+          modal.style.display = "flex";
+        }
+
+        function closeTermModal() {
+          if (modal) modal.style.display = "none";
+        }
+
+        document
+          .querySelectorAll(".info-btn[data-term]")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              openTermModal(btn.getAttribute("data-term"));
+            });
+          });
+
+        if (closeBtn) closeBtn.addEventListener("click", closeTermModal);
+        if (modal) {
+          modal.addEventListener("click", function (e) {
+            if (e.target.id === "term-modal") closeTermModal();
+          });
+        }
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closeTermModal();
+        });
+      })();
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <script>
+      // 다크모드 토글 (메인 페이지와 동일한 localStorage 키 공유)
+      (function () {
+        var THEME_KEY = "qrgen-theme";
+        var btn = document.getElementById("theme-toggle");
+
+        function updateBtn(theme) {
+          if (theme === "dark") {
+            btn.textContent = "☀️";
+            btn.title = "라이트 모드로 전환";
+          } else {
+            btn.textContent = "🌙";
+            btn.title = "다크 모드로 전환";
+          }
+        }
+
+        updateBtn(
+          document.documentElement.getAttribute("data-theme") || "light",
+        );
+
+        btn.addEventListener("click", function () {
+          var current =
+            document.documentElement.getAttribute("data-theme") || "light";
+          var next = current === "dark" ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", next);
+          localStorage.setItem(THEME_KEY, next);
+          updateBtn(next);
+        });
+      })();
+
+      // 히어로 장식용 QR 모듈 그리드 (실제 QR 코드가 아닌 순수 장식 요소)
+      (function () {
+        var container = document.getElementById("qr-module-grid");
+        if (!container) return;
+
+        var size = 11;
+        var finder = new Set();
+        // 좌상단, 우상단, 좌하단 파인더 패턴(7x7) 위치를 표시용으로 표기
+        [
+          [0, 0],
+          [0, 6],
+          [6, 0],
+          [6, 6],
+        ].forEach(function (corner) {
+          for (var dr = 0; dr < 7; dr++) {
+            for (var dc = 0; dc < 7; dc++) {
+              var r = corner[0] + dr;
+              var c = corner[1] + dc;
+              if (r < size && c < size) {
+                var isBorder = dr === 0 || dr === 6 || dc === 0 || dc === 6;
+                var isCore = dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4;
+                if (isBorder || isCore) finder.add(r + "-" + c);
+              }
+            }
+          }
+        });
+
+        var cells = [];
+        for (var row = 0; row < size; row++) {
+          for (var col = 0; col < size; col++) {
+            var cell = document.createElement("span");
+            var key = row + "-" + col;
+            var isFinder = finder.has(key);
+            var on = isFinder || Math.random() > 0.55;
+            cell.className =
+              "qr-cell" + (on ? " on" : "") + (isFinder ? " finder" : "");
+            container.appendChild(cell);
+            if (on) cells.push(cell);
+          }
+        }
+
+        var reduceMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        if (typeof gsap === "undefined" || reduceMotion) {
+          cells.forEach(function (c) {
+            c.style.opacity = "1";
+            c.style.transform = "scale(1)";
+          });
+          return;
+        }
+
+        gsap.set(cells, { opacity: 0, scale: 0.3, transformOrigin: "50% 50%" });
+        gsap.to(cells, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          ease: "elastic.out(1, 0.55)",
+          delay: 0.15,
+          stagger: { each: 0.018, from: "random" },
+        });
+      })();
+    </script>
+
+    <script>
+      // ===== 여기부터는 GSAP으로 만드는 "말랑말랑한" 인터랙션들 =====
+      (function () {
+        if (typeof gsap === "undefined") return;
+
+        var reduceMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        if (reduceMotion) return; // 모션 최소화 환경에서는 아래 애니메이션을 전부 건너뜀
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* ---------- 히어로 텍스트: 통통 튀며 등장 ---------- */
+        gsap.from(
+          [
+            ".about-topbar",
+            ".about-eyebrow",
+            ".about-hero-text h1",
+            ".about-hero-desc",
+            ".about-cta-large",
+          ],
+          {
+            y: 26,
+            opacity: 0,
+            duration: 0.7,
+            ease: "back.out(1.7)",
+            stagger: 0.1,
+          },
+        );
+
+        /* ---------- 스크롤에 맞춰 섹션이 말랑하게 떠오름 ---------- */
+        gsap.utils
+          .toArray(".about-section, .about-bottom-cta")
+          .forEach(function (section) {
+            gsap.from(section, {
+              y: 36,
+              opacity: 0,
+              scale: 0.96,
+              duration: 0.7,
+              ease: "back.out(1.6)",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 85%",
+              },
+            });
+          });
+
+        /* ---------- 9가지 유형 카드: 순서대로 팝업 ---------- */
+        gsap.from(".type-card", {
+          y: 24,
+          opacity: 0,
+          scale: 0.85,
+          duration: 0.6,
+          ease: "back.out(2)",
+          stagger: 0.06,
+          scrollTrigger: {
+            trigger: ".type-card-grid",
+            start: "top 85%",
+          },
+        });
+
+        /* ---------- 사용 방법 번호: 하나씩 통통 튀며 등장 ---------- */
+        gsap.from(".howto-list li", {
+          x: -20,
+          opacity: 0,
+          duration: 0.5,
+          ease: "back.out(2.2)",
+          stagger: 0.12,
+          scrollTrigger: {
+            trigger: ".howto-list",
+            start: "top 85%",
+          },
+        });
+
+        /* ---------- 명도 대비 데모: 순서대로 통통 등장 ---------- */
+        gsap.from(".contrast-demo-row", {
+          x: 24,
+          opacity: 0,
+          duration: 0.5,
+          ease: "back.out(2.2)",
+          stagger: 0.15,
+          scrollTrigger: {
+            trigger: ".contrast-demo",
+            start: "top 85%",
+          },
+        });
+
+        /* ---------- 미니 QR 데모: 숨 쉬듯 은은하게 부풀었다 줄었다 ---------- */
+        gsap.to(".mini-qr-demo", {
+          scale: 1.06,
+          duration: 1.8,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+        });
+
+        /* ---------- 버튼: 누르면 쏙 들어갔다 탱글 튀어나옴 ---------- */
+        document
+          .querySelectorAll(".about-cta-large, .about-cta-small")
+          .forEach(function (btn) {
+            gsap.set(btn, { transformOrigin: "50% 50%" });
+
+            btn.addEventListener("mouseenter", function () {
+              gsap.to(btn, { scale: 1.06, duration: 0.3, ease: "back.out(3)" });
+            });
+            btn.addEventListener("mouseleave", function () {
+              gsap.to(btn, {
+                scale: 1,
+                duration: 0.4,
+                ease: "elastic.out(1, 0.4)",
+              });
+            });
+            btn.addEventListener("mousedown", function () {
+              gsap.to(btn, { scale: 0.9, duration: 0.12, ease: "power2.out" });
+            });
+            ["mouseup", "mouseleave"].forEach(function (evt) {
+              btn.addEventListener(evt, function () {
+                gsap.to(btn, {
+                  scale: 1,
+                  duration: 0.5,
+                  ease: "elastic.out(1, 0.35)",
+                });
+              });
+            });
+          });
+
+        /* ---------- 유형 카드: 마우스 올리면 살짝 씰룩 ---------- */
+        document.querySelectorAll(".type-card").forEach(function (card) {
+          gsap.set(card, { transformOrigin: "50% 100%" });
+          var wobble = gsap.utils.random(-2.5, 2.5);
+
+          card.addEventListener("mouseenter", function () {
+            gsap.to(card, {
+              y: -6,
+              scale: 1.04,
+              rotate: wobble,
+              duration: 0.35,
+              ease: "back.out(3)",
+            });
+          });
+          card.addEventListener("mouseleave", function () {
+            gsap.to(card, {
+              y: 0,
+              scale: 1,
+              rotate: 0,
+              duration: 0.5,
+              ease: "elastic.out(1, 0.4)",
+            });
+          });
+        });
+
+        /* ---------- FAQ: 열고 닫힐 때 말랑하게 늘어났다 줄어듦 ---------- */
+        document.querySelectorAll(".faq-item").forEach(function (item) {
+          var summary = item.querySelector("summary");
+          var body = item.querySelector(".faq-body");
+          if (!summary || !body) return;
+
+          gsap.set(body, { height: 0, overflow: "hidden" });
+
+          summary.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            var isOpen = item.classList.contains("is-open");
+
+            if (!isOpen) {
+              item.setAttribute("open", "");
+              item.classList.add("is-open");
+              gsap.fromTo(
+                body,
+                { height: 0 },
+                {
+                  height: body.scrollHeight,
+                  duration: 0.5,
+                  ease: "back.out(1.7)",
+                  onComplete: function () {
+                    gsap.set(body, { height: "auto" });
+                  },
+                },
+              );
+            } else {
+              var currentHeight = body.scrollHeight;
+              gsap.fromTo(
+                body,
+                { height: currentHeight },
+                {
+                  height: 0,
+                  duration: 0.35,
+                  ease: "power2.inOut",
+                  onComplete: function () {
+                    item.classList.remove("is-open");
+                    item.removeAttribute("open");
+                  },
+                },
+              );
+            }
+          });
+        });
+      })();
+    </script>
   </body>
 </html>

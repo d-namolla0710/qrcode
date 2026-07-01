@@ -1,0 +1,586 @@
+/* ===================================================================
+   landing.css — 소개(랜딩) 페이지 전용 스타일 (index.html에서 사용)
+   색상·폰트·다크모드 변수는 app.css의 :root / [data-theme] 값을 그대로 사용.
+   여기서는 소개 페이지에서만 쓰는 accent 컬러와 레이아웃만 추가로 정의.
+=================================================================== */
+
+:root {
+  --accent: #4338ca;
+  --accent-2: #6366f1;
+  --accent-fg: #ffffff;
+  --accent-soft-bg: #eef0fd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --accent: #818cf8;
+    --accent-2: #a5b4fc;
+    --accent-fg: #14142b;
+    --accent-soft-bg: #1c1c33;
+  }
+}
+
+:root[data-theme="dark"] {
+  --accent: #818cf8;
+  --accent-2: #a5b4fc;
+  --accent-fg: #14142b;
+  --accent-soft-bg: #1c1c33;
+}
+
+.about-page {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ---------- 상단 바 ---------- */
+.about-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+/* app.css의 .theme-toggle-btn은 생성기 페이지(app.html)의 가운데 정렬된
+   헤더 기준으로 position:absolute가 걸려있음. 랜딩 페이지는 flex로
+   배치하는 구조라 그대로 두면 "사용해보기" 버튼과 같은 자리에 겹쳐
+   보이므로, 여기서만 원래 flex 흐름을 따르도록 되돌림. */
+.about-topbar .theme-toggle-btn {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+}
+
+.about-brand {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.about-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-cta-small {
+  display: inline-block;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.about-cta-small:hover {
+  background: var(--accent-2);
+}
+
+/* ---------- 히어로 ---------- */
+.about-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  align-items: center;
+  margin-bottom: 72px;
+}
+
+.about-eyebrow {
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+.about-hero-text h1 {
+  margin: 0 0 18px;
+  font-size: clamp(26px, 5.2dvw, 38px);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.about-hero-desc {
+  margin: 0 0 26px;
+  font-size: clamp(14px, 2dvw, 16px);
+  line-height: 1.7;
+  color: var(--fg-3);
+}
+
+.about-cta-large {
+  display: inline-block;
+  padding: 15px 30px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 10px 24px -12px var(--accent);
+  transition: background 0.15s ease;
+}
+
+.about-cta-large:hover {
+  background: var(--accent-2);
+}
+
+/* ---------- 히어로 장식: QR 모듈 그리드 ---------- */
+.about-hero-grid {
+  display: flex;
+  justify-content: center;
+}
+
+.qr-module-grid {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 4px;
+  width: min(72dvw, 260px);
+  aspect-ratio: 1 / 1;
+  padding: 18px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 16px 32px -20px rgba(0, 0, 0, 0.25);
+}
+
+/* 초기 상태(opacity/scale)만 CSS로 잡아두고, 실제 등장 애니메이션은
+   index.html 하단 스크립트에서 GSAP으로 제어함. JS가 로드되지 않는
+   경우를 대비해 아래 fallback도 남겨둠. */
+.qr-cell {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 3px;
+  background: transparent;
+  opacity: 0;
+  transform: scale(0.3);
+}
+
+.qr-cell.on {
+  background: var(--fg-4);
+}
+
+.qr-cell.finder {
+  background: var(--accent);
+}
+
+/* 자바스크립트가 비활성화된 경우를 위한 fallback: gsap이 실행되지
+   않으면 이 CSS 애니메이션으로 대신 등장 */
+@media (scripting: none) {
+  .qr-cell.on {
+    animation: qr-cell-pop 0.4s ease forwards;
+  }
+
+  @keyframes qr-cell-pop {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* ---------- 섹션 공통 ---------- */
+.about-section {
+  margin-bottom: 64px;
+}
+
+.about-section h2 {
+  margin: 0 0 14px;
+  font-size: clamp(19px, 2.6dvw, 24px);
+  font-weight: 700;
+}
+
+.about-section p {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--fg-2);
+}
+
+.about-section-lead {
+  color: var(--fg-3) !important;
+}
+
+.about-section code {
+  padding: 2px 6px;
+  font-size: 13px;
+  background: var(--bg-3);
+  border-radius: 4px;
+}
+
+/* ---------- 9가지 유형 카드 ---------- */
+.type-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.type-card {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg-2);
+  cursor: default;
+}
+
+.type-card h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.type-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--fg-3);
+}
+
+/* ---------- 기능 소개 (텍스트 + 비주얼) ---------- */
+.feature-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: center;
+  margin: 32px 0;
+}
+
+.feature-text h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.feature-text p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--fg-2);
+}
+
+.feature-visual {
+  display: flex;
+  justify-content: center;
+}
+
+/* 도트/모서리 스타일 데모 */
+.mini-qr-demo {
+  width: 140px;
+  height: 140px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 30% 30%, var(--accent-2), transparent 60%),
+    linear-gradient(135deg, var(--accent), var(--accent-2));
+  position: relative;
+}
+
+.mini-qr-demo::before,
+.mini-qr-demo::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 6px solid var(--bg);
+  border-radius: 10px;
+}
+
+.mini-qr-demo::before {
+  top: 14px;
+  left: 14px;
+}
+
+.mini-qr-demo::after {
+  bottom: 14px;
+  right: 14px;
+}
+
+/* 명도 대비 데모 */
+.contrast-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.contrast-demo-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.contrast-demo-swatch {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+}
+
+.contrast-demo-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+}
+
+.contrast-demo-bad {
+  background: #f2f0e6;
+}
+
+.contrast-demo-bad .contrast-demo-dot {
+  background: #d8d4c2;
+}
+
+.contrast-demo-good {
+  background: #ffffff;
+}
+
+.contrast-demo-good .contrast-demo-dot {
+  background: #111111;
+}
+
+.contrast-demo-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.contrast-demo-label-bad {
+  color: var(--warn-sev-border);
+}
+
+.contrast-demo-label-good {
+  color: #2e7d32;
+}
+
+/* ---------- 개인정보 섹션 ---------- */
+.about-section-privacy {
+  padding: 24px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+}
+
+.privacy-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--fg-2);
+}
+
+.privacy-list li {
+  margin: 8px 0;
+}
+
+/* ---------- 사용 방법 ---------- */
+.howto-list {
+  counter-reset: howto;
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.howto-list li {
+  counter-increment: howto;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.howto-list li::before {
+  content: counter(howto);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-fg);
+  background: var(--accent);
+}
+
+.howto-list strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.howto-list span {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--fg-3);
+}
+
+/* ---------- FAQ ---------- */
+.faq-item {
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--bg-2);
+}
+
+.faq-item summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  list-style: none;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::before {
+  content: "+";
+  display: inline-block;
+  width: 16px;
+  margin-right: 8px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.faq-item[open] summary::before {
+  content: "–";
+}
+
+.faq-body p {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--fg-3);
+}
+
+/* ---------- 용어 설명 버튼 (물음표) + 모달 ---------- */
+.info-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 0 0 6px !important;
+  padding: 0 !important;
+  font-size: 11px !important;
+  font-weight: 700;
+  line-height: 1 !important;
+  border: 1.5px solid var(--fg-4) !important;
+  border-radius: 50% !important;
+  background: none !important;
+  color: var(--fg-4) !important;
+  cursor: pointer;
+  vertical-align: middle;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.info-btn:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: var(--accent-soft-bg) !important;
+}
+
+#term-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  padding: 16px;
+}
+
+#term-modal .modal-box {
+  width: min(90dvw, 380px);
+  max-height: 80dvh;
+  overflow-y: auto;
+  background: var(--bg);
+  color: var(--fg);
+  padding: 26px 22px;
+  border-radius: 20px;
+  text-align: left;
+}
+
+#term-modal h2 {
+  margin: 0 0 14px;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+#term-modal-body p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--fg-2);
+}
+
+#term-modal-body p:last-child {
+  margin-bottom: 0;
+}
+
+#term-modal .modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+/* ---------- 하단 CTA ---------- */
+.about-bottom-cta {
+  text-align: center;
+  margin: 56px 0 24px;
+}
+
+/* ---------- 푸터 정렬 (기존 page-footer와 폭 맞춤) ---------- */
+.about-footer hr,
+.about-footer .footer-bar {
+  max-width: 900px;
+}
+
+/* ---------- 데스크톱 대응 ---------- */
+@media (min-width: 760px) {
+  .about-hero {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+
+  .feature-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .feature-row-reverse .feature-text {
+    order: 2;
+  }
+
+  .feature-row-reverse .feature-visual {
+    order: 1;
+  }
+}
+
+/* ---------- 모션 최소화 환경 대응 ----------
+   index.html 스크립트에서 prefers-reduced-motion을 감지해 GSAP
+   애니메이션 자체를 건너뛰고 최종 상태로 바로 세팅함.
+   여기서는 CSS fallback(@keyframes qr-cell-pop)만 꺼줌. */
+@media (prefers-reduced-motion: reduce) {
+  .qr-cell.on {
+    animation: none;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
