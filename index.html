@@ -10,7 +10,7 @@
       (function () {
         try {
           if (localStorage.getItem("qrgen-visited") === "true") {
-            location.replace("/app");
+            location.replace("/app.html");
           }
         } catch (e) {
           // localStorage를 못 쓰는 환경이면 그냥 소개 페이지를 보여줌
@@ -203,7 +203,7 @@
           >
             🌙
           </button>
-          <a href="/app" class="about-cta-small">사용해보기</a>
+          <a href="/app.html" class="about-cta-small">사용해보기</a>
         </div>
       </header>
 
@@ -221,7 +221,7 @@
             모양 그리고 로고를 원하는 대로 꾸미고, PNG·SVG 등 원하는 형식으로
             내려받으세요.
           </p>
-          <a href="/app" class="about-cta-large">사용해보기</a>
+          <a href="/app.html" class="about-cta-large">사용해보기</a>
         </div>
 
         <div class="about-hero-grid" aria-hidden="true">
@@ -509,7 +509,7 @@
       </section>
 
       <div class="about-bottom-cta">
-        <a href="/app" class="about-cta-large">지금 사용해보기</a>
+        <a href="/app.html" class="about-cta-large">지금 사용해보기</a>
       </div>
     </div>
 
@@ -540,15 +540,17 @@
       // 바로 app.html로 이동시키기 위한 플래그. GSAP 로드 여부와
       // 무관하게 항상 동작해야 하므로 별도 스크립트로 분리함.
       (function () {
-        document.querySelectorAll('a[href="/app"]').forEach(function (link) {
-          link.addEventListener("click", function () {
-            try {
-              localStorage.setItem("qrgen-visited", "true");
-            } catch (e) {
-              // localStorage를 못 쓰는 환경이면 그냥 넘어감 (다음에도 소개 페이지가 보임)
-            }
+        document
+          .querySelectorAll('a[href="/app.html"]')
+          .forEach(function (link) {
+            link.addEventListener("click", function () {
+              try {
+                localStorage.setItem("qrgen-visited", "true");
+              } catch (e) {
+                // localStorage를 못 쓰는 환경이면 그냥 넘어감 (다음에도 소개 페이지가 보임)
+              }
+            });
           });
-        });
       })();
     </script>
 
