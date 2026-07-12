@@ -427,7 +427,7 @@ function generate(data, settings = {}) {
   const qrCode = new QRCodeStyling({
     width,
     height,
-    type: "svg",
+    type: "canvas",
     shape,
     data: toUtf8BinaryString(data),
     image,
@@ -686,7 +686,7 @@ function syncTypeFields() {
 }
 
 /**
- * 입력값 또는 디자인 설정 변경 시 300ms 디바운스 후 자동으로 미리보기를 갱신하고,
+ * 입력값 또는 디자인 설정 변경 시 500ms 디바운스 후 자동으로 미리보기를 갱신하고,
  * 2000ms 후 히스토리에 기록한다.
  */
 function scheduleAutoPreview() {
@@ -699,7 +699,7 @@ function scheduleAutoPreview() {
     if (!data) return;
     const settings = collectSettingsFromForm();
     renderQrPreviewAuto(data, settings);
-  }, 300);
+  }, 500);
 
   autoHistoryTimer = setTimeout(() => {
     if (suppressHistoryRecord) return;
@@ -859,7 +859,9 @@ const THEME_KEY = "qrgen-theme";
 /* ==================== 테마 ==================== */
 
 function initTheme() {
-  updateThemeBtn(document.documentElement.getAttribute("data-theme") || "light");
+  updateThemeBtn(
+    document.documentElement.getAttribute("data-theme") || "light",
+  );
 
   // 시스템 설정 변경 시 명시적 override 없으면 자동 반영
   window
@@ -892,7 +894,8 @@ function updateThemeBtn(theme) {
 }
 
 function toggleTheme() {
-  const current = document.documentElement.getAttribute("data-theme") || "light";
+  const current =
+    document.documentElement.getAttribute("data-theme") || "light";
   applyTheme(current === "dark" ? "light" : "dark");
 }
 
@@ -1485,7 +1488,9 @@ function initBrowserWarning() {
 // DOM 로드 후 이벤트 연결
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
-  document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+  document
+    .getElementById("theme-toggle")
+    .addEventListener("click", toggleTheme);
 
   initBrowserWarning();
   initAccordions();
