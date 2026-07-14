@@ -1137,22 +1137,28 @@ function renderHistoryList() {
       try {
         const thumbQr = generate(entry.data, {
           ...entry.settings,
-          width: 90,
-          height: 90,
+          width: 45,
+          height: 45,
           image: undefined,
         });
         const tempDiv = document.createElement("div");
         thumbQr.append(tempDiv);
-        const svgEl = tempDiv.querySelector("svg");
-        if (svgEl) {
-          const svgStr = new XMLSerializer().serializeToString(svgEl);
+        const canvasEl = tempDiv.querySelector("canvas");
+        const canvasCtx = canvasEl.getContext("2d");
+        if (canvasEl) {
+          const svgStr = new XMLSerializer().serializeToString(canvasEl);
           const b64 = btoa(unescape(encodeURIComponent(svgStr)));
           const img = new Image();
           img.src = `data:image/svg+xml;base64,${b64}`;
-          img.style.cssText = "width:100%;height:100%;object-fit:contain;";
-          thumb.appendChild(img);
+          img.onload = function () {
+            // drawImage(이미지객체, x좌표, y좌표, 가로크기, 세로크기)
+            canvasCtx.drawImage(img, 0, 0, canvasEl.width, canvasEl.height);
+            // console.log(thumb);
+          };
+          thumb.appendChild(tempDiv);
         }
-      } catch {
+      } catch (e) {
+        console.error(e);
         thumb.classList.add("history-thumb-locked");
         thumb.textContent = "?";
       }
