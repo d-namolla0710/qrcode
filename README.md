@@ -1,3 +1,5 @@
+# https://qr.minchan.app/
+
 # QR Code 생성기
 
 순수 HTML / CSS / JavaScript로 만든, 브라우저에서 바로 동작하는 QR 코드 생성기입니다.
