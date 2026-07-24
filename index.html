@@ -136,7 +136,7 @@
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "QR 코드 생성기",
-        "url": "https://qr.minchan.app/app.html",
+        "url": "https://qr.minchan.app/app",
         "description": "URL, 와이파이, 연락처, 일정 등 9가지 유형의 QR 코드를 무료로 생성하고 색상·로고·모양을 커스터마이징할 수 있는 웹 애플리케이션입니다.",
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "Any",
@@ -174,7 +174,7 @@
             "name": "로고를 넣으면 QR 코드 인식이 안 되나요?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "오류 복원율을 Q 이상으로 설정하면 로고가 QR 코드 일부를 가려도 대부분 정상적으로 인식됩니다. 다만 로고 크기가 너무 크거나 배경과 색상 대비가 낮으면 인식률이 떨어질 수 있어, 실시간 대비 경고 기능으로 이를 미리 알려줍니다."
+              "text": "대부분의 경우에는 안정적으로 인식됩니다. 로고 사이즈는 조정 할 수 있으며, 만약 크게 설정했더라도 "오류복원레벨"을 높게 설정하여 안정적으로 인식되게 할 수 있습니다."
             }
           },
           {
@@ -213,7 +213,7 @@
           <p class="about-eyebrow">무료 · 설치 없음 · 개인정보 보호 설계</p>
           <h1>
             네모 칸들이 모여 만드는<br />
-            여러가지 정보들
+            QR 코드 속 여러가지 정보들
           </h1>
           <p class="about-hero-desc">
             QR 코드 생성기는 URL부터 와이파이, 연락처, 일정까지 9가지 유형의 QR
@@ -344,6 +344,33 @@
           </div>
         </div>
 
+        <div class="feature-row">
+          <div class="feature-text">
+            <h3>로고를 넣어도 인식되는 이유</h3>
+            <p>
+              QR 코드는 오류 복원율을 높이면 일부가 가려져도 나머지 정보만으로
+              복구할 수 있는 여유 데이터를 함께 담습니다. 로고 없이 정보만 담을
+              때는 복원율 L(약 7% 손상까지 복구)로도 충분하지만, 중앙에 로고를
+              얹으면 그만큼 가려지는 영역이 늘어나므로 Q(약 25%) 이상으로 올리면
+              대부분 안정적으로 스캔됩니다.
+            </p>
+          </div>
+          <div class="feature-visual" aria-hidden="true">
+            <div class="logo-demo">
+              <div class="logo-demo-item">
+                <div class="mini-qr-demo mini-qr-demo-plain"></div>
+                <span class="logo-demo-label">로고 없음 · 복원율 L</span>
+              </div>
+              <div class="logo-demo-item">
+                <div class="mini-qr-demo mini-qr-demo-with-logo"></div>
+                <span class="logo-demo-label"
+                  >로고 삽입 · 복원율 Q 이상 권장</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="feature-row feature-row-reverse">
           <div class="feature-text">
             <h3>
@@ -396,8 +423,21 @@
       <section class="about-section about-section-privacy">
         <h2>개인정보는 브라우저 밖으로 나가지 않습니다</h2>
         <p>
-          만든 QR 코드를 기록해두는 히스토리 기능은 전적으로 사용 중인 브라우저
-          안에만 저장되며, 어떤 서버로도 전송되지 않습니다.
+          QR 코드 생성기는 입력한 내용을 브라우저 안에서 곧바로 QR 이미지로
+          인코딩합니다. 서버에 내용을 보내 QR을 만들어 돌려받는 방식이 아니라
+          처음부터 끝까지 사용하는 기기 안에서만 처리가 끝나기 때문에, 와이파이
+          비밀번호나 연락처 같은 정보가 네트워크를 타고 어딘가로 전송될 구간
+          자체가 없습니다. 만든 QR 코드를 기록해두는 히스토리 기능도 마찬가지로
+          브라우저의 로컬 저장소에만 저장되며, 어떤 서버로도 전송되지 않습니다.
+        </p>
+        <p>
+          이 방식이 특히 중요해지는 순간은
+          <strong>QR 코드 자체에 민감한 정보가 그대로 담길 때</strong>입니다.
+          예를 들어 와이파이 QR 코드에는 비밀번호가 그대로 인코딩되고, 전자명함
+          QR 코드에는 이름·전화번호·이메일이 그대로 담깁니다. 서버를 거쳐 QR을
+          생성해주는 서비스라면 이 정보가 최소한 한 번은 서버 로그나 네트워크
+          구간을 지나가지만, 브라우저에서 바로 인코딩하는 방식에서는 그 구간
+          자체가 존재하지 않습니다.
         </p>
         <ul class="privacy-list">
           <li>
@@ -448,6 +488,34 @@
         </ol>
       </section>
 
+      <!-- ===================== 실전 가이드 ===================== -->
+      <section class="about-section">
+        <h2>상황별 QR 코드 제작 가이드</h2>
+        <p class="about-section-lead">
+          실제로 QR 코드를 인쇄해 쓸 때 자주 막히는 지점을 정리했습니다.
+        </p>
+
+        <div class="type-card-grid">
+          <a href="/guides/wifi-qr" class="type-card">
+            <h3>와이파이 QR코드가 원활하게 작동하지 않을 때 체크리스트</h3>
+            <p>
+              암호화 방식, 숨김 네트워크, 특수문자, 인쇄 크기까지 접속 실패 원인
+              9가지.
+            </p>
+          </a>
+          <a href="/guides/business-card-qr" class="type-card">
+            <h3>명함 QR코드에 로고 넣는 법과 주의사항</h3>
+            <p>
+              오류 복원율, 로고 크기, 여백까지 인식률을 지키며 로고를 넣는 방법.
+            </p>
+          </a>
+          <a href="/guides/menu-qr" class="type-card">
+            <h3>메뉴판·안내판용 QR코드 제작 가이드</h3>
+            <p>스캔 거리별 크기 계산법부터 색상, URL 구조까지 실전 기준.</p>
+          </a>
+        </div>
+      </section>
+
       <!-- ===================== FAQ ===================== -->
       <section class="about-section">
         <h2>자주 묻는 질문</h2>
@@ -475,20 +543,16 @@
           <summary>로고를 넣으면 QR 코드 인식이 안 되나요?</summary>
           <div class="faq-body">
             <p>
-              QR 코드는 일부가 가려지거나 더러워져도 알아볼 수 있게 복구용
-              여유분을
-              <button
+              로고를 넣어도 대부분의 경우에는 안정적으로 인식됩니다. 로고
+              사이즈는 조정 할 수 있으며, 만약 크게 설정했더라도
+              오류복원률<button
                 type="button"
                 class="info-btn"
                 data-term="ecc"
                 aria-label="오류 복원율이 뭔지 설명 보기"
               >
-                ?
-              </button>
-              가지고 있는데, 이 여유분을 넉넉하게 설정하면 로고가 있어도 대부분
-              정상적으로 인식됩니다. 다만 로고가 너무 크거나 배경과 색상 차이가
-              작으면 인식률이 떨어질 수 있어, 실시간 대비 경고 기능이 이를 미리
-              알려줍니다.
+                ?</button
+              >을 높게 설정하여 안정적으로 인식되게 할 수 있습니다.
             </p>
           </div>
         </details>
@@ -503,6 +567,32 @@
               이름·전화번호·이메일 같은 민감한 항목은 기본적으로 기록되지
               않습니다. 또한 모든 기록은 서버로 전송되지 않고 사용하는
               브라우저에만 저장됩니다.
+            </p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>다른 QR코드 생성기들과의 차별점이 뭔가요?</summary>
+          <div class="faq-body">
+            <p>
+              첫 번째 차별점은 데이터를 그대로 집어넣어 <b>영구적인 QR코드</b>를
+              생성해준다는 점 입니다.<br />다른 QR코드 생성기들의 대부분은 "단축
+              URL"에 데이터를 담고, QR코드에 단축 URL을 넣는 경우가 있습니다. 이
+              때 보통 단축 URL에 유효기간이 있어서 유효기간이 지나면 QR코드를
+              사용하지 못하게 됩니다. <br />두 번째 차별점은 자유로운
+              커스터마이징 기능으로 <b>나만의 특별한 QR코드</b>를 제작 할 수
+              있다는 점 입니다. <br />다른 QR코드 생성기는 배경색, 점 모양, 점
+              색깔, 로고 삽입, 원형 QR코드 등과 같은 커스터마이징 기능을 전부
+              지원하지 않습니다. 이 QR코드 생성기는 최대한 많은 커스터마이징
+              요소들을 지원하기에 다양하게 QR코드를 꾸밀 수 있습니다. <br />세
+              번째 차별점은 한 사이트에서 <b>여러 종류의 QR코드</b>를 생성 할 수
+              있다는 점입니다. <br />다른 대부분의 QR코드 생성기들은 유형이
+              정해져있습니다. 하지만 이 생성기는 텍스트, URL, Wifi, 전화번호 외
+              5개 유형의 QR코드를 생성 할 수 있습니다.<br /><br />
+              이 QR코드 생성기는 다른 QR코드 생성기를 사용하다 불편해서 만들게
+              된 것 입니다. 위에 설명한
+              <b>다른 생성기들과의 차별점들은 이 생성기를 만들게 된 계기</b
+              >입니다.
             </p>
           </div>
         </details>
@@ -540,17 +630,15 @@
       // 바로 app.html로 이동시키기 위한 플래그. GSAP 로드 여부와
       // 무관하게 항상 동작해야 하므로 별도 스크립트로 분리함.
       (function () {
-        document
-          .querySelectorAll('a[href="/app"]')
-          .forEach(function (link) {
-            link.addEventListener("click", function () {
-              try {
-                localStorage.setItem("qrgen-visited", "true");
-              } catch (e) {
-                // localStorage를 못 쓰는 환경이면 그냥 넘어감 (다음에도 소개 페이지가 보임)
-              }
-            });
+        document.querySelectorAll('a[href="/app"]').forEach(function (link) {
+          link.addEventListener("click", function () {
+            try {
+              localStorage.setItem("qrgen-visited", "true");
+            } catch (e) {
+              // localStorage를 못 쓰는 환경이면 그냥 넘어감 (다음에도 소개 페이지가 보임)
+            }
           });
+        });
       })();
     </script>
 

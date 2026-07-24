@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        var t =
+          localStorage.getItem("qrgen-theme") ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+    <title>메뉴판·안내판용 QR코드 제작 가이드 | QR 코드 생성기</title>
+
+    <meta
+      name="description"
+      content="테이블 스탠드부터 벽 부착 안내판까지, 메뉴판·안내판용 QR코드를 만들 때 크기·색상·URL 구조를 어떻게 정해야 하는지 실전 기준으로 정리했습니다."
+    />
+    <meta name="author" content="김민찬" />
+    <meta name="language" content="Korean" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://qr.minchan.app/guides/menu-qr" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="QR Code 생성기" />
+    <meta
+      property="og:title"
+      content="메뉴판·안내판용 QR코드 제작 가이드"
+    />
+    <meta
+      property="og:description"
+      content="스캔 거리에 맞는 크기 계산법부터 색상, URL 구조까지 메뉴판·안내판용 QR코드 제작 기준."
+    />
+    <meta property="og:url" content="https://qr.minchan.app/guides/menu-qr" />
+    <meta property="og:image" content="https://qr.minchan.app/og-image.png" />
+    <meta property="og:locale" content="ko_KR" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="메뉴판·안내판용 QR코드 제작 가이드"
+    />
+    <meta
+      name="twitter:description"
+      content="스캔 거리에 맞는 크기 계산법부터 색상, URL 구조까지 메뉴판·안내판용 QR코드 제작 기준."
+    />
+    <meta name="twitter:image" content="https://qr.minchan.app/og-image.png" />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link rel="manifest" href="/favicon/manifest.json" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <style>
+      @font-face {
+        font-family: "NanumSquare";
+        font-weight: 400;
+        font-display: swap;
+        src:
+          local("☺"),
+          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2")
+            format("woff2");
+      }
+      @font-face {
+        font-family: "NanumSquare";
+        font-weight: 700;
+        font-display: swap;
+        src:
+          local("☺"),
+          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2")
+            format("woff2");
+      }
+    </style>
+
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="stylesheet" href="/landing.css" />
+    <link rel="stylesheet" href="/guides/guides.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "메뉴판·안내판용 QR코드 제작 가이드",
+        "description": "테이블 스탠드부터 벽 부착 안내판까지, 스캔 거리별 QR 크기 계산법과 색상, URL 구조 기준.",
+        "author": { "@type": "Person", "name": "김민찬" },
+        "publisher": { "@type": "Person", "name": "김민찬" },
+        "mainEntityOfPage": "https://qr.minchan.app/guides/menu-qr",
+        "image": "https://qr.minchan.app/og-image.png",
+        "inLanguage": "ko"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "QR 코드 생성기",
+            "item": "https://qr.minchan.app/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "가이드",
+            "item": "https://qr.minchan.app/guides/menu-qr"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "메뉴판·안내판용 QR코드 제작 가이드"
+          }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "메뉴판 QR코드는 어떤 유형으로 만드는 게 좋나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "메뉴가 자주 바뀐다면 URL 유형으로 만들어 QR은 그대로 두고 연결된 웹페이지 내용만 갱신하는 방식이 가장 실용적입니다. 텍스트 유형으로 메뉴 전체를 QR에 직접 담으면 메뉴가 바뀔 때마다 QR도 다시 인쇄해야 합니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "QR코드는 스캔 거리에 따라 얼마나 크게 인쇄해야 하나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "대략 스캔 거리를 10으로 나눈 값 이상으로 QR 한 변을 인쇄하면 안정적으로 인식됩니다. 30cm 거리에서 스캔한다면 3cm 이상, 1m 거리의 벽 부착 안내판이라면 10cm 이상을 권장합니다."
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div class="about-page">
+      <header class="about-topbar">
+        <a href="/" class="about-brand">QR 코드 생성기</a>
+        <div class="about-topbar-actions">
+          <button
+            id="theme-toggle"
+            type="button"
+            class="theme-toggle-btn"
+            title="다크 모드로 전환"
+          >
+            🌙
+          </button>
+          <a href="/app" class="about-cta-small">사용해보기</a>
+        </div>
+      </header>
+
+      <nav class="guide-breadcrumb" aria-label="위치">
+        <a href="/">홈</a> <span>/</span> <span>가이드</span> <span>/</span>
+        <span aria-current="page">메뉴판·안내판 QR코드 가이드</span>
+      </nav>
+
+      <article class="guide-article">
+        <p class="about-eyebrow">가이드 · 메뉴판/안내판 QR코드</p>
+        <h1>메뉴판·안내판용 QR코드 제작 가이드</h1>
+        <p class="about-hero-desc">
+          테이블 위 스탠드부터 매장 입구의 벽 부착 안내판까지, 놓이는
+          위치와 스캔 거리에 따라 QR코드를 다르게 만들어야 합니다. 인쇄
+          전에 확인해야 할 기준을 정리했습니다.
+        </p>
+
+        <section class="about-section">
+          <h2>URL 유형으로 만들어야 메뉴 교체가 쉬움</h2>
+          <p>
+            메뉴는 시즌마다, 혹은 품절 때문에 자주 바뀝니다. 메뉴 내용을
+            QR코드 안에 텍스트로 직접 담으면 바뀔 때마다 QR을 다시 만들어
+            인쇄해야 합니다. 대신 <strong>고정된 짧은 URL</strong> 하나를
+            QR에 담고, 그 URL이 가리키는 웹페이지 내용만 바꾸는 방식을 쓰면
+            QR코드는 한 번 인쇄한 뒤 다시 손댈 일이 없습니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>스캔 거리별 QR 크기 계산법</h2>
+          <p>
+            QR코드는 대략
+            <strong>"스캔 거리 ÷ 10" 이상의 한 변 길이</strong>를 확보해야
+            안정적으로 인식됩니다.
+          </p>
+          <ul class="privacy-list">
+            <li>
+              테이블 스탠드 (20~30cm 거리): 한 변 3cm 이상이면 충분합니다.
+            </li>
+            <li>
+              카운터·계산대 옆 안내판 (50cm 내외): 한 변 5cm 이상을
+              권장합니다.
+            </li>
+            <li>
+              벽 부착형 대형 포스터 (1~2m 거리): 한 변 10~20cm까지 키워야
+              멀리서도 스캔할 수 있습니다.
+            </li>
+          </ul>
+        </section>
+
+        <section class="about-section">
+          <h2>색상은 브랜드 컬러보다 인식률이 우선</h2>
+          <p>
+            빨강·초록처럼 채도가 높은 원색 배경은 카메라가 밝은 칸/어두운
+            칸으로 이진화하는 과정에서 애매하게 처리될 수 있습니다. 브랜드
+            컬러를 꼭 쓰고 싶다면 배경은 무채색에 가깝게 두고 포인트로만
+            브랜드 컬러를 쓰는 편이 안전하며, 색을 바꿀 때마다 명도 대비
+            경고가 뜨지 않는지 확인하세요.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>코팅 반사와 조명 위치</h2>
+          <p>
+            매장 조명이 QR코드 정면에서 반사되는 위치에 안내판을 두면 유광
+            코팅에서 빛 번짐이 생겨 스캔이 잘 안 될 수 있습니다. 가능하면
+            무광 코팅을 쓰고, 조명이 QR에 정면으로 반사되지 않는 각도로
+            배치하세요.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>외국인 손님을 고려한다면 URL 방식이 유리</h2>
+          <p>
+            연결된 웹페이지에서 언어를 전환할 수 있게 만들면 QR코드 하나로
+            여러 언어의 메뉴를 제공할 수 있습니다. 반면 텍스트를 QR에 직접
+            담는 방식은 한 언어로 고정되므로, 다국어 메뉴가 필요하다면
+            처음부터 URL 유형을 선택하는 것이 좋습니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>인쇄 전 마지막 확인</h2>
+          <p>
+            실제 인쇄물 크기로 출력한 뒤, 매장 조명 아래에서 여러 각도와
+            거리로 스캔 테스트를 해보세요. 화면에서 확인한 대비와 인쇄물의
+            실제 대비는 종이 재질과 조명에 따라 다르게 느껴질 수 있습니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>자주 묻는 질문</h2>
+          <details class="faq-item">
+            <summary>메뉴판 QR코드는 어떤 유형으로 만드는 게 좋나요?</summary>
+            <div class="faq-body">
+              <p>
+                메뉴가 자주 바뀐다면 URL 유형으로 만들어 QR은 그대로 두고
+                연결된 웹페이지 내용만 갱신하는 방식이 가장 실용적입니다.
+                텍스트 유형으로 메뉴를 QR에 직접 담으면 메뉴가 바뀔 때마다
+                QR도 다시 인쇄해야 합니다.
+              </p>
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>QR코드는 스캔 거리에 따라 얼마나 크게 인쇄해야 하나요?</summary>
+            <div class="faq-body">
+              <p>
+                대략 스캔 거리를 10으로 나눈 값 이상으로 QR 한 변을 인쇄하면
+                안정적으로 인식됩니다. 30cm 거리에서 스캔한다면 3cm 이상,
+                1m 거리의 벽 부착 안내판이라면 10cm 이상을 권장합니다.
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <div class="about-bottom-cta">
+          <a href="/app" class="about-cta-large">메뉴판 QR코드 만들기</a>
+        </div>
+
+        <nav class="guide-related">
+          <h2>다른 가이드</h2>
+          <ul>
+            <li>
+              <a href="/guides/wifi-qr"
+                >와이파이 QR코드 안 터질 때 체크리스트</a
+              >
+            </li>
+            <li>
+              <a href="/guides/business-card-qr"
+                >명함 QR코드에 로고 넣는 법과 주의사항</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </article>
+    </div>
+
+    <footer class="page-footer about-footer">
+      <hr />
+      <small
+        >Copyright 2026. <a href="https://minchan.app">김민찬</a> All rights
+        reserved.</small
+      >
+      <small>
+        Contact: <a href="mailto:business@minchan.app">business@minchan.app</a>
+      </small>
+      <small> Created by Claude </small>
+    </footer>
+
+    <script src="/guides/guides.js"></script>
+  </body>
+</html>

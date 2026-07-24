@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        var t =
+          localStorage.getItem("qrgen-theme") ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+    <title>
+      와이파이 QR코드가 원활하게 작동하지 않을 때 체크리스트 | QR 코드 생성기
+    </title>
+
+    <meta
+      name="description"
+      content="와이파이 QR코드를 스캔해도 접속이 안 될 때 확인해야 할 9가지 원인. 암호화 방식, 숨김 네트워크, 비밀번호 특수문자, 인쇄 크기, 명도 대비까지 실전 체크리스트로 정리했습니다."
+    />
+    <meta name="author" content="김민찬" />
+    <meta name="language" content="Korean" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://qr.minchan.app/guides/wifi-qr" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="QR Code 생성기" />
+    <meta
+      property="og:title"
+      content="와이파이 QR코드가 원활하게 작동하지 않을 때 체크리스트"
+    />
+    <meta
+      property="og:description"
+      content="암호화 방식, 숨김 네트워크, 특수문자, 인쇄 크기까지 와이파이 QR코드가 인식되지 않는 9가지 원인과 해결법."
+    />
+    <meta property="og:url" content="https://qr.minchan.app/guides/wifi-qr" />
+    <meta property="og:image" content="https://qr.minchan.app/og-image.png" />
+    <meta property="og:locale" content="ko_KR" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="와이파이 QR코드가 원활하게 작동하지 않을 때 체크리스트"
+    />
+    <meta
+      name="twitter:description"
+      content="암호화 방식, 숨김 네트워크, 특수문자, 인쇄 크기까지 와이파이 QR코드가 인식되지 않는 9가지 원인과 해결법."
+    />
+    <meta name="twitter:image" content="https://qr.minchan.app/og-image.png" />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link rel="manifest" href="/favicon/manifest.json" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <style>
+      @font-face {
+        font-family: "NanumSquare";
+        font-weight: 400;
+        font-display: swap;
+        src:
+          local("☺"),
+          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2")
+            format("woff2");
+      }
+      @font-face {
+        font-family: "NanumSquare";
+        font-weight: 700;
+        font-display: swap;
+        src:
+          local("☺"),
+          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2")
+            format("woff2");
+      }
+    </style>
+
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="stylesheet" href="/landing.css" />
+    <link rel="stylesheet" href="/guides/guides.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "와이파이 QR코드가 원활하게 작동하지 않을 때 체크리스트",
+        "description": "와이파이 QR코드를 스캔해도 접속이 안 될 때 확인해야 할 9가지 원인과 해결법.",
+        "author": { "@type": "Person", "name": "김민찬" },
+        "publisher": { "@type": "Person", "name": "김민찬" },
+        "mainEntityOfPage": "https://qr.minchan.app/guides/wifi-qr",
+        "image": "https://qr.minchan.app/og-image.png",
+        "inLanguage": "ko"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "QR 코드 생성기",
+            "item": "https://qr.minchan.app/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "가이드",
+            "item": "https://qr.minchan.app/guides/wifi-qr"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "와이파이 QR코드가 원활하게 작동하지 않을 때 체크리스트"
+          }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "와이파이 QR코드는 어떤 원리로 자동 접속되나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "WIFI:T:WPA;S:네트워크이름;P:비밀번호;; 형식의 표준 문자열을 QR로 인코딩합니다. 스마트폰 카메라가 이 형식을 인식하면 비밀번호 입력 없이 바로 접속 화면을 띄웁니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "구형 안드로이드에서도 와이파이 QR코드가 인식되나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "안드로이드 10 이상, iOS 11 이상은 기본 카메라 앱에서 바로 인식됩니다. 그보다 오래된 기기는 기본 카메라가 QR을 인식하지 못할 수 있어 네이버 앱이나 구글 렌즈 같은 별도 스캔 앱이 필요할 수 있습니다."
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div class="about-page">
+      <header class="about-topbar">
+        <a href="/" class="about-brand">QR 코드 생성기</a>
+        <div class="about-topbar-actions">
+          <button
+            id="theme-toggle"
+            type="button"
+            class="theme-toggle-btn"
+            title="다크 모드로 전환"
+          >
+            🌙
+          </button>
+          <a href="/app" class="about-cta-small">사용해보기</a>
+        </div>
+      </header>
+
+      <nav class="guide-breadcrumb" aria-label="위치">
+        <a href="/">홈</a> <span>/</span> <span>가이드</span> <span>/</span>
+        <span aria-current="page">와이파이 QR코드 체크리스트</span>
+      </nav>
+
+      <article class="guide-article">
+        <p class="about-eyebrow">가이드 · 와이파이 QR코드</p>
+        <h1>와이파이 QR코드가 원활하게 작동하지 않을 때 체크리스트</h1>
+        <p class="about-hero-desc">
+          카페·매장·게스트룸에 붙여둔 와이파이 QR코드가 스캔은 되는데 접속이 안
+          된다는 얘기를 들었다면, 대부분 아래 9가지 중 하나에 해당합니다.
+          위에서부터 순서대로 확인해보세요.
+        </p>
+
+        <section class="about-section">
+          <h2>1. 암호화 방식이 실제 공유기 설정과 다름</h2>
+          <p>
+            와이파이 QR코드에는 SSID·비밀번호뿐 아니라
+            <strong>암호화 방식(WPA/WPA2, WEP, 없음)</strong>도 함께 담깁니다.
+            공유기가 WPA2를 쓰는데 QR에는 WEP나 "암호화 없음"으로 잘못 설정하면,
+            비밀번호가 정확해도 접속 화면 자체가 이상하게 뜨거나 실패합니다.
+            공유기 관리 페이지나 기기에 붙은 스티커에서 실제 보안 방식을 먼저
+            확인하세요.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>2. WPA3 전용 네트워크 + 구형 기기</h2>
+          <p>
+            최근 공유기는 WPA3를 지원하지만, WPA3는 표준 와이파이 QR 포맷에 아직
+            완전히 정착되지 않은 값입니다. 공유기를 "WPA2/WPA3 혼용" 모드로
+            바꾸고 QR은 WPA로 생성하면 대부분의 기기에서 호환됩니다. WPA3
+            전용으로 강제해두면 구형 아이폰· 안드로이드에서 QR 접속이 실패할 수
+            있습니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>3. 숨김 네트워크(Hidden SSID) 옵션 누락</h2>
+          <p>
+            네트워크 이름을 브로드캐스트하지 않도록 "숨김" 설정을 해둔
+            공유기라면, QR코드를 만들 때도 반드시
+            <strong>숨김 네트워크 옵션을 켜야</strong> 합니다. 이 옵션이 빠지면
+            스캔한 기기가 "존재하지 않는 네트워크"로 인식해 접속을 시도조차 하지
+            않습니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>4. 비밀번호에 세미콜론·콤마·콜론·백슬래시가 포함됨</h2>
+          <p>
+            와이파이 QR 표준 형식에서 <code>;</code>, <code>,</code>,
+            <code>:</code>, <code>\</code>은 구분자로 쓰이는 특수문자라
+            비밀번호에 그대로 들어가면 파싱이 깨질 수 있습니다. 반드시 이 문자들
+            앞에 <code>\</code>를 붙여 이스케이프해야 하는데, 직접 QR 생성
+            도구를 만든다면 이 처리를 놓치기 쉽습니다. QR 코드 생성기의 와이파이
+            유형은 이 이스케이프를 자동으로 처리하므로 비밀번호를 있는 그대로
+            입력하면 됩니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>5. SSID나 비밀번호에 오타, 특히 대소문자·유사 문자</h2>
+          <p>
+            와이파이 비밀번호는 대소문자를 구분합니다. 숫자 <code>0</code>과
+            알파벳 <code>O</code>, 숫자 <code>1</code>과 알파벳
+            <code>l</code>처럼 헷갈리기 쉬운 문자가 섞여 있다면 입력창에
+            붙여넣기 방식으로 만들고, 만든 직후 다른 기기로 반드시 한 번 스캔
+            테스트를 해보세요.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>6. 인쇄 크기가 스캔 거리에 비해 너무 작음</h2>
+          <p>
+            QR코드는 대략 <strong>"스캔 거리 ÷ 10" 이상의 한 변 길이</strong>
+            를 확보해야 안정적으로 인식됩니다. 테이블에 놓는 스탠드형 안내판처럼
+            20~30cm 거리에서 스캔한다면 2~3cm면 충분하지만, 벽에 붙여 1m 이상
+            떨어져서 스캔하는 안내판이라면 최소 10cm 이상으로 인쇄해야 합니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>7. 배경색과 QR 색상의 명도 대비 부족</h2>
+          <p>
+            브랜드 컬러에 맞춰 QR 색상을 바꾸다 보면 배경과 색상이 너무
+            비슷해지는 경우가 흔합니다. 밝기 차이가 작으면 카메라가 밝은 칸과
+            어두운 칸을 구분하지 못해 스캔 자체가 안 됩니다. QR 코드 생성기는
+            디자인을 바꾸는 즉시 명도 대비를 계산해 경고를 보여주므로, 경고가
+            뜨면 색상을 더 진하게 조정하세요.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>8. 코팅지 반사로 카메라가 초점을 못 맞춤</h2>
+          <p>
+            유광 코팅이나 아크릴 액자에 QR을 넣으면 조명이 반사되어 카메라가 QR
+            패턴을 제대로 읽지 못하는 경우가 있습니다. 무광 라미네이팅을 쓰거나,
+            액자라면 조명이 정면으로 반사되지 않는 각도에 배치하세요.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>9. 로고를 넣으면서 오류 복원율을 그대로 둠</h2>
+          <p>
+            중앙에 매장 로고를 넣었다면 오류 복원율을 <strong>Q 이상</strong>
+            으로 올려야 로고가 가리는 영역만큼 정보를 복구할 여유가 생깁니다.
+            기본값(L)인 채로 로고를 얹으면 인식률이 눈에 띄게 떨어집니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>자주 묻는 질문</h2>
+          <details class="faq-item">
+            <summary>와이파이 QR코드는 어떤 원리로 자동 접속되나요?</summary>
+            <div class="faq-body">
+              <p>
+                <code>WIFI:T:WPA;S:네트워크이름;P:비밀번호;;</code> 형식의 표준
+                문자열을 QR로 인코딩합니다. 스마트폰 카메라가 이 형식을 인식하면
+                비밀번호 입력 없이 바로 접속 화면을 띄웁니다.
+              </p>
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>구형 안드로이드에서도 인식되나요?</summary>
+            <div class="faq-body">
+              <p>
+                안드로이드 10 이상, iOS 11 이상은 기본 카메라 앱에서 바로
+                인식됩니다. 그보다 오래된 기기는 네이버 앱이나 구글 렌즈 같은
+                별도 스캔 앱이 필요할 수 있어, 안내판에 "카메라로 QR을
+                비춰주세요" 문구를 함께 적어두면 도움이 됩니다.
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <div class="about-bottom-cta">
+          <a href="/app" class="about-cta-large">와이파이 QR코드 만들기</a>
+        </div>
+
+        <nav class="guide-related">
+          <h2>다른 가이드</h2>
+          <ul>
+            <li>
+              <a href="/guides/business-card-qr"
+                >명함 QR코드에 로고 넣는 법과 주의사항</a
+              >
+            </li>
+            <li>
+              <a href="/guides/menu-qr">메뉴판/안내판용 QR코드 제작 가이드</a>
+            </li>
+          </ul>
+        </nav>
+      </article>
+    </div>
+
+    <footer class="page-footer about-footer">
+      <hr />
+      <small
+        >Copyright 2026. <a href="https://minchan.app">김민찬</a> All rights
+        reserved.</small
+      >
+      <small>
+        Contact: <a href="mailto:business@minchan.app">business@minchan.app</a>
+      </small>
+      <small> Created by Claude </small>
+    </footer>
+
+    <script src="/guides/guides.js"></script>
+  </body>
+</html>

@@ -223,11 +223,23 @@
 }
 
 .type-card {
+  display: block;
   padding: 18px;
   border: 1px solid var(--border);
   border-radius: 20px;
   background: var(--bg-2);
+  color: inherit;
+  text-decoration: none;
   cursor: default;
+}
+
+a.type-card {
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+a.type-card:hover {
+  border-color: var(--accent);
 }
 
 .type-card h3 {
@@ -299,6 +311,48 @@
 .mini-qr-demo::after {
   bottom: 14px;
   right: 14px;
+}
+
+/* 로고 유무 비교 데모 */
+.logo-demo {
+  display: flex;
+  gap: 20px;
+}
+
+.logo-demo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.mini-qr-demo-plain,
+.mini-qr-demo-with-logo {
+  width: 96px;
+  height: 96px;
+}
+
+/* 기본 .mini-qr-demo::after(우하단 모서리 마커) 자리에 중앙 로고를
+   흉내낸 사각형을 대신 그려 넣음 */
+.mini-qr-demo-with-logo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  top: auto;
+  left: auto;
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--bg);
+  border-radius: 8px;
+  background: var(--bg-2);
+}
+
+.logo-demo-label {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--fg-3);
+  text-align: center;
 }
 
 /* 명도 대비 데모 */

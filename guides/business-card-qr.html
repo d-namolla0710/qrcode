@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        var t =
+          localStorage.getItem("qrgen-theme") ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+    <title>명함 QR코드에 로고 넣는 법과 주의사항 | QR 코드 생성기</title>
+
+    <meta
+      name="description"
+      content="명함이나 전자명함 QR코드에 로고를 넣을 때 인식률을 지키는 방법. 오류 복원율, 로고 크기, 여백(quiet zone), vCard와 URL 방식의 차이까지 정리했습니다."
+    />
+    <meta name="author" content="김민찬" />
+    <meta name="language" content="Korean" />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://qr.minchan.app/guides/business-card-qr"
+    />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="QR Code 생성기" />
+    <meta
+      property="og:title"
+      content="명함 QR코드에 로고 넣는 법과 주의사항"
+    />
+    <meta
+      property="og:description"
+      content="오류 복원율, 로고 크기, 여백, vCard와 URL 방식의 차이까지 명함 QR코드 제작 시 확인할 점."
+    />
+    <meta
+      property="og:url"
+      content="https://qr.minchan.app/guides/business-card-qr"
+    />
+    <meta property="og:image" content="https://qr.minchan.app/og-image.png" />
+    <meta property="og:locale" content="ko_KR" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="명함 QR코드에 로고 넣는 법과 주의사항"
+    />
+    <meta
+      name="twitter:description"
+      content="오류 복원율, 로고 크기, 여백, vCard와 URL 방식의 차이까지 명함 QR코드 제작 시 확인할 점."
+    />
+    <meta name="twitter:image" content="https://qr.minchan.app/og-image.png" />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link rel="manifest" href="/favicon/manifest.json" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <style>
+      @font-face {
+        font-family: "NanumSquare";
+        font-weight: 400;
+        font-display: swap;
+        src:
+          local("☺"),
+          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2")
+            format("woff2");
+      }
+      @font-face {
+        font-family: "NanumSquare";
+        font-weight: 700;
+        font-display: swap;
+        src:
+          local("☺"),
+          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2")
+            format("woff2");
+      }
+    </style>
+
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="stylesheet" href="/landing.css" />
+    <link rel="stylesheet" href="/guides/guides.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "명함 QR코드에 로고 넣는 법과 주의사항",
+        "description": "명함·전자명함 QR코드에 로고를 넣을 때 인식률을 지키는 방법과 vCard·URL 방식의 차이.",
+        "author": { "@type": "Person", "name": "김민찬" },
+        "publisher": { "@type": "Person", "name": "김민찬" },
+        "mainEntityOfPage": "https://qr.minchan.app/guides/business-card-qr",
+        "image": "https://qr.minchan.app/og-image.png",
+        "inLanguage": "ko"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "QR 코드 생성기",
+            "item": "https://qr.minchan.app/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "가이드",
+            "item": "https://qr.minchan.app/guides/business-card-qr"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "명함 QR코드에 로고 넣는 법과 주의사항"
+          }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "명함 QR코드는 vCard와 URL 방식 중 뭐가 나은가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "연락처를 그 자리에서 바로 저장하게 하려면 vCard(연락처 유형)가 편리하고, 이직·이메일 변경이 잦거나 포트폴리오처럼 내용을 계속 갱신하고 싶다면 URL 방식이 유리합니다. vCard는 QR을 재발급해야 정보가 바뀌지만, URL은 QR은 그대로 두고 연결된 페이지 내용만 바꾸면 됩니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "명함에 넣을 QR코드는 얼마나 커야 하나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "명함은 보통 5~10cm 거리에서 스캔하므로 QR코드 한 변이 최소 1.5~2cm는 되어야 안정적으로 인식됩니다. 로고를 넣었다면 여유를 더 두는 것이 좋습니다."
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div class="about-page">
+      <header class="about-topbar">
+        <a href="/" class="about-brand">QR 코드 생성기</a>
+        <div class="about-topbar-actions">
+          <button
+            id="theme-toggle"
+            type="button"
+            class="theme-toggle-btn"
+            title="다크 모드로 전환"
+          >
+            🌙
+          </button>
+          <a href="/app" class="about-cta-small">사용해보기</a>
+        </div>
+      </header>
+
+      <nav class="guide-breadcrumb" aria-label="위치">
+        <a href="/">홈</a> <span>/</span> <span>가이드</span> <span>/</span>
+        <span aria-current="page">명함 QR코드 로고 삽입 가이드</span>
+      </nav>
+
+      <article class="guide-article">
+        <p class="about-eyebrow">가이드 · 명함/전자명함 QR코드</p>
+        <h1>명함 QR코드에 로고 넣는 법과 주의사항</h1>
+        <p class="about-hero-desc">
+          명함에 QR코드를 넣으면 상대방이 연락처를 손으로 입력할 필요 없이
+          스캔 한 번으로 저장할 수 있습니다. 다만 명함은 인쇄 면적이 좁고
+          로고까지 함께 넣는 경우가 많아, 일반 QR코드보다 신경 써야 할 점이
+          많습니다.
+        </p>
+
+        <section class="about-section">
+          <h2>vCard 방식과 URL 방식, 무엇을 쓸까</h2>
+          <p>
+            <strong>연락처(vCard) 유형</strong>으로 만들면 스캔 즉시 이름·
+            전화번호·이메일·회사가 상대방 연락처 앱에 그대로 저장됩니다.
+            오프라인에서 인터넷 연결 없이도 동작한다는 장점이 있지만, 이직
+            하거나 연락처가 바뀌면 명함과 QR을 모두 다시 인쇄해야 합니다.
+          </p>
+          <p>
+            반대로 <strong>URL 유형</strong>으로 포트폴리오나 소개 페이지
+            주소를 넣으면, QR코드는 그대로 두고 연결된 페이지 내용만 계속
+            최신 정보로 바꿀 수 있습니다. 연락처가 자주 바뀌거나 이력·포트
+            폴리오처럼 보여줄 내용이 많다면 URL 방식이 더 실용적입니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>로고를 넣을 때는 오류 복원율부터 올리기</h2>
+          <p>
+            로고 없이 정보만 담을 때는 오류 복원율 L로도 충분하지만, 중앙에
+            로고를 얹으면 그만큼 QR 패턴 일부가 가려집니다. 로고를 넣기 전에
+            먼저 오류 복원율을
+            <strong>Q 이상(가능하면 H)</strong>으로 올려야 로고가 가리는
+            영역을 나머지 데이터로 복구할 수 있습니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>로고 크기는 전체의 20~25% 이하로</h2>
+          <p>
+            QR 코드 생성기의 로고 크기 값(0~0.5)은 QR 전체 너비 대비 로고가
+            차지하는 비율입니다. 0.5에 가까울수록 로고가 커지지만 인식률은
+            급격히 떨어지므로, 실무에서는
+            <strong>0.2~0.25 사이</strong>를 권장합니다. 로고가 커서 대비
+            경고가 뜬다면 로고를 줄이거나 오류 복원율을 더 높여야 합니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>QR 주변 여백(quiet zone)을 충분히 남기기</h2>
+          <p>
+            QR코드는 패턴 바깥쪽에 최소 4모듈 정도의 흰 여백이 있어야
+            카메라가 QR의 경계를 정확히 인식합니다. 명함 디자인에서 QR을
+            로고나 텍스트, 명함 테두리에 바짝 붙여 배치하면 여백이 부족해져
+            인식률이 떨어집니다. QR 주위에는 다른 요소를 배치하지 않는 것이
+            안전합니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>어두운 명함 + 밝은 QR 조합은 반사에 주의</h2>
+          <p>
+            다크 컬러 명함에 화이트나 골드 톤 QR을 올리는 디자인이 인기지만,
+            유광 코팅과 만나면 조명이 반사되어 카메라가 초점을 못 맞추는
+            경우가 있습니다. 무광 코팅을 쓰거나, 명도 대비 경고가 뜨지
+            않는 선에서 색상을 정하는 것이 안전합니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>인쇄는 벡터(SVG)로, 해상도는 최소 300dpi</h2>
+          <p>
+            명함처럼 작은 크기로 인쇄할 때는 PNG보다
+            <strong>SVG로 내려받아</strong> 인쇄소에 전달하는 것이
+            안전합니다. 비트맵 이미지를 확대·축소하면 QR 패턴의 경계가
+            흐려질 수 있지만, 벡터 형식은 어떤 크기로 인쇄해도 선명하게
+            유지됩니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>인쇄 전 마지막 테스트</h2>
+          <p>
+            대량 인쇄에 들어가기 전에, 실제 명함 크기로 출력한 시안을
+            아이폰과 안드로이드 두 종류 이상의 기기로 스캔해보세요. 화면에서
+            보이는 것과 인쇄물의 실제 대비·크기는 다르게 느껴질 수 있습니다.
+          </p>
+        </section>
+
+        <section class="about-section">
+          <h2>자주 묻는 질문</h2>
+          <details class="faq-item">
+            <summary>vCard와 URL 방식 중 뭐가 나은가요?</summary>
+            <div class="faq-body">
+              <p>
+                연락처를 그 자리에서 바로 저장하게 하려면 vCard(연락처
+                유형)가 편리하고, 정보가 자주 바뀌거나 보여줄 내용이 많다면
+                URL 방식이 유리합니다. vCard는 정보가 바뀌면 QR을 다시
+                인쇄해야 하지만, URL은 QR은 그대로 두고 페이지 내용만 바꾸면
+                됩니다.
+              </p>
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>명함 QR코드는 얼마나 커야 하나요?</summary>
+            <div class="faq-body">
+              <p>
+                명함은 보통 5~10cm 거리에서 스캔하므로 QR코드 한 변이 최소
+                1.5~2cm는 되어야 안정적으로 인식됩니다. 로고를 넣었다면
+                여유를 더 두는 것이 좋습니다.
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <div class="about-bottom-cta">
+          <a href="/app" class="about-cta-large">명함 QR코드 만들기</a>
+        </div>
+
+        <nav class="guide-related">
+          <h2>다른 가이드</h2>
+          <ul>
+            <li>
+              <a href="/guides/wifi-qr"
+                >와이파이 QR코드 안 터질 때 체크리스트</a
+              >
+            </li>
+            <li>
+              <a href="/guides/menu-qr">메뉴판/안내판용 QR코드 제작 가이드</a>
+            </li>
+          </ul>
+        </nav>
+      </article>
+    </div>
+
+    <footer class="page-footer about-footer">
+      <hr />
+      <small
+        >Copyright 2026. <a href="https://minchan.app">김민찬</a> All rights
+        reserved.</small
+      >
+      <small>
+        Contact: <a href="mailto:business@minchan.app">business@minchan.app</a>
+      </small>
+      <small> Created by Claude </small>
+    </footer>
+
+    <script src="/guides/guides.js"></script>
+  </body>
+</html>
