@@ -229,8 +229,11 @@ function buildDataString(type, { silent = false } = {}) {
       ];
 
       if (org) lines.push(`ORG:${escapeVcardValue(org)}`);
-      if (phone) lines.push(`TEL;TYPE=CELL:${phone.replace(/[\s-]/g, "")}`);
-      if (email) lines.push(`EMAIL:${email}`);
+      if (phone)
+        lines.push(
+          `TEL;TYPE=CELL:${escapeVcardValue(phone.replace(/[\s-]/g, ""))}`,
+        );
+      if (email) lines.push(`EMAIL:${escapeVcardValue(email)}`);
 
       lines.push("END:VCARD");
 
@@ -407,6 +410,50 @@ function updateContrastWarning() {
   return ratio;
 }
 
+/**
+ * 한글 등 UTF-8에서 여러 바이트를 차지하는 문자가 많으면 QR에 담기는
+ * 실제 바이트 수가 늘어나고, 그만큼 모듈(점) 개수도 늘어나(=버전이 올라가)
+ * 코드가 조밀해진다. qr-code-styling(qrcode-generator 기반)이 내부적으로
+ * 계산해 둔 실제 격자 크기(_qr.getModuleCount())를 그대로 읽어서 판단하므로
+ * 버전별 용량 표를 별도로 유지보수할 필요가 없다.
+ */
+function applyDensityWarning(warningEl, textEl, moduleCount, byteLength) {
+  if (!warningEl) return;
+  const boxEl = warningEl.querySelector(".contrast-warning-box");
+  let level = null;
+  let msg = "";
+  if (moduleCount >= 97) {
+    level = "severe";
+    msg = `입력한 내용이 많아 QR 코드가 매우 조밀합니다 (${moduleCount}×${moduleCount} 모듈, ${byteLength}바이트). 작게 인쇄하거나 카메라 성능이 낮은 기기에서는 스캔이 잘 안 될 수 있습니다.`;
+  } else if (moduleCount >= 57) {
+    level = "moderate";
+    msg = `입력한 내용이 많아 QR 코드가 다소 조밀합니다 (${moduleCount}×${moduleCount} 모듈, ${byteLength}바이트). 일부 기기에서 카메라 초점이 잘 안 맞을 수 있습니다.`;
+  }
+  if (level) {
+    if (textEl) textEl.textContent = msg;
+    if (boxEl) boxEl.className = `contrast-warning-box warning-${level}`;
+    warningEl.style.display = "";
+  } else {
+    warningEl.style.display = "none";
+  }
+}
+
+function updateDensityWarning(qrCode, data) {
+  const warningEl = document.getElementById("qr-density-warning");
+  const moduleCount = qrCode?._qr?.getModuleCount?.();
+  if (!moduleCount) {
+    if (warningEl) warningEl.style.display = "none";
+    return;
+  }
+  const byteLength = new TextEncoder().encode(data).length;
+  applyDensityWarning(
+    warningEl,
+    document.getElementById("density-warning-text"),
+    moduleCount,
+    byteLength,
+  );
+}
+
 /* ==================== QR 코드 생성 ==================== */
 
 function generate(data, settings = {}) {
@@ -510,6 +557,145 @@ function renderQrPreviewAuto(data, settings) {
   document.getElementById("qr-preview").replaceChildren(newEl);
   currentQrCode = newQrCode;
   updateContrastWarning();
+  updateDensityWarning(newQrCode, data);
+  updatePreviewSize();
+}
+
+/* ==================== 미리보기 보기 모드 (너비 기준 / 높이 기준 / 직접 조절) ==================== */
+const PREVIEW_VIEW_MODE_KEY = "qr-preview-view-mode-v1";
+const PREVIEW_MANUAL_SIZE_KEY = "qr-preview-manual-size-v1";
+const PREVIEW_MANUAL_SIZE_DEFAULT = 320;
+
+function getPreviewViewMode() {
+  const v = localStorage.getItem(PREVIEW_VIEW_MODE_KEY);
+  return v === "height" || v === "manual" ? v : "width";
+}
+
+function setPreviewViewMode(mode) {
+  localStorage.setItem(PREVIEW_VIEW_MODE_KEY, mode);
+}
+
+/**
+ * "직접 조절" 모드는 1:1 비율 고정이라 width 한 값만 저장하면 되고,
+ * height는 CSS aspect-ratio가 그대로 따라가게 둔다.
+ */
+function getManualPreviewSize() {
+  const saved = Number(localStorage.getItem(PREVIEW_MANUAL_SIZE_KEY));
+  return saved > 0 ? saved : PREVIEW_MANUAL_SIZE_DEFAULT;
+}
+
+function saveManualPreviewSize(width) {
+  localStorage.setItem(PREVIEW_MANUAL_SIZE_KEY, String(Math.round(width)));
+}
+
+/** 저장되어 있던(또는 기본) 폭을 #qr-preview에 인라인 width로 적용 (height는 aspect-ratio가 계산) */
+function applyManualPreviewSize() {
+  const previewEl = document.getElementById("qr-preview");
+  previewEl.style.width = `${getManualPreviewSize()}px`;
+  previewEl.style.removeProperty("height");
+}
+
+function outerHeight(el) {
+  if (!el) return 0;
+  const style = getComputedStyle(el);
+  return (
+    el.offsetHeight +
+    parseFloat(style.marginTop || "0") +
+    parseFloat(style.marginBottom || "0")
+  );
+}
+
+/**
+ * "높이 기준" 모드에서 #qr-preview의 높이를
+ * 100dvh - (미리보기 위/아래에 있는 요소들의 실제 높이 합) 으로 계산해 적용한다.
+ * "너비 기준" 모드에서는 인라인 height를 지워 CSS(min(90dvw,360px) 등)가 그대로 적용되게 하고,
+ * "직접 조절" 모드에서는 사용자가 드래그로 정한 크기를 건드리지 않는다.
+ */
+function updatePreviewSize() {
+  const previewEl = document.getElementById("qr-preview");
+  if (!previewEl) return;
+
+  const mode = getPreviewViewMode();
+  if (mode === "manual") return;
+
+  if (mode !== "height") {
+    previewEl.style.removeProperty("height");
+    return;
+  }
+
+  const spaceAbove = previewEl.offsetTop;
+  const spaceBelow =
+    outerHeight(document.getElementById("btn-export")) +
+    parseFloat(getComputedStyle(document.body).paddingBottom || "0") +
+    parseFloat(getComputedStyle(previewEl).marginBottom || "0");
+
+  const reserved = Math.round(spaceAbove + spaceBelow);
+  previewEl.style.height = `max(160px, calc(100dvh - ${reserved}px))`;
+}
+
+let previewSizeRaf = null;
+function schedulePreviewSizeUpdate() {
+  if (previewSizeRaf) cancelAnimationFrame(previewSizeRaf);
+  previewSizeRaf = requestAnimationFrame(() => {
+    previewSizeRaf = null;
+    updatePreviewSize();
+  });
+}
+
+function applyPreviewViewMode(mode) {
+  const previewEl = document.getElementById("qr-preview");
+  previewEl.classList.toggle("view-mode-width", mode === "width");
+  previewEl.classList.toggle("view-mode-height", mode === "height");
+  previewEl.classList.toggle("view-mode-manual", mode === "manual");
+  document
+    .querySelectorAll('input[name="preview-view-mode"]')
+    .forEach((input) => {
+      input.checked = input.value === mode;
+    });
+
+  if (mode === "manual") {
+    applyManualPreviewSize();
+  } else {
+    previewEl.style.removeProperty("width");
+    updatePreviewSize();
+  }
+}
+
+/**
+ * "직접 조절" 모드에서 사용자가 리사이즈 핸들을 드래그해 박스 크기를 바꾸면
+ * 그 크기를 감지해 localStorage에 저장(다음 접속 시 그대로 복원)한다.
+ */
+function initManualPreviewResizeObserver() {
+  const previewEl = document.getElementById("qr-preview");
+  if (!previewEl || typeof ResizeObserver === "undefined") return;
+
+  const observer = new ResizeObserver((entries) => {
+    if (getPreviewViewMode() !== "manual") return;
+    const entry = entries[0];
+    const box = entry.borderBoxSize?.[0];
+    const width = box ? box.inlineSize : entry.contentRect.width;
+    if (width > 0) saveManualPreviewSize(width);
+  });
+  observer.observe(previewEl);
+}
+
+function initPreviewViewMode() {
+  applyPreviewViewMode(getPreviewViewMode());
+  initManualPreviewResizeObserver();
+
+  document
+    .querySelectorAll('input[name="preview-view-mode"]')
+    .forEach((input) => {
+      input.addEventListener("change", (e) => {
+        if (!e.target.checked) return;
+        setPreviewViewMode(e.target.value);
+        applyPreviewViewMode(e.target.value);
+      });
+    });
+
+  window.addEventListener("resize", schedulePreviewSizeUpdate);
+  window.addEventListener("orientationchange", schedulePreviewSizeUpdate);
+  window.addEventListener("load", schedulePreviewSizeUpdate);
 }
 
 /**
@@ -720,7 +906,7 @@ function openExportModal() {
   if (!data) return;
 
   const settings = collectSettingsFromForm();
-  renderQrPreviewAuto(data, settings); // 내부에서 updateContrastWarning() 호출됨
+  renderQrPreviewAuto(data, settings); // 내부에서 updateContrastWarning()/updateDensityWarning() 호출됨
 
   // 내보내기 모달에도 동일한 대비 경고 표시
   const ratio = computeMinContrastRatio();
@@ -1146,7 +1332,7 @@ function renderHistoryList() {
         const canvasEl = tempDiv.querySelector("canvas");
         const canvasCtx = canvasEl.getContext("2d");
         if (canvasEl) {
-          const svgStr = new XMLSerializer().serializeToString(canvasEl);
+          const svgStr = new XMLSerializer().serializeToString(canvasEl); // svg 로드
           const b64 = btoa(unescape(encodeURIComponent(svgStr)));
           const img = new Image();
           img.src = `data:image/svg+xml;base64,${b64}`;
@@ -1158,11 +1344,13 @@ function renderHistoryList() {
           thumb.appendChild(tempDiv);
         }
       } catch (e) {
+        // 오류 예외 처리
         console.error(e);
         thumb.classList.add("history-thumb-locked");
         thumb.textContent = "?";
       }
     } else {
+      // 민감 정보 포함 시 랜더링 x
       thumb.classList.add("history-thumb-locked");
       thumb.textContent = "🔒";
     }
@@ -1465,6 +1653,7 @@ function initBrowserWarning() {
 
   const warningEl = document.getElementById("browser-warning");
   warningEl.style.display = "";
+  updatePreviewSize();
 
   // 플랫폼별 Chrome으로 열기 링크 설정
   const currentUrl = window.location.href;
@@ -1488,6 +1677,7 @@ function initBrowserWarning() {
         localStorage.setItem(BROWSER_WARNING_DISMISSED_KEY, "true");
       }
       warningEl.style.display = "none";
+      updatePreviewSize();
     });
 }
 
@@ -1511,7 +1701,11 @@ document.addEventListener("DOMContentLoaded", () => {
   typeSelect.addEventListener("change", (e) => {
     syncTypeFields();
     localStorage.setItem(LAST_QR_TYPE_KEY, e.target.value);
+    updatePreviewSize();
   });
+
+  // 미리보기 보기 모드(너비/높이 기준) 복원 + 초기 크기 계산
+  initPreviewViewMode();
 
   document
     .getElementById("btn-export")
@@ -1616,6 +1810,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const t = e.target;
       if (t.id === "logo-file-input") return;
       if (t.id === "history-max-input") return;
+      if (t.name === "preview-view-mode") return;
 
       if (t.name === "logo-source") {
         const isUpload = t.value === "upload";

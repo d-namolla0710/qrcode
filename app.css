@@ -411,16 +411,64 @@ select#qr-type-select {
 }
 
 /* ---------- QR 미리보기 ---------- */
+/* 보기 모드: "너비 기준"은 CSS 너비를 고정하고 높이는 비율에 맞춰 auto로,
+   "높이 기준"은 JS가 계산한 인라인 height(=100dvh - 주변 요소 높이)를 쓰고
+   너비는 비율에 맞춰 auto로 잡는다. */
 #qr-preview {
-  width: min(90dvw, 360px);
   margin: 24px auto;
 }
 
-#qr-preview svg,
-#qr-preview canvas {
+#qr-preview.view-mode-width {
+  width: min(90dvw, 360px);
+  height: auto;
+}
+
+#qr-preview.view-mode-height {
+  /* width:auto인 일반 block 요소는 부모 폭을 그대로 채워버려서 margin:auto
+     중앙 정렬이 무의미해진다. fit-content로 자식(svg/canvas)의 실제 폭만큼만
+     차지하도록 해야 가운데 정렬이 유지된다. */
+  width: fit-content;
+  min-width: 160px;
+  max-width: 100%;
+}
+
+#qr-preview.view-mode-manual {
+  /* 1:1 비율 고정: 가로 방향으로만 리사이즈 핸들을 두고,
+     height는 aspect-ratio로 width를 그대로 따라가게 한다. */
+  width: 320px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  min-width: 160px;
+  max-width: 100%;
+  max-height: 90dvh;
+  resize: horizontal;
+  overflow: hidden;
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+}
+
+#qr-preview.view-mode-width svg,
+#qr-preview.view-mode-width canvas {
   display: block;
   width: 100%;
   height: auto;
+}
+
+#qr-preview.view-mode-height svg,
+#qr-preview.view-mode-height canvas {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+#qr-preview.view-mode-manual svg,
+#qr-preview.view-mode-manual canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* ---------- 버튼 ---------- */
@@ -1101,7 +1149,8 @@ button:hover {
 }
 
 /* ---------- 명도 대비 경고 ---------- */
-#qr-contrast-warning {
+#qr-contrast-warning,
+#qr-density-warning {
   width: min(90dvw, 360px);
   margin: 0 auto 12px;
 }
@@ -1308,8 +1357,9 @@ button:hover {
 
   select#qr-type-select,
   .type-fields-section,
-  #qr-preview,
-  #qr-contrast-warning {
+  #qr-preview.view-mode-width,
+  #qr-contrast-warning,
+  #qr-density-warning {
     width: 100%;
     max-width: none;
   }
