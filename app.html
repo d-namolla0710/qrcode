@@ -700,6 +700,31 @@
                     />
                   </label>
 
+                  <label>
+                    전체 여백 (px)
+                    <input id="margin-input" type="number" min="0" value="0" />
+                  </label>
+
+                  <label>
+                    오류 복원율
+                    <select id="error-corr-select">
+                      <option value="L">L (약 7% 복원)</option>
+                      <option value="M">M (약 15% 복원)</option>
+                      <option value="Q" selected>Q (약 25% 복원)</option>
+                      <option value="H">H (약 30% 복원)</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion">
+              <button type="button" class="accordion-header">
+                <span class="accordion-title">미리보기 설정</span>
+                <span class="accordion-icon">▾</span>
+              </button>
+              <div class="accordion-body">
+                <div class="accordion-body-inner">
                   <div class="logo-source-field">
                     <span>미리보기 화면 맞춤 기준</span>
                     <div class="logo-source-options">
@@ -707,8 +732,8 @@
                         ><input
                           type="radio"
                           name="preview-view-mode"
-                          checked
                           value="height"
+                          checked
                         />
                         높이 기준</label
                       >
@@ -732,27 +757,78 @@
                   </div>
                   <p class="settings-note">
                     화면에 보이는 미리보기 크기에만 적용됩니다 (내보내기 이미지
-                    해상도는 아래 너비/높이(px) 값을 따릅니다). 높이 기준을
+                    해상도는 위 너비/높이(px) 값을 따릅니다). 높이 기준을
                     선택하면 화면에 남은 공간을 최대한 채우도록 미리보기 높이가
                     자동으로 계산되고, 직접 조절을 선택하면 미리보기 상자 오른쪽
                     가장자리를 드래그해 1:1 비율을 유지한 채 크기를 조절할 수
                     있습니다.
                   </p>
 
-                  <label>
-                    전체 여백 (px)
-                    <input id="margin-input" type="number" min="0" value="0" />
-                  </label>
+                  <div class="preview-bg-controls">
+                    <label>
+                      미리보기 배경 표시
+                      <select id="preview-bg-mode-select">
+                        <option value="theme" selected>테마 배경 (기본)</option>
+                        <option value="checkerboard">
+                          체크무늬 (투명 표시용)
+                        </option>
+                        <option value="solid">단색 지정</option>
+                        <option value="gradient">그라데이션 지정</option>
+                      </select>
+                    </label>
+                    <p class="settings-note">
+                      배경색이나 도트를 투명하게 설정한 경우, 미리보기 화면에서
+                      어디가 실제로 비어 보이는지 확인하기 쉽도록 화면상
+                      미리보기의 배경만 바꿔서 보여줍니다. 내보내기 결과물에는
+                      영향을 주지 않습니다.
+                    </p>
 
-                  <label>
-                    오류 복원율
-                    <select id="error-corr-select">
-                      <option value="L">L (약 7% 복원)</option>
-                      <option value="M">M (약 15% 복원)</option>
-                      <option value="Q" selected>Q (약 25% 복원)</option>
-                      <option value="H">H (약 30% 복원)</option>
-                    </select>
-                  </label>
+                    <label id="preview-bg-solid-field">
+                      미리보기 배경색
+                      <input
+                        id="preview-bg-solid-color-input"
+                        type="color"
+                        value="#f2f2f2"
+                      />
+                    </label>
+
+                    <div id="preview-bg-gradient-fields">
+                      <label>
+                        그라데이션 종류
+                        <select id="preview-bg-gradient-type-select">
+                          <option value="linear" selected>선형</option>
+                          <option value="radial">원형</option>
+                        </select>
+                      </label>
+
+                      <label>
+                        회전 (도)
+                        <input
+                          id="preview-bg-gradient-rotation-input"
+                          type="number"
+                          value="0"
+                        />
+                      </label>
+
+                      <label>
+                        색상 1
+                        <input
+                          id="preview-bg-gradient-color1-input"
+                          type="color"
+                          value="#ffffff"
+                        />
+                      </label>
+
+                      <label>
+                        색상 2
+                        <input
+                          id="preview-bg-gradient-color2-input"
+                          type="color"
+                          value="#000000"
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -854,6 +930,16 @@
                     될 수도 있습니다.</small
                   >
                   <label>
+                    <input id="dots-transparent-toggle" type="checkbox" />
+                    투명 (구멍 뚫기)
+                  </label>
+                  <small
+                    >도트가 있던 픽셀 자리만 정확히 투명해지고, 도트가 없던
+                    나머지 배경은 배경 스타일 설정 그대로 유지됩니다. 주의: QR
+                    코드가 스캔되지 않을 수 있습니다.</small
+                  >
+
+                  <label>
                     색상
                     <input id="dots-color-input" type="color" value="#000000" />
                   </label>
@@ -923,6 +1009,15 @@
               <div class="accordion-body">
                 <div class="accordion-body-inner">
                   <label>
+                    <input id="bg-transparent-toggle" type="checkbox" />
+                    배경 없음 (투명 배경으로 내보내기)
+                  </label>
+                  <small
+                    >png·webp·svg로 내보낼 때만 투명 배경이 적용됩니다. jpeg는
+                    투명을 지원하지 않아 흰 배경으로 저장됩니다.</small
+                  >
+
+                  <label>
                     색상
                     <input id="bg-color-input" type="color" value="#ffffff" />
                   </label>
@@ -985,17 +1080,79 @@
                   >
                   <label>
                     색상
-                    <input
-                      id="corners-square-color-input"
-                      type="color"
-                      value="#000000"
-                    />
+                    <select id="corners-square-color-mode-select">
+                      <option value="follow-dots" selected>
+                        점 스타일 색상 따라가기
+                      </option>
+                      <option value="custom">직접 지정</option>
+                      <option value="transparent">투명 (구멍 뚫기)</option>
+                    </select>
                   </label>
+                  <small
+                    >"투명"을 선택하면 모서리 사각형이 있던 자리만 정확히 뚫려서
+                    배경이 그대로 비칩니다. 주의: QR 코드가 스캔되지 않을 수
+                    있습니다.</small
+                  >
+
+                  <div id="corners-square-color-fields">
+                    <label>
+                      <input
+                        id="corners-square-color-input"
+                        type="color"
+                        value="#000000"
+                      />
+                    </label>
+
+                    <label>
+                      <input
+                        id="corners-square-gradient-toggle"
+                        type="checkbox"
+                      />
+                      그라데이션 사용
+                    </label>
+
+                    <div id="corners-square-gradient-fields">
+                      <label>
+                        그라데이션 종류
+                        <select id="corners-square-gradient-type-select">
+                          <option value="linear" selected>선형</option>
+                          <option value="radial">원형</option>
+                        </select>
+                      </label>
+
+                      <label>
+                        회전 (도)
+                        <input
+                          id="corners-square-gradient-rotation-input"
+                          type="number"
+                          value="0"
+                        />
+                      </label>
+
+                      <label>
+                        색상 1
+                        <input
+                          id="corners-square-gradient-color1-input"
+                          type="color"
+                          value="#000000"
+                        />
+                      </label>
+
+                      <label>
+                        색상 2
+                        <input
+                          id="corners-square-gradient-color2-input"
+                          type="color"
+                          value="#ffffff"
+                        />
+                      </label>
+                    </div>
+                  </div>
 
                   <label>
                     스타일
                     <select id="corners-square-type-select">
-                      <option value="">(점 스타일 따라가기)</option>
+                      <option value="" selected>(점 스타일 따라가기)</option>
                       <option value="square">사각형</option>
                       <option value="dot">원형</option>
                       <option value="dots">점 패턴</option>
@@ -1005,51 +1162,6 @@
                       <option value="classy-rounded">둥근 클래식</option>
                     </select>
                   </label>
-
-                  <label>
-                    <input
-                      id="corners-square-gradient-toggle"
-                      type="checkbox"
-                    />
-                    그라데이션 사용
-                  </label>
-
-                  <div id="corners-square-gradient-fields">
-                    <label>
-                      그라데이션 종류
-                      <select id="corners-square-gradient-type-select">
-                        <option value="linear" selected>선형</option>
-                        <option value="radial">원형</option>
-                      </select>
-                    </label>
-
-                    <label>
-                      회전 (도)
-                      <input
-                        id="corners-square-gradient-rotation-input"
-                        type="number"
-                        value="0"
-                      />
-                    </label>
-
-                    <label>
-                      색상 1
-                      <input
-                        id="corners-square-gradient-color1-input"
-                        type="color"
-                        value="#000000"
-                      />
-                    </label>
-
-                    <label>
-                      색상 2
-                      <input
-                        id="corners-square-gradient-color2-input"
-                        type="color"
-                        value="#ffffff"
-                      />
-                    </label>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1067,17 +1179,79 @@
                   >
                   <label>
                     색상
-                    <input
-                      id="corners-dot-color-input"
-                      type="color"
-                      value="#000000"
-                    />
+                    <select id="corners-dot-color-mode-select">
+                      <option value="follow-dots" selected>
+                        점 스타일 색상 따라가기
+                      </option>
+                      <option value="follow-corners-square">
+                        모서리 사각형 색상 따라가기
+                      </option>
+                      <option value="custom">직접 지정</option>
+                      <option value="transparent">투명 (구멍 뚫기)</option>
+                    </select>
                   </label>
+                  <small
+                    >"투명"을 선택하면 모서리 도트가 있던 자리만 정확히 뚫려서
+                    배경이 그대로 비칩니다. 주의: QR 코드가 스캔되지 않을 수
+                    있습니다.</small
+                  >
+
+                  <div id="corners-dot-color-fields">
+                    <label>
+                      <input
+                        id="corners-dot-color-input"
+                        type="color"
+                        value="#000000"
+                      />
+                    </label>
+
+                    <label>
+                      <input id="corners-dot-gradient-toggle" type="checkbox" />
+                      그라데이션 사용
+                    </label>
+
+                    <div id="corners-dot-gradient-fields">
+                      <label>
+                        그라데이션 종류
+                        <select id="corners-dot-gradient-type-select">
+                          <option value="linear" selected>선형</option>
+                          <option value="radial">원형</option>
+                        </select>
+                      </label>
+
+                      <label>
+                        회전 (도)
+                        <input
+                          id="corners-dot-gradient-rotation-input"
+                          type="number"
+                          value="0"
+                        />
+                      </label>
+
+                      <label>
+                        색상 1
+                        <input
+                          id="corners-dot-gradient-color1-input"
+                          type="color"
+                          value="#000000"
+                        />
+                      </label>
+
+                      <label>
+                        색상 2
+                        <input
+                          id="corners-dot-gradient-color2-input"
+                          type="color"
+                          value="#ffffff"
+                        />
+                      </label>
+                    </div>
+                  </div>
 
                   <label>
                     스타일
                     <select id="corners-dot-type-select">
-                      <option value="">(점 스타일 따라가기)</option>
+                      <option value="" selected>(점 스타일 따라가기)</option>
                       <option value="square">사각형</option>
                       <option value="dot">원형</option>
                       <option value="dots">점 패턴</option>
@@ -1087,48 +1261,6 @@
                       <option value="classy-rounded">둥근 클래식</option>
                     </select>
                   </label>
-
-                  <label>
-                    <input id="corners-dot-gradient-toggle" type="checkbox" />
-                    그라데이션 사용
-                  </label>
-
-                  <div id="corners-dot-gradient-fields">
-                    <label>
-                      그라데이션 종류
-                      <select id="corners-dot-gradient-type-select">
-                        <option value="linear" selected>선형</option>
-                        <option value="radial">원형</option>
-                      </select>
-                    </label>
-
-                    <label>
-                      회전 (도)
-                      <input
-                        id="corners-dot-gradient-rotation-input"
-                        type="number"
-                        value="0"
-                      />
-                    </label>
-
-                    <label>
-                      색상 1
-                      <input
-                        id="corners-dot-gradient-color1-input"
-                        type="color"
-                        value="#000000"
-                      />
-                    </label>
-
-                    <label>
-                      색상 2
-                      <input
-                        id="corners-dot-gradient-color2-input"
-                        type="color"
-                        value="#ffffff"
-                      />
-                    </label>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1146,6 +1278,10 @@
           <option value="webp">.webp</option>
           <option value="svg" selected>.svg</option>
         </select>
+        <small id="export-transparent-note" style="display: none"
+          >※ jpeg는 투명 배경을 지원하지 않아 불투명하게 저장됩니다.
+          png·webp·svg를 이용해주세요.</small
+        >
         <div id="export-contrast-warning" style="display: none">
           <div class="contrast-warning-box">
             <span id="export-contrast-warning-text"></span>
@@ -1194,6 +1330,33 @@
             </ul>
           </div>
           -->
+          <div class="patch-note-entry">
+            <h3 class="patch-note-version">
+              v. 1.5.0 <span class="patch-note-date">2026. 07. 30.</span>
+            </h3>
+            <p class="patch-note-label">투명 배경/도트 내보내기 기능 추가</p>
+            <ul>
+              <li>
+                배경 스타일에 "배경 없음" 옵션 추가
+              </li>
+              <li>
+                도트(점)·모서리 사각형·모서리 도트 스타일에 "투명 (구멍 뚫기)"
+                옵션 추가
+              </li>
+              <li>
+                모서리 사각형/모서리 도트 색상에 "점 스타일 색상 따라가기"
+                기본 옵션 추가, 모서리 도트에는 "모서리 사각형 색상
+                따라가기" 옵션 추가
+              </li>
+              <li>
+                "미리보기 설정" 메뉴 신설 — 미리보기 화면 맞춤 기준을
+                이동하고, 투명 요소를 확인하기 쉽도록 미리보기 배경 표시(테마
+                배경/체크무늬/단색/그라데이션) 옵션 추가 (내보내기 결과물에는
+                영향 없음)
+              </li>
+              <li>jpeg 내보내기 시 투명 배경 미지원 안내 문구 추가</li>
+            </ul>
+          </div>
           <div class="patch-note-entry">
             <h3 class="patch-note-version">
               v. 1.4.0 <span class="patch-note-date">2026. 07. 29.</span>
@@ -1313,7 +1476,7 @@
         >(나눔스퀘어)이 적용되어 있습니다.
       </small>
       <div class="footer-bar">
-        <span class="site-version">v. 1.3.0</span>
+        <span class="site-version">v. 1.5.0</span>
         <div class="footer-bar-links">
           <a
             href="https://qr.minchan.app/"

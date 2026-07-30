@@ -2,6 +2,11 @@
 // (ES 모듈 import 아님 — 브라우저 전역 스크립트 방식)
 
 let currentQrCode = null;
+// 도트/모서리를 "투명(구멍 뚫기)"으로 설정했을 때, 뚫린 구멍이 반영된 svg
+// 엘리먼트와 원본 크기(px). 내보내기(다운로드) 시 qr-code-styling의 기본
+// download()는 이 구멍을 반영하지 않으므로(내부적으로 옵션에서 svg를 다시
+// 만들기 때문), 이 값이 있으면 그것을 직접 사용해 다운로드한다.
+let currentHolePunchedSvg = null;
 let logoDataUrl = null;
 let autoPreviewTimer = null;
 let autoHistoryTimer = null;
@@ -326,42 +331,26 @@ function getContrastRatio(hex1, hex2) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-function getFormColors(colorId, toggleId, c1Id, c2Id) {
-  if (document.getElementById(toggleId)?.checked) {
-    return [
-      document.getElementById(c1Id).value,
-      document.getElementById(c2Id).value,
-    ];
+/**
+ * backgroundOptions/dotsOptions/cornersSquareOptions/cornersDotOptions 형태의
+ * 옵션 객체에서 실제로 비교에 쓰일 색상 문자열 목록을 뽑아낸다.
+ * 투명(color === "transparent")이면 대비를 계산할 색이 없다고 보고 빈 배열 반환.
+ */
+function extractColorsForContrast(options) {
+  if (!options || options.color === "transparent") return [];
+  if (options.gradient) {
+    return options.gradient.colorStops.map((stop) => stop.color);
   }
-  return [document.getElementById(colorId).value];
+  return options.color != null ? [options.color] : [];
 }
 
 function computeMinContrastRatio() {
-  const bgColors = getFormColors(
-    "bg-color-input",
-    "bg-gradient-toggle",
-    "bg-gradient-color1-input",
-    "bg-gradient-color2-input",
-  );
+  const settings = collectSettingsFromForm();
+  const bgColors = extractColorsForContrast(settings.backgroundOptions);
   const fgColorGroups = [
-    getFormColors(
-      "dots-color-input",
-      "dots-gradient-toggle",
-      "dots-gradient-color1-input",
-      "dots-gradient-color2-input",
-    ),
-    getFormColors(
-      "corners-square-color-input",
-      "corners-square-gradient-toggle",
-      "corners-square-gradient-color1-input",
-      "corners-square-gradient-color2-input",
-    ),
-    getFormColors(
-      "corners-dot-color-input",
-      "corners-dot-gradient-toggle",
-      "corners-dot-gradient-color1-input",
-      "corners-dot-gradient-color2-input",
-    ),
+    extractColorsForContrast(settings.dotsOptions),
+    extractColorsForContrast(settings.cornersSquareOptions),
+    extractColorsForContrast(settings.cornersDotOptions),
   ];
 
   let minRatio = 21;
@@ -456,7 +445,7 @@ function updateDensityWarning(qrCode, data) {
 
 /* ==================== QR 코드 생성 ==================== */
 
-function generate(data, settings = {}) {
+function generate(data, settings = {}, type = "canvas") {
   const {
     errorCorrLvl = "Q",
     image,
@@ -474,7 +463,7 @@ function generate(data, settings = {}) {
   const qrCode = new QRCodeStyling({
     width,
     height,
-    type: "canvas",
+    type,
     shape,
     data: toUtf8BinaryString(data),
     image,
@@ -520,6 +509,83 @@ function generate(data, settings = {}) {
 }
 
 /**
+ * 도트/모서리 사각형/모서리 도트를 "투명(구멍 뚫기)"으로 설정했을 때, 그
+ * 요소가 있던 자리의 배경만 정확히 뚫어서 비우고 나머지 배경(여백 등)은
+ * 그대로 남긴다.
+ *
+ * qr-code-styling이 svg 안에 이미 만들어 둔 "clip-path-dot-color-*" /
+ * "clip-path-corners-square-color-*" / "clip-path-corners-dot-color-*"
+ * 클립패스(해당 요소 하나하나의 정확한 모양/회전 — 실제 렌더링과 100% 동일)를
+ * 그대로 재사용해서, 배경을 그리는 사각형에 mask로 적용한다. 그런 다음 해당
+ * 요소 자체를 칠하던 rect는 지워서 순수하게 "뚫린 구멍"만 남긴다.
+ *
+ * @param {{dots?: boolean, cornersSquare?: boolean, cornersDot?: boolean}} punch
+ */
+function applyQrHolePunch(svgEl, punch) {
+  const clipPathPrefixes = [];
+  if (punch.dots) clipPathPrefixes.push("clip-path-dot-color-");
+  if (punch.cornersSquare) clipPathPrefixes.push("clip-path-corners-square-color-");
+  if (punch.cornersDot) clipPathPrefixes.push("clip-path-corners-dot-color-");
+  if (!clipPathPrefixes.length) return;
+
+  const bgRects = svgEl.querySelectorAll(
+    '[clip-path*="clip-path-background-color-"]',
+  );
+  const holeClipPaths = clipPathPrefixes.flatMap((prefix) =>
+    [...svgEl.querySelectorAll(`[id^="${prefix}"]`)],
+  );
+  if (!bgRects.length || !holeClipPaths.length) return;
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const width = svgEl.getAttribute("width") || 300;
+  const height = svgEl.getAttribute("height") || 300;
+
+  let defs = svgEl.querySelector("defs");
+  if (!defs) {
+    defs = document.createElementNS(svgNS, "defs");
+    svgEl.insertBefore(defs, svgEl.firstChild);
+  }
+
+  const maskId = `qr-hole-mask-${Math.random().toString(36).slice(2, 9)}`;
+  const mask = document.createElementNS(svgNS, "mask");
+  mask.setAttribute("id", maskId);
+  mask.setAttribute("maskUnits", "userSpaceOnUse");
+  mask.setAttribute("x", "0");
+  mask.setAttribute("y", "0");
+  mask.setAttribute("width", String(width));
+  mask.setAttribute("height", String(height));
+
+  // mask는 흰색=보임/검정색=숨김이므로, 전체를 흰색으로 채운 뒤 구멍 낼 모양만
+  // 검정으로 덮어써서 그 자리만 구멍이 뚫리게 한다.
+  const visibleRect = document.createElementNS(svgNS, "rect");
+  visibleRect.setAttribute("x", "0");
+  visibleRect.setAttribute("y", "0");
+  visibleRect.setAttribute("width", String(width));
+  visibleRect.setAttribute("height", String(height));
+  visibleRect.setAttribute("fill", "white");
+  mask.appendChild(visibleRect);
+
+  const holesGroup = document.createElementNS(svgNS, "g");
+  holesGroup.setAttribute("fill", "black");
+  holeClipPaths.forEach((clipPath) => {
+    [...clipPath.children].forEach((shape) => {
+      holesGroup.appendChild(shape.cloneNode(true));
+    });
+  });
+  mask.appendChild(holesGroup);
+  defs.appendChild(mask);
+
+  bgRects.forEach((rect) => rect.setAttribute("mask", `url(#${maskId})`));
+
+  // 구멍 낸 요소 자체를 칠하던 rect는 제거해서 순수하게 "뚫린 구멍"만 남긴다
+  clipPathPrefixes.forEach((prefix) => {
+    svgEl
+      .querySelectorAll(`[clip-path*="${prefix}"]`)
+      .forEach((el) => el.remove());
+  });
+}
+
+/**
  * qr-code-styling이 만드는 svg에는 width/height 속성만 있고 viewBox가 없어서,
  * CSS로 크기를 줄이면 "축소"가 아니라 "잘림"이 발생한다.
  * viewBox를 직접 채워주고 고정 width/height 속성은 지워서,
@@ -548,9 +614,30 @@ function makeQrSvgResponsive(container) {
  * innerHTML 초기화를 하지 않으므로 깜빡임이 없다.
  */
 function renderQrPreviewAuto(data, settings) {
-  const newQrCode = generate(data, settings);
+  const holePunch = {
+    dots: settings.dotsOptions?.color === "transparent",
+    cornersSquare: settings.cornersSquareOptions?.color === "transparent",
+    cornersDot: settings.cornersDotOptions?.color === "transparent",
+  };
+  const needsHolePunch =
+    holePunch.dots || holePunch.cornersSquare || holePunch.cornersDot;
+  const newQrCode = generate(data, settings, needsHolePunch ? "svg" : "canvas");
   const temp = document.createElement("div");
   newQrCode.append(temp);
+
+  currentHolePunchedSvg = null;
+  if (needsHolePunch) {
+    const svgEl = temp.querySelector("svg");
+    if (svgEl) {
+      applyQrHolePunch(svgEl, holePunch);
+      currentHolePunchedSvg = {
+        el: svgEl,
+        width: settings.width ?? 300,
+        height: settings.height ?? 300,
+      };
+    }
+  }
+
   makeQrSvgResponsive(temp);
   const newEl = temp.firstElementChild;
   if (!newEl) return;
@@ -568,7 +655,7 @@ const PREVIEW_MANUAL_SIZE_DEFAULT = 320;
 
 function getPreviewViewMode() {
   const v = localStorage.getItem(PREVIEW_VIEW_MODE_KEY);
-  return v === "height" || v === "manual" ? v : "width";
+  return v === "width" || v === "manual" ? v : "height";
 }
 
 function setPreviewViewMode(mode) {
@@ -699,6 +786,104 @@ function initPreviewViewMode() {
 }
 
 /**
+ * 미리보기 화면 전용 배경(테마 배경/체크무늬/단색/그라데이션) 설정.
+ * QR 자체의 배경(backgroundOptions)과는 완전히 별개이며, 내보내기 결과물에는
+ * 영향을 주지 않는다. 투명 배경·투명 도트를 화면에서 알아보기 쉽게 하기 위한
+ * 화면 표시용 설정.
+ */
+const PREVIEW_BG_KEY = "qr-preview-bg-v1";
+
+function getPreviewBgSettings() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PREVIEW_BG_KEY));
+    if (raw && typeof raw === "object") return raw;
+  } catch {
+    // 저장된 값이 손상된 경우 기본값 사용
+  }
+  return { mode: "theme" };
+}
+
+function savePreviewBgSettings(settings) {
+  localStorage.setItem(PREVIEW_BG_KEY, JSON.stringify(settings));
+}
+
+function readPreviewBgSettingsFromForm() {
+  return {
+    mode: document.getElementById("preview-bg-mode-select").value,
+    solidColor: document.getElementById("preview-bg-solid-color-input").value,
+    gradientType: document.getElementById("preview-bg-gradient-type-select")
+      .value,
+    gradientRotation: Number(
+      document.getElementById("preview-bg-gradient-rotation-input").value,
+    ),
+    gradientColor1: document.getElementById("preview-bg-gradient-color1-input")
+      .value,
+    gradientColor2: document.getElementById("preview-bg-gradient-color2-input")
+      .value,
+  };
+}
+
+function applyPreviewBgSettingsToForm(settings) {
+  document.getElementById("preview-bg-mode-select").value =
+    settings.mode ?? "theme";
+  document.getElementById("preview-bg-solid-color-input").value =
+    settings.solidColor ?? "#f2f2f2";
+  document.getElementById("preview-bg-gradient-type-select").value =
+    settings.gradientType ?? "linear";
+  document.getElementById("preview-bg-gradient-rotation-input").value =
+    settings.gradientRotation ?? 0;
+  document.getElementById("preview-bg-gradient-color1-input").value =
+    settings.gradientColor1 ?? "#ffffff";
+  document.getElementById("preview-bg-gradient-color2-input").value =
+    settings.gradientColor2 ?? "#000000";
+}
+
+function applyPreviewBgSettings(settings) {
+  const previewEl = document.getElementById("qr-preview");
+  if (!previewEl) return;
+  const mode = settings.mode ?? "theme";
+
+  previewEl.classList.toggle("preview-bg-checkerboard", mode === "checkerboard");
+  previewEl.style.removeProperty("background-color");
+  previewEl.style.removeProperty("background-image");
+
+  document.getElementById("preview-bg-solid-field").style.display =
+    mode === "solid" ? "" : "none";
+  document.getElementById("preview-bg-gradient-fields").style.display =
+    mode === "gradient" ? "" : "none";
+
+  if (mode === "solid") {
+    previewEl.style.backgroundColor = settings.solidColor ?? "#f2f2f2";
+  } else if (mode === "gradient") {
+    const type = settings.gradientType ?? "linear";
+    const rotation = settings.gradientRotation ?? 0;
+    const color1 = settings.gradientColor1 ?? "#ffffff";
+    const color2 = settings.gradientColor2 ?? "#000000";
+    previewEl.style.backgroundImage =
+      type === "radial"
+        ? `radial-gradient(circle, ${color1}, ${color2})`
+        : `linear-gradient(${rotation}deg, ${color1}, ${color2})`;
+  }
+  // mode === "theme"이면 클래스/인라인 스타일을 모두 제거한 상태로 두어
+  // 기존처럼 페이지 테마 배경이 그대로 비쳐 보이게 한다.
+}
+
+function initPreviewBgSettings() {
+  const saved = getPreviewBgSettings();
+  applyPreviewBgSettingsToForm(saved);
+  applyPreviewBgSettings(saved);
+
+  document.querySelectorAll(".preview-bg-controls input, .preview-bg-controls select")
+    .forEach((el) => {
+      el.addEventListener("input", () => {
+        const settings = readPreviewBgSettingsFromForm();
+        savePreviewBgSettings(settings);
+        applyPreviewBgSettings(settings);
+      });
+    });
+}
+
+/**
  * 체크박스로 그라데이션 사용 여부를 토글했을 때, 해당 영역 input들을 읽어서
  * gradient 객체를 만들어주는 헬퍼. 체크 안 했으면 undefined 반환 (-> color 단독 사용)
  *
@@ -756,6 +941,40 @@ function applyGradientToForm(prefix, gradient) {
 }
 
 /**
+ * "투명" 체크박스(dots/bg 공통) 상태에 맞춰 색상·그라데이션 입력칸을 숨김/표시.
+ */
+function syncTransparentVisibility(prefix) {
+  const toggle = document.getElementById(`${prefix}-transparent-toggle`);
+  if (!toggle) return;
+
+  const hide = toggle.checked;
+  const colorLabel = document
+    .getElementById(`${prefix}-color-input`)
+    ?.closest("label");
+  const gradientToggle = document.getElementById(`${prefix}-gradient-toggle`);
+  const gradientLabel = gradientToggle?.closest("label");
+  const gradientFields = document.getElementById(`${prefix}-gradient-fields`);
+
+  if (colorLabel) colorLabel.style.display = hide ? "none" : "";
+  if (gradientLabel) gradientLabel.style.display = hide ? "none" : "";
+  if (gradientFields) {
+    gradientFields.style.display =
+      !hide && gradientToggle?.checked ? "" : "none";
+  }
+}
+
+/**
+ * 모서리 사각형/도트의 "색상" 선택(select)이 "직접 지정"이 아니면
+ * 색상·그라데이션 입력칸을 숨긴다.
+ */
+function syncColorModeVisibility(prefix) {
+  const select = document.getElementById(`${prefix}-color-mode-select`);
+  const fields = document.getElementById(`${prefix}-color-fields`);
+  if (!select || !fields) return;
+  fields.style.display = select.value === "custom" ? "" : "none";
+}
+
+/**
  * 디자인 설정 영역의 모든 입력값을 읽어서 generate()에 넘길 settings 객체로 변환
  */
 function collectSettingsFromForm() {
@@ -772,6 +991,87 @@ function collectSettingsFromForm() {
       ? logoDataUrl || undefined
       : document.getElementById("logo-url-input").value || undefined;
 
+  const dotsTransparent = document.getElementById(
+    "dots-transparent-toggle",
+  ).checked;
+  const dotsOptions = {
+    color: dotsTransparent
+      ? "transparent"
+      : document.getElementById("dots-color-input").value,
+    type: document.getElementById("dots-type-select").value,
+    gradient: dotsTransparent ? undefined : readGradient("dots"),
+  };
+
+  const bgTransparent = document.getElementById(
+    "bg-transparent-toggle",
+  ).checked;
+  const backgroundOptions = {
+    color: bgTransparent
+      ? "transparent"
+      : document.getElementById("bg-color-input").value,
+    gradient: bgTransparent ? undefined : readGradient("bg"),
+  };
+
+  // 모서리 사각형 색상: 직접 지정 / 투명(구멍 뚫기) / 점 스타일 색상 따라가기(기본).
+  // "따라가기"인데 도트가 "투명(구멍 뚫기)" 상태라 따라갈 실제 색이 없는 경우에는
+  // 모서리(파인더 패턴)까지 함께 사라져 인식이 아예 불가능해지므로, 기본 검정색으로
+  // 대체한다 — 모서리를 투명하게 하고 싶으면 아래에서 명시적으로 "투명"을 선택해야 한다.
+  const cornersSquareColorMode = document.getElementById(
+    "corners-square-color-mode-select",
+  ).value;
+  const cornersSquareOptions =
+    cornersSquareColorMode === "custom"
+      ? {
+          colorMode: "custom",
+          color: document.getElementById("corners-square-color-input").value,
+          type: cornersSquareType || undefined,
+          gradient: readGradient("corners-square"),
+        }
+      : cornersSquareColorMode === "transparent"
+        ? {
+            colorMode: "transparent",
+            color: "transparent",
+            type: cornersSquareType || undefined,
+            gradient: undefined,
+          }
+        : {
+            colorMode: "follow-dots",
+            color: dotsOptions.color === "transparent" ? "#000000" : dotsOptions.color,
+            type: cornersSquareType || undefined,
+            gradient: dotsOptions.color === "transparent" ? undefined : dotsOptions.gradient,
+          };
+
+  // 모서리 도트 색상: 직접 지정 / 투명(구멍 뚫기) / 모서리 사각형 색상 따라가기 /
+  // 점 스타일 색상 따라가기(기본)
+  const cornersDotColorMode = document.getElementById(
+    "corners-dot-color-mode-select",
+  ).value;
+  const cornersDotColorSource =
+    cornersDotColorMode === "custom"
+      ? {
+          color: document.getElementById("corners-dot-color-input").value,
+          gradient: readGradient("corners-dot"),
+        }
+      : cornersDotColorMode === "transparent"
+        ? { color: "transparent", gradient: undefined }
+        : cornersDotColorMode === "follow-corners-square"
+          ? {
+              color: cornersSquareOptions.color,
+              gradient: cornersSquareOptions.gradient,
+            }
+          : {
+              color:
+                dotsOptions.color === "transparent" ? "#000000" : dotsOptions.color,
+              gradient:
+                dotsOptions.color === "transparent" ? undefined : dotsOptions.gradient,
+            };
+  const cornersDotOptions = {
+    colorMode: cornersDotColorMode,
+    color: cornersDotColorSource.color,
+    type: cornersDotType || undefined,
+    gradient: cornersDotColorSource.gradient,
+  };
+
   return {
     errorCorrLvl: document.getElementById("error-corr-select").value,
     image,
@@ -785,28 +1085,10 @@ function collectSettingsFromForm() {
       margin: Number(document.getElementById("image-margin-input").value),
     },
 
-    dotsOptions: {
-      color: document.getElementById("dots-color-input").value,
-      type: document.getElementById("dots-type-select").value,
-      gradient: readGradient("dots"),
-    },
-
-    backgroundOptions: {
-      color: document.getElementById("bg-color-input").value,
-      gradient: readGradient("bg"),
-    },
-
-    cornersSquareOptions: {
-      color: document.getElementById("corners-square-color-input").value,
-      type: cornersSquareType || undefined,
-      gradient: readGradient("corners-square"),
-    },
-
-    cornersDotOptions: {
-      color: document.getElementById("corners-dot-color-input").value,
-      type: cornersDotType || undefined,
-      gradient: readGradient("corners-dot"),
-    },
+    dotsOptions,
+    backgroundOptions,
+    cornersSquareOptions,
+    cornersDotOptions,
   };
 }
 
@@ -834,16 +1116,33 @@ function applySettingsToForm(settings) {
   document.getElementById("image-margin-input").value =
     settings.imageOptions?.margin ?? 0;
 
-  document.getElementById("dots-color-input").value =
-    settings.dotsOptions?.color ?? "#000000";
+  const bgTransparent = settings.backgroundOptions?.color === "transparent";
+  document.getElementById("bg-transparent-toggle").checked = bgTransparent;
+  document.getElementById("bg-color-input").value = bgTransparent
+    ? "#ffffff"
+    : (settings.backgroundOptions?.color ?? "#ffffff");
+  applyGradientToForm("bg", settings.backgroundOptions?.gradient);
+  syncTransparentVisibility("bg");
+
+  const dotsTransparent = settings.dotsOptions?.color === "transparent";
+  document.getElementById("dots-transparent-toggle").checked = dotsTransparent;
+  document.getElementById("dots-color-input").value = dotsTransparent
+    ? "#000000"
+    : (settings.dotsOptions?.color ?? "#000000");
   document.getElementById("dots-type-select").value =
     settings.dotsOptions?.type ?? "square";
   applyGradientToForm("dots", settings.dotsOptions?.gradient);
+  syncTransparentVisibility("dots");
 
-  document.getElementById("bg-color-input").value =
-    settings.backgroundOptions?.color ?? "#ffffff";
-  applyGradientToForm("bg", settings.backgroundOptions?.gradient);
-
+  // colorMode가 없는(신규 기능 이전에 저장된) 기존 프리셋/히스토리는 사용자가
+  // 직접 지정했던 색을 그대로 보존해야 하므로 "custom"으로 취급한다.
+  const cornersSquareColorMode = settings.cornersSquareOptions?.colorMode;
+  document.getElementById("corners-square-color-mode-select").value = [
+    "follow-dots",
+    "transparent",
+  ].includes(cornersSquareColorMode)
+    ? cornersSquareColorMode
+    : "custom";
   document.getElementById("corners-square-color-input").value =
     settings.cornersSquareOptions?.color ?? "#000000";
   document.getElementById("corners-square-type-select").value =
@@ -852,12 +1151,23 @@ function applySettingsToForm(settings) {
     "corners-square",
     settings.cornersSquareOptions?.gradient,
   );
+  syncColorModeVisibility("corners-square");
 
+  const cornersDotColorMode = settings.cornersDotOptions?.colorMode;
+  document.getElementById("corners-dot-color-mode-select").value = [
+    "follow-dots",
+    "follow-corners-square",
+    "transparent",
+    "custom",
+  ].includes(cornersDotColorMode)
+    ? cornersDotColorMode
+    : "custom";
   document.getElementById("corners-dot-color-input").value =
     settings.cornersDotOptions?.color ?? "#000000";
   document.getElementById("corners-dot-type-select").value =
     settings.cornersDotOptions?.type ?? "";
   applyGradientToForm("corners-dot", settings.cornersDotOptions?.gradient);
+  syncColorModeVisibility("corners-dot");
 }
 
 /**
@@ -898,6 +1208,24 @@ function scheduleAutoPreview() {
 }
 
 /**
+ * jpeg는 알파 채널을 지원하지 않으므로, 투명 배경/도트를 사용 중인데
+ * jpeg를 선택했으면 안내 문구를 보여준다.
+ */
+function updateExportTransparentNote() {
+  const noteEl = document.getElementById("export-transparent-note");
+  if (!noteEl) return;
+  const ext = document.getElementById("download-ext-select").value;
+  const anyTransparent =
+    document.getElementById("bg-transparent-toggle").checked ||
+    document.getElementById("dots-transparent-toggle").checked ||
+    document.getElementById("corners-square-color-mode-select").value ===
+      "transparent" ||
+    document.getElementById("corners-dot-color-mode-select").value ===
+      "transparent";
+  noteEl.style.display = anyTransparent && ext === "jpeg" ? "" : "none";
+}
+
+/**
  * "내보내기" 버튼 클릭 시: 현재 입력값/스타일로 QR을 갱신한 뒤 다운로드 모달을 띔
  */
 function openExportModal() {
@@ -915,6 +1243,7 @@ function openExportModal() {
     document.getElementById("export-contrast-warning-text"),
     ratio,
   );
+  updateExportTransparentNote();
 
   document.getElementById("export-modal").style.display = "flex";
 }
@@ -934,6 +1263,66 @@ function closePatchNotesModal() {
 /**
  * 모달의 "다운로드" 버튼 클릭 시: 선택한 확장자로 현재 QR 코드 다운로드
  */
+function triggerBlobDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function loadImageFromUrl(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+/**
+ * 도트 구멍 뚫기가 적용된 svg는 qr-code-styling의 기본 download()로 내보내면
+ * 구멍이 사라진 채(내부적으로 옵션만 보고 svg를 다시 그리기 때문) 저장되므로,
+ * 화면에 실제로 그려진(구멍이 반영된) svg 엘리먼트를 직접 직렬화/래스터화해서
+ * 내보낸다.
+ */
+async function downloadMaskedSvg({ el, width, height }, extension) {
+  const svgString = new XMLSerializer().serializeToString(el);
+
+  if (extension === "svg") {
+    triggerBlobDownload(
+      new Blob([svgString], { type: "image/svg+xml" }),
+      "qrcode.svg",
+    );
+    return;
+  }
+
+  const svgUrl = URL.createObjectURL(
+    new Blob([svgString], { type: "image/svg+xml" }),
+  );
+  try {
+    const img = await loadImageFromUrl(svgUrl);
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+    const mime =
+      extension === "jpeg"
+        ? "image/jpeg"
+        : extension === "webp"
+          ? "image/webp"
+          : "image/png";
+    canvas.toBlob((blob) => {
+      if (blob) triggerBlobDownload(blob, `qrcode.${extension}`);
+    }, mime);
+  } finally {
+    URL.revokeObjectURL(svgUrl);
+  }
+}
+
 function downloadQrCode() {
   if (!currentQrCode) {
     alert("먼저 QR 코드를 생성해주세요.");
@@ -941,6 +1330,10 @@ function downloadQrCode() {
   }
 
   const extension = document.getElementById("download-ext-select").value;
+  if (currentHolePunchedSvg) {
+    downloadMaskedSvg(currentHolePunchedSvg, extension);
+    return;
+  }
   currentQrCode.download({ name: "qrcode", extension });
 }
 
@@ -1481,6 +1874,7 @@ const DESIGN_DEFAULTS = {
   "logo-url-input": "",
   "image-size-input": "0.4",
   "image-margin-input": "0",
+  "dots-transparent-toggle": false,
   "dots-color-input": "#000000",
   "dots-type-select": "square",
   "dots-gradient-toggle": false,
@@ -1488,12 +1882,14 @@ const DESIGN_DEFAULTS = {
   "dots-gradient-rotation-input": "0",
   "dots-gradient-color1-input": "#000000",
   "dots-gradient-color2-input": "#ffffff",
+  "bg-transparent-toggle": false,
   "bg-color-input": "#ffffff",
   "bg-gradient-toggle": false,
   "bg-gradient-type-select": "linear",
   "bg-gradient-rotation-input": "0",
   "bg-gradient-color1-input": "#ffffff",
   "bg-gradient-color2-input": "#000000",
+  "corners-square-color-mode-select": "follow-dots",
   "corners-square-color-input": "#000000",
   "corners-square-type-select": "",
   "corners-square-gradient-toggle": false,
@@ -1501,6 +1897,7 @@ const DESIGN_DEFAULTS = {
   "corners-square-gradient-rotation-input": "0",
   "corners-square-gradient-color1-input": "#000000",
   "corners-square-gradient-color2-input": "#ffffff",
+  "corners-dot-color-mode-select": "follow-dots",
   "corners-dot-color-input": "#000000",
   "corners-dot-type-select": "",
   "corners-dot-gradient-toggle": false,
@@ -1706,6 +2103,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 미리보기 보기 모드(너비/높이 기준) 복원 + 초기 크기 계산
   initPreviewViewMode();
+  initPreviewBgSettings();
 
   document
     .getElementById("btn-export")
@@ -1716,6 +2114,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("modal-close-btn")
     .addEventListener("click", closeExportModal);
+  document
+    .getElementById("download-ext-select")
+    .addEventListener("change", updateExportTransparentNote);
 
   // 모달 바깥(배경) 클릭 시 닫기
   document.getElementById("export-modal").addEventListener("click", (event) => {
@@ -1750,6 +2151,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toggle.addEventListener("change", syncVisibility);
     syncVisibility(); // 초기 상태 반영
+  });
+
+  // 투명 체크박스(도트/배경): 켜지면 색상·그라데이션 입력 숨김.
+  ["bg", "dots"].forEach((prefix) => {
+    document
+      .getElementById(`${prefix}-transparent-toggle`)
+      .addEventListener("change", () => syncTransparentVisibility(prefix));
+    syncTransparentVisibility(prefix); // 초기 상태 반영
+  });
+
+  // 모서리 사각형/도트 색상 선택(따라가기/직접 지정): 직접 지정일 때만 입력 표시
+  ["corners-square", "corners-dot"].forEach((prefix) => {
+    document
+      .getElementById(`${prefix}-color-mode-select`)
+      .addEventListener("change", () => syncColorModeVisibility(prefix));
+    syncColorModeVisibility(prefix); // 초기 상태 반영
   });
 
   // 스타일 저장/불러오기
@@ -1811,6 +2228,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (t.id === "logo-file-input") return;
       if (t.id === "history-max-input") return;
       if (t.name === "preview-view-mode") return;
+      if (t.closest(".preview-bg-controls")) return;
 
       if (t.name === "logo-source") {
         const isUpload = t.value === "upload";

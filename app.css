@@ -427,6 +427,7 @@ select#qr-type-select {
   /* width:auto인 일반 block 요소는 부모 폭을 그대로 채워버려서 margin:auto
      중앙 정렬이 무의미해진다. fit-content로 자식(svg/canvas)의 실제 폭만큼만
      차지하도록 해야 가운데 정렬이 유지된다. */
+  aspect-ratio: 1 / 1;
   width: fit-content;
   min-width: 160px;
   max-width: 100%;
@@ -600,10 +601,27 @@ button:hover {
   flex: none;
 }
 
-[id$="-gradient-fields"] {
+[id$="-gradient-fields"],
+[id$="-color-fields"] {
   margin-top: 4px;
   padding-left: 12px;
   border-left: 2px solid var(--border-2);
+}
+
+/* ---------- 미리보기 배경(화면 표시 전용) ---------- */
+#qr-preview.preview-bg-checkerboard {
+  background-image:
+    linear-gradient(45deg, #bbb 25%, transparent 25%),
+    linear-gradient(-45deg, #bbb 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #bbb 75%),
+    linear-gradient(-45deg, transparent 75%, #bbb 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0px;
+  background-color: #fff;
 }
 
 .accordion-body-inner small {
@@ -1246,7 +1264,9 @@ button:hover {
   border: 1.5px dashed var(--file-border);
   border-radius: 8px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .accordion-body-inner input[type="file"]:hover {
@@ -1268,7 +1288,9 @@ button:hover {
   border: 1px solid var(--border-input);
   border-radius: 5px;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 
 .accordion-body-inner input[type="file"]::file-selector-button:hover {
