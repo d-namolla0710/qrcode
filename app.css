@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 김민찬
+ * Licensed under the MIT License. See LICENSE file for details.
+ */
+
+
 /* ===================================================================
    테마 변수  —  @media (prefers-color-scheme) 를 쓰면 시스템 설정을
    자동으로 따르지만, JS 가 <html data-theme="..."> 를 설정한 순간부터
