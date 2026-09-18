@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2026 김민찬
+ * Licensed under the MIT License. See LICENSE file for details.
+ */
+
+
+
+
 // qr-code-styling.js를 <script> 태그로 불러오면 전역 변수 QRCodeStyling으로 노출됨
 // (ES 모듈 import 아님 — 브라우저 전역 스크립트 방식)
 
