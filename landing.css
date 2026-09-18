@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 김민찬
+ * Licensed under the MIT License. See LICENSE file for details.
+ */
+
+
 /* ===================================================================
    landing.css — 소개(랜딩) 페이지 전용 스타일 (index.html에서 사용)
    색상·폰트·다크모드 변수는 app.css의 :root / [data-theme] 값을 그대로 사용.
