@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 김민찬
+ * Licensed under the MIT License. See LICENSE file for details.
+ */
+
+
+
 // 다크모드 토글 (다른 페이지와 동일한 localStorage 키 공유)
 (function () {
   var THEME_KEY = "qrgen-theme";
