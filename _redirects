@@ -1,0 +1,5 @@
+# 종료된 가이드 페이지 → 소개 페이지 (v2.0.0)
+/guides/* / 301
+/wifi-qr / 301
+/business-card-qr / 301
+/menu-qr / 301

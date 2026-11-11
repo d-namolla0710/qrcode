@@ -165,28 +165,22 @@
     <meta name="theme-color" content="#ffffff" />
     <!-- Favicon 설정 END -->
 
+    <!-- 글꼴: 영문·숫자·특수문자는 SUIT, 한글은 나눔스퀘어 (SUIT에도 한글이 있어서 unicode-range로 라틴 문자에만 쓰이게 제한) -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2" as="font" type="font/woff2" crossorigin />
     <style>
-      @font-face {
-        font-family: "NanumSquare";
-        font-weight: 400;
-        font-display: swap; /* 추가 */
-        src:
-          local("☺"),
-          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2")
-            format("woff2");
-      }
-      @font-face {
-        font-family: "NanumSquare";
-        font-weight: 700;
-        font-display: swap; /* 추가 */
-        src:
-          local("☺"),
-          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2")
-            format("woff2");
-      }
+      @font-face { font-family: "SUIT"; font-weight: 400; font-display: swap; src: url("https://cdn.jsdelivr.net/npm/@sun-typeface/suit@2.0.5/fonts/static/woff2/SUIT-Regular.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-205E, U+20A9, U+2190-2193; }
+      @font-face { font-family: "SUIT"; font-weight: 700; font-display: swap; src: url("https://cdn.jsdelivr.net/npm/@sun-typeface/suit@2.0.5/fonts/static/woff2/SUIT-Bold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-205E, U+20A9, U+2190-2193; }
+      @font-face { font-family: "SUIT"; font-weight: 800; font-display: swap; src: url("https://cdn.jsdelivr.net/npm/@sun-typeface/suit@2.0.5/fonts/static/woff2/SUIT-ExtraBold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-205E, U+20A9, U+2190-2193; }
+      @font-face { font-family: "NanumSquare"; font-weight: 400; font-display: swap; src: url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2") format("woff2"); }
+      @font-face { font-family: "NanumSquare"; font-weight: 700; font-display: swap; src: url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2") format("woff2"); }
+      @font-face { font-family: "NanumSquare"; font-weight: 800; font-display: swap; src: url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareEB.woff2") format("woff2"); }
     </style>
 
-    <link rel="stylesheet" href="/app.css" />
+    <!-- 색상 선택기: Coloris (MIT) by Momo Bassit — https://github.com/mdbassit/Coloris -->
+    <link rel="stylesheet" href="/vendor/coloris/coloris.min.css" />
+    <script defer src="/vendor/coloris/coloris.min.js"></script>
+
+    <link rel="stylesheet" href="/editor.css" />
 
     <!-- 렌더링 막지 않도록 defer -->
     <script defer src="/app.js"></script>
@@ -197,519 +191,486 @@
       defer
       src="https://unpkg.com/qr-code-styling@1.9.2/lib/qr-code-styling.js"
     ></script>
-    <!----------------------------------------------------------------------------------->
   </head>
   <body>
-    <div class="page-content">
-      <header class="page-header">
-        <button
-          id="theme-toggle"
-          type="button"
-          class="theme-toggle-btn"
-          title="다크 모드로 전환"
-        >
-          🌙
+    <div class="app-shell">
+      <!-- ===================== 상단바 ===================== -->
+      <header class="topbar">
+        <a href="https://qr.minchan.app/" class="brand" id="link-to-landing" title="소개 페이지로 이동">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 14v7h-7"/></svg>
+          </span>
+          <h1 id="title" class="brand-name">QR 생성기</h1>
+        </a>
+        <span class="version-chip site-version">v2.0.0</span>
+
+        <div class="topbar-spacer"></div>
+
+        <nav class="topbar-links" aria-label="사이트 메뉴">
+          <button id="btn-patch-notes" type="button" class="topbar-link">패치노트</button>
+          <a href="https://forms.gle/BvHiWuuexWZ9Sm5x8" target="_blank" rel="noopener" class="topbar-link">의견 보내기</a>
+        </nav>
+
+        <button id="theme-toggle" type="button" class="icon-btn" title="다크 모드로 전환" aria-label="다크 모드로 전환"></button>
+
+        <button id="btn-copy" type="button" class="btn-secondary btn-copy" title="QR 이미지를 클립보드에 복사">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+          <span>복사</span>
         </button>
-        <h1 id="title">QR Code 생성기</h1>
-        <p class="lead">생성할 QR Code의 유형을 선택하세요.</p>
-        <p class="engine-credit">
-          사용된 QR 코드 생성 엔진:
-          <a
-            href="https://github.com/kozakdenys/qr-code-styling"
-            target="_blank"
-            rel="noopener"
-            >qr-code-styling</a
-          >
-          (MIT License) by Denys Kozak | 폰트:
-          <a
-            href="https://hangeul.naver.com/fonts/search?f=nanum"
-            target="_blank"
-            rel="noopener"
-            >나눔글꼴</a
-          >(나눔스퀘어, 오픈 라이선스) by 네이버
-        </p>
+
+        <button id="btn-export" type="button" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          <span>다운로드</span>
+        </button>
       </header>
 
       <!-- 비 크롬 브라우저 경고 -->
       <div id="browser-warning" style="display: none">
         <div class="browser-warning-box">
           <div class="browser-warning-content">
-            <h3 style="text-align: center">⚠️ 다른 브라우저 감지 됨 ⚠️</h3>
-            Google Chrome이 아닌 브라우저에서 사용 시 일부 기능(내보내기,
-            미리보기 실시간 반영 등)이 정상적으로 동작하지 않을 수 있습니다.
-            <a
-              id="browser-warning-chrome-link"
-              href="#"
-              target="_self"
-              rel="noopener"
-              >Chrome으로 열기</a
-            >
+            <strong>Chrome이 아닌 브라우저예요.</strong>
+            일부 기능(다운로드, 실시간 미리보기 등)이 정상적으로 동작하지 않을 수 있어요.
+            <a id="browser-warning-chrome-link" href="#" target="_self" rel="noopener">Chrome으로 열기</a>
           </div>
           <div class="browser-warning-footer">
             <label class="browser-warning-label">
               <input type="checkbox" id="browser-warning-noshow" />
-              이 경고 다시는 보지않기
+              다시 보지 않기
             </label>
             <button id="browser-warning-close" type="button">닫기</button>
           </div>
         </div>
       </div>
 
-      <div class="app-layout">
-        <!-- ===================== 좌측(데스크톱)/하단(모바일): 히스토리 ===================== -->
-        <aside class="panel-history">
-          <div class="accordion-group" data-group="history">
-            <div class="accordion" id="history-panel">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">히스토리</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <div class="history-toolbar">
-                    <small id="history-count-label"></small>
-                    <button id="btn-clear-history" type="button">
-                      전체 삭제
-                    </button>
-                  </div>
-                  <div id="history-list"></div>
-                  <div id="history-pagination"></div>
-                </div>
-              </div>
-            </div>
+      <div class="workspace">
+        <!-- ===================== 왼쪽 아이콘 메뉴 ===================== -->
+        <nav class="rail" aria-label="편집 메뉴">
+          <button type="button" class="rail-btn is-active" data-tab="content" aria-pressed="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13 7l4 4"/></svg>
+            <span>내용</span>
+          </button>
+          <button type="button" class="rail-btn" data-tab="design" aria-pressed="false">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.5-1.6 0-.9-.7-1.4-.7-2.3 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></svg>
+            <span>디자인</span>
+          </button>
+          <button type="button" class="rail-btn" data-tab="logo" aria-pressed="false">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+            <span>로고</span>
+          </button>
+          <button type="button" class="rail-btn" data-tab="styles" aria-pressed="false">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
+            <span>내 스타일</span>
+          </button>
+          <button type="button" class="rail-btn" data-tab="history" aria-pressed="false">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span>기록</span>
+          </button>
+        </nav>
 
-            <div class="accordion" id="history-settings">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">히스토리 설정</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <label class="toggle-row">
-                    <input id="history-enabled-toggle" type="checkbox" />
-                    히스토리 기록 사용
-                  </label>
-
-                  <label class="history-max-row">
-                    히스토리 최대 개수
-                    <input
-                      id="history-max-input"
-                      type="number"
-                      min="1"
-                      max="500"
-                      value="50"
-                    />
-                  </label>
-                  <p class="settings-note">
-                    설정한 개수를 초과하면 오래된 기록부터 자동으로 삭제됩니다.
-                    (즐겨찾기된 항목은 우선 순위가 가장 낮습니다.)
-                  </p>
-
-                  <p class="settings-note">
-                    아래 항목은 개인정보 보호를 위해 기본적으로 기록되지
-                    않습니다. 필요한 항목만 활성화 해주시기 바랍니다.<br />
-                    (모든 히스토리 정보는 외부로 전송되지 않으며, 사용자의
-                    브라우저에만 저장됩니다. 여러명이 사용하는 기기인 경우
-                    활성화 하지 않는 것을 추천합니다.)
-                  </p>
-
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-wifi-password"
-                      type="checkbox"
-                      data-field="wifi-password"
-                    />
-                    와이파이 비밀번호 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-vcard-name"
-                      type="checkbox"
-                      data-field="vcard-name"
-                    />
-                    연락처 이름 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-vcard-phone"
-                      type="checkbox"
-                      data-field="vcard-phone"
-                    />
-                    연락처 전화번호 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-vcard-email"
-                      type="checkbox"
-                      data-field="vcard-email"
-                    />
-                    연락처 이메일 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-tel-number"
-                      type="checkbox"
-                      data-field="tel-number"
-                    />
-                    전화번호(전화) 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-sms-number"
-                      type="checkbox"
-                      data-field="sms-number"
-                    />
-                    전화번호(문자) 번호 기록
-                  </label>
-                  <label class="toggle-row">
-                    <input
-                      id="privacy-email-address"
-                      type="checkbox"
-                      data-field="email-address"
-                    />
-                    이메일 주소 기록
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <!-- ===================== 중앙: QR 생성 본문 ===================== -->
-        <main class="panel-main">
-          <label for="qr-type-select" class="sr-only">QR 코드 종류 선택</label>
-          <select id="qr-type-select">
-            <option value="url" selected>URL</option>
-            <option value="wifi">와이파이</option>
-            <option value="text">텍스트</option>
-            <option value="email">이메일</option>
-            <option value="tel">전화번호(전화)</option>
-            <option value="sms">전화번호(문자)</option>
-            <option value="vcard">연락처</option>
-            <option value="event">일정</option>
-            <option value="geo">위치</option>
-          </select>
-
-          <!-- 텍스트 -->
-          <div class="type-fields-section" id="type-fields-text">
-            <textarea
-              id="text-content"
-              placeholder="여기에 텍스트 입력..."
-            ></textarea>
-          </div>
-
-          <!-- 와이파이 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-wifi"
-            style="display: none"
-          >
-            <label>
-              네트워크 이름 (SSID)
-              <input id="wifi-ssid" type="text" placeholder="My_WiFi" />
-            </label>
-            <label>
-              비밀번호
-              <input id="wifi-password" type="text" placeholder="비밀번호" />
-            </label>
-            <label>
-              암호화 방식
-              <select id="wifi-encryption">
-                <option value="WPA" selected>WPA/WPA2</option>
-                <option value="WEP">WEP</option>
-                <option value="nopass">암호화 없음</option>
+        <!-- ===================== 설정 패널 ===================== -->
+        <aside class="panel" id="side-panel">
+          <!-- ---------- 내용 ---------- -->
+          <section class="tab-panel" data-tab-panel="content">
+            <div class="panel-group">
+              <h2 class="panel-heading">어떤 QR을 만들까요?</h2>
+              <label for="qr-type-select" class="sr-only">QR 코드 종류 선택</label>
+              <select id="qr-type-select" class="sr-only" tabindex="-1">
+                <option value="url" selected>URL</option>
+                <option value="wifi">와이파이</option>
+                <option value="text">텍스트</option>
+                <option value="email">이메일</option>
+                <option value="tel">전화번호(전화)</option>
+                <option value="sms">전화번호(문자)</option>
+                <option value="vcard">연락처</option>
+                <option value="event">일정</option>
+                <option value="geo">위치</option>
               </select>
-            </label>
-            <label>
-              <input id="wifi-hidden" type="checkbox" />
-              숨겨진 네트워크
-            </label>
-          </div>
-
-          <!-- URL -->
-          <div
-            class="type-fields-section"
-            id="type-fields-url"
-            style="display: none"
-          >
-            <label>
-              URL
-              <input
-                id="url-input"
-                type="text"
-                placeholder="https://example.com"
-              />
-            </label>
-          </div>
-
-          <!-- 이메일 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-email"
-            style="display: none"
-          >
-            <label>
-              받는 사람 이메일
-              <input
-                id="email-address"
-                type="email"
-                placeholder="example@email.com"
-              />
-            </label>
-            <label>
-              제목 (선택)
-              <input id="email-subject" type="text" />
-            </label>
-            <label>
-              내용 (선택)
-              <textarea id="email-body"></textarea>
-            </label>
-          </div>
-
-          <!-- 전화번호(전화) -->
-          <div
-            class="type-fields-section"
-            id="type-fields-tel"
-            style="display: none"
-          >
-            <label>
-              전화번호
-              <input id="tel-number" type="tel" placeholder="010-1234-5678" />
-            </label>
-          </div>
-
-          <!-- 전화번호(문자) -->
-          <div
-            class="type-fields-section"
-            id="type-fields-sms"
-            style="display: none"
-          >
-            <label>
-              전화번호
-              <input id="sms-number" type="tel" placeholder="010-1234-5678" />
-            </label>
-            <label>
-              문자 내용 (선택)
-              <textarea id="sms-message"></textarea>
-            </label>
-          </div>
-
-          <!-- 연락처 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-vcard"
-            style="display: none"
-          >
-            <label>
-              이름
-              <input id="vcard-name" type="text" />
-            </label>
-            <label>
-              전화번호 (선택)
-              <input id="vcard-phone" type="tel" />
-            </label>
-            <label>
-              이메일 (선택)
-              <input id="vcard-email" type="email" />
-            </label>
-            <label>
-              회사/소속 (선택)
-              <input id="vcard-org" type="text" />
-            </label>
-          </div>
-
-          <!-- 일정 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-event"
-            style="display: none"
-          >
-            <label>
-              제목
-              <input id="event-title" type="text" />
-            </label>
-            <label>
-              시작 일시
-              <input id="event-start" type="datetime-local" />
-            </label>
-            <label>
-              종료 일시 (선택)
-              <input id="event-end" type="datetime-local" />
-            </label>
-            <label>
-              장소 (선택)
-              <input id="event-location" type="text" />
-            </label>
-            <label>
-              설명 (선택)
-              <textarea id="event-description"></textarea>
-            </label>
-          </div>
-
-          <!-- 위치 -->
-          <div
-            class="type-fields-section"
-            id="type-fields-geo"
-            style="display: none"
-          >
-            <label>
-              위도
-              <input
-                id="geo-lat"
-                type="number"
-                step="any"
-                placeholder="37.5665"
-              />
-            </label>
-            <label>
-              경도
-              <input
-                id="geo-lng"
-                type="number"
-                step="any"
-                placeholder="126.978"
-              />
-            </label>
-          </div>
-
-          <div id="qr-contrast-warning" style="display: none">
-            <div class="contrast-warning-box">
-              <span id="contrast-warning-text"></span>
-              <details class="contrast-tip">
-                <summary>해결 방법 보기</summary>
-                <div class="contrast-tip-body">
-                  <p>
-                    배경색과 도트(점)·모서리 색상 사이의 명도 차이가 부족합니다.
-                  </p>
-                  <ul>
-                    <li>
-                      배경색을 더 밝게, 도트·모서리 색상을 더 어둡게 디자인하기
-                    </li>
-                    <li>
-                      또는 반대로 어두운 배경에 밝은 도트·모서리로 디자인하기
-                    </li>
-                    <li>
-                      그라데이션 사용 시 양 끝 색상 모두 배경과 충분한 대비
-                      유지하기
-                    </li>
-                  </ul>
-                </div>
-              </details>
+              <div class="type-grid" role="group" aria-label="QR 종류">
+                <button type="button" class="type-tile" data-type="url">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>URL
+                </button>
+                <button type="button" class="type-tile" data-type="wifi">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 9a12 12 0 0 1 16 0"/><path d="M7 12.5a7.5 7.5 0 0 1 10 0"/><path d="M10 16a3 3 0 0 1 4 0"/><circle cx="12" cy="19" r="0.8"/></svg>와이파이
+                </button>
+                <button type="button" class="type-tile" data-type="text">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 6h14M12 6v13"/></svg>텍스트
+                </button>
+                <button type="button" class="type-tile" data-type="email">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>이메일
+                </button>
+                <button type="button" class="type-tile" data-type="tel">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>전화
+                </button>
+                <button type="button" class="type-tile" data-type="sms">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>문자
+                </button>
+                <button type="button" class="type-tile" data-type="vcard">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>연락처
+                </button>
+                <button type="button" class="type-tile" data-type="event">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>일정
+                </button>
+                <button type="button" class="type-tile" data-type="geo">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>위치
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div id="qr-density-warning" style="display: none">
-            <div class="contrast-warning-box">
-              <span id="density-warning-text"></span>
-              <details class="contrast-tip">
-                <summary>해결 방법 보기</summary>
-                <div class="contrast-tip-body">
-                  <p>
-                    입력한 내용(특히 한글)이 많을수록 QR 코드 안에 담기는
-                    데이터양이 늘어나 모듈(점) 개수가 많아지고 조밀해집니다.
-                  </p>
-                  <ul>
-                    <li>입력한 텍스트/내용을 줄이기</li>
-                    <li>
-                      오류 복원율을 L 또는 M으로 낮추기 (Q·H는 복원 데이터가
-                      많아 더 조밀해집니다)
-                    </li>
-                    <li>로고 이미지를 제거하거나 더 작게 설정하기</li>
-                    <li>
-                      실제 출력(인쇄/화면) 크기를 키워서 모듈 하나의 크기를
-                      키우기
-                    </li>
-                  </ul>
-                </div>
-              </details>
+            <div class="panel-group">
+              <h2 class="panel-heading" id="type-fields-title">주소 입력</h2>
+
+              <!-- 텍스트 -->
+              <div class="type-fields-section" id="type-fields-text" style="display: none">
+                <label>
+                  내용
+                  <textarea id="text-content" placeholder="QR에 담을 내용을 입력하세요"></textarea>
+                </label>
+              </div>
+
+              <!-- 와이파이 -->
+              <div class="type-fields-section" id="type-fields-wifi" style="display: none">
+                <label>
+                  네트워크 이름 (SSID)
+                  <input id="wifi-ssid" type="text" placeholder="예: My_WiFi" />
+                </label>
+                <label>
+                  비밀번호
+                  <input id="wifi-password" type="text" placeholder="비밀번호" />
+                </label>
+                <label>
+                  암호화 방식
+                  <select id="wifi-encryption">
+                    <option value="WPA" selected>WPA/WPA2</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">암호화 없음</option>
+                  </select>
+                </label>
+                <label class="check-row">
+                  <input id="wifi-hidden" type="checkbox" />
+                  숨겨진 네트워크예요
+                </label>
+              </div>
+
+              <!-- URL -->
+              <div class="type-fields-section" id="type-fields-url">
+                <label>
+                  주소
+                  <input id="url-input" type="text" placeholder="example.com" />
+                </label>
+                <p class="field-hint">https://는 안 붙여도 자동으로 붙여드려요.</p>
+              </div>
+
+              <!-- 이메일 -->
+              <div class="type-fields-section" id="type-fields-email" style="display: none">
+                <label>
+                  받는 사람
+                  <input id="email-address" type="email" placeholder="example@email.com" />
+                </label>
+                <label>
+                  제목 (선택)
+                  <input id="email-subject" type="text" />
+                </label>
+                <label>
+                  내용 (선택)
+                  <textarea id="email-body"></textarea>
+                </label>
+              </div>
+
+              <!-- 전화번호(전화) -->
+              <div class="type-fields-section" id="type-fields-tel" style="display: none">
+                <label>
+                  전화번호
+                  <input id="tel-number" type="tel" placeholder="010-1234-5678" />
+                </label>
+              </div>
+
+              <!-- 전화번호(문자) -->
+              <div class="type-fields-section" id="type-fields-sms" style="display: none">
+                <label>
+                  전화번호
+                  <input id="sms-number" type="tel" placeholder="010-1234-5678" />
+                </label>
+                <label>
+                  문자 내용 (선택)
+                  <textarea id="sms-message"></textarea>
+                </label>
+              </div>
+
+              <!-- 연락처 -->
+              <div class="type-fields-section" id="type-fields-vcard" style="display: none">
+                <label>
+                  이름
+                  <input id="vcard-name" type="text" />
+                </label>
+                <label>
+                  전화번호 (선택)
+                  <input id="vcard-phone" type="tel" />
+                </label>
+                <label>
+                  이메일 (선택)
+                  <input id="vcard-email" type="email" />
+                </label>
+                <label>
+                  회사/소속 (선택)
+                  <input id="vcard-org" type="text" />
+                </label>
+              </div>
+
+              <!-- 일정 -->
+              <div class="type-fields-section" id="type-fields-event" style="display: none">
+                <label>
+                  제목
+                  <input id="event-title" type="text" />
+                </label>
+                <label>
+                  시작 일시
+                  <input id="event-start" type="datetime-local" />
+                </label>
+                <label>
+                  종료 일시 (선택)
+                  <input id="event-end" type="datetime-local" />
+                </label>
+                <label>
+                  장소 (선택)
+                  <input id="event-location" type="text" />
+                </label>
+                <label>
+                  설명 (선택)
+                  <textarea id="event-description"></textarea>
+                </label>
+              </div>
+
+              <!-- 위치 -->
+              <div class="type-fields-section" id="type-fields-geo" style="display: none">
+                <label>
+                  위도
+                  <input id="geo-lat" type="number" step="any" placeholder="37.5665" />
+                </label>
+                <label>
+                  경도
+                  <input id="geo-lng" type="number" step="any" placeholder="126.978" />
+                </label>
+              </div>
             </div>
-          </div>
+          </section>
 
-          <div id="qr-preview"></div>
+          <!-- ---------- 디자인 ---------- -->
+          <section class="tab-panel panel-design" data-tab-panel="design" hidden>
+            <div class="panel-group">
+              <h2 class="panel-heading">빠른 스타일</h2>
+              <div class="preset-grid">
+                <button type="button" class="preset-card" data-quick-preset="basic">
+                  <span class="preset-thumb" style="--dot: #000000; --bg: #ffffff; --r: 0"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                  기본
+                </button>
+                <button type="button" class="preset-card" data-quick-preset="soft">
+                  <span class="preset-thumb" style="--dot: #1e3a8a; --bg: #e8f0fe; --r: 30%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                  부드럽게
+                </button>
+                <button type="button" class="preset-card" data-quick-preset="dots">
+                  <span class="preset-thumb" style="--dot: #2563eb; --bg: #ffffff; --r: 50%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                  도트
+                </button>
+                <button type="button" class="preset-card" data-quick-preset="classy">
+                  <span class="preset-thumb" style="--dot: #14532d; --bg: #f5f0e6; --r: 0 50% 0 50%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                  클래식
+                </button>
+              </div>
+            </div>
 
-          <button id="btn-export">내보내기</button>
-        </main>
+            <div class="panel-group">
+              <h2 class="panel-heading">색상</h2>
 
-        <!-- ===================== 우측(데스크톱)/하단(모바일): 디자인 설정 ===================== -->
-        <aside class="panel-design">
-          <h2 class="panel-title">디자인 설정</h2>
-
-          <div class="accordion-group" data-group="design">
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">스타일 저장/불러오기</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <label>
-                    스타일 이름
-                    <input
-                      id="preset-name-input"
-                      type="text"
-                      placeholder="예: 블루 그라데이션"
-                    />
-                  </label>
-                  <div class="preset-actions">
-                    <button id="btn-save-preset" type="button">
-                      현재 디자인 저장
-                    </button>
+              <div class="color-block">
+                <div class="color-block-head">
+                  <span class="sub-label">점 색</span>
+                  <div class="mode-toggle" data-mode-for="dots" role="group" aria-label="점 색 방식">
+                    <button type="button" data-mode="solid">단색</button>
+                    <button type="button" data-mode="gradient">그라데이션</button>
                   </div>
-
-                  <label>
-                    저장된 스타일
-                    <select id="preset-select">
-                      <option value="">저장된 스타일 없음</option>
+                  <label class="sr-only">
+                    <input id="dots-gradient-toggle" type="checkbox" />
+                    그라데이션 사용
+                  </label>
+                </div>
+                <div class="swatch-row" data-swatch-target="dots">
+                  <button type="button" class="swatch" data-color="#000000" style="--c: #000000" aria-label="검정"></button>
+                  <button type="button" class="swatch" data-color="#1e3a8a" style="--c: #1e3a8a" aria-label="네이비"></button>
+                  <button type="button" class="swatch" data-color="#2563eb" style="--c: #2563eb" aria-label="파랑"></button>
+                  <button type="button" class="swatch" data-color="#14532d" style="--c: #14532d" aria-label="초록"></button>
+                  <button type="button" class="swatch" data-color="#7c3aed" style="--c: #7c3aed" aria-label="보라"></button>
+                  <button type="button" class="swatch swatch-none" data-color="transparent" aria-label="투명 (구멍 뚫기)" title="투명 (구멍 뚫기)"></button>
+                  <div class="swatch swatch-custom" title="직접 고르기">
+                    <input id="dots-color-input" class="coloris-swatch" type="text" value="#000000" readonly aria-label="점 색 직접 고르기" />
+                  </div>
+                </div>
+                <label class="sr-only">
+                  <input id="dots-transparent-toggle" type="checkbox" />
+                  점을 투명하게 (구멍 뚫기)
+                </label>
+                <p class="field-hint hole-hint" id="dots-hole-hint" hidden>점이 있던 자리만 뚫리고 나머지 배경은 그대로 남아요. 인식이 안 될 수도 있으니 꼭 스캔해 보세요.</p>
+                <div id="dots-gradient-fields" class="gradient-editor" data-gradient="dots">
+                  <div class="gradient-preview" aria-hidden="true"></div>
+                  <div class="gradient-stops">
+                    <div class="gradient-stop">
+                      <span class="sub-label">시작 색</span>
+                      <input id="dots-gradient-color1-input" class="coloris-field" type="text" value="#000000" readonly aria-label="점 그라데이션 시작 색" />
+                    </div>
+                    <div class="gradient-stop">
+                      <span class="sub-label">끝 색</span>
+                      <input id="dots-gradient-color2-input" class="coloris-field" type="text" value="#ffffff" readonly aria-label="점 그라데이션 끝 색" />
+                    </div>
+                  </div>
+                  <label class="sr-only">
+                    종류
+                    <select id="dots-gradient-type-select" tabindex="-1">
+                      <option value="linear" selected>선형</option>
+                      <option value="radial">원형</option>
                     </select>
                   </label>
-                  <div class="preset-actions">
-                    <button id="btn-load-preset" type="button">불러오기</button>
-                    <button id="btn-delete-preset" type="button">삭제</button>
+                  <div class="seg-buttons" data-seg-target="dots-gradient-type-select">
+                    <button type="button" data-value="linear">선형</button>
+                    <button type="button" data-value="radial">원형</button>
+                  </div>
+                  <div class="angle-row" data-angle-for="dots">
+                    <span class="sub-label">각도</span>
+                    <input id="dots-gradient-rotation-input" type="range" min="0" max="360" step="5" value="0" aria-label="점 그라데이션 각도" />
+                    <output class="angle-value">0°</output>
+                  </div>
+                </div>
+              </div>
+
+              <div class="color-block">
+                <div class="color-block-head">
+                  <span class="sub-label">배경 색</span>
+                  <div class="mode-toggle" data-mode-for="bg" role="group" aria-label="배경 색 방식">
+                    <button type="button" data-mode="solid">단색</button>
+                    <button type="button" data-mode="gradient">그라데이션</button>
+                  </div>
+                  <label class="sr-only">
+                    <input id="bg-gradient-toggle" type="checkbox" />
+                    그라데이션 사용
+                  </label>
+                </div>
+                <div class="swatch-row" data-swatch-target="bg">
+                  <button type="button" class="swatch" data-color="#ffffff" style="--c: #ffffff" aria-label="흰색"></button>
+                  <button type="button" class="swatch" data-color="#f5f0e6" style="--c: #f5f0e6" aria-label="아이보리"></button>
+                  <button type="button" class="swatch" data-color="#e8f0fe" style="--c: #e8f0fe" aria-label="하늘"></button>
+                  <button type="button" class="swatch" data-color="#fde68a" style="--c: #fde68a" aria-label="노랑"></button>
+                  <button type="button" class="swatch" data-color="#000000" style="--c: #000000" aria-label="검정"></button>
+                  <button type="button" class="swatch swatch-none" data-color="transparent" aria-label="배경 없음 (투명)" title="배경 없음 (투명)"></button>
+                  <div class="swatch swatch-custom" title="직접 고르기">
+                    <input id="bg-color-input" class="coloris-swatch" type="text" value="#ffffff" readonly aria-label="배경 색 직접 고르기" />
+                  </div>
+                </div>
+                <label class="sr-only">
+                  <input id="bg-transparent-toggle" type="checkbox" />
+                  배경 없음 (투명 배경으로 내보내기)
+                </label>
+                <div id="bg-gradient-fields" class="gradient-editor" data-gradient="bg">
+                  <div class="gradient-preview" aria-hidden="true"></div>
+                  <div class="gradient-stops">
+                    <div class="gradient-stop">
+                      <span class="sub-label">시작 색</span>
+                      <input id="bg-gradient-color1-input" class="coloris-field" type="text" value="#ffffff" readonly aria-label="배경 그라데이션 시작 색" />
+                    </div>
+                    <div class="gradient-stop">
+                      <span class="sub-label">끝 색</span>
+                      <input id="bg-gradient-color2-input" class="coloris-field" type="text" value="#000000" readonly aria-label="배경 그라데이션 끝 색" />
+                    </div>
+                  </div>
+                  <label class="sr-only">
+                    종류
+                    <select id="bg-gradient-type-select" tabindex="-1">
+                      <option value="linear" selected>선형</option>
+                      <option value="radial">원형</option>
+                    </select>
+                  </label>
+                  <div class="seg-buttons" data-seg-target="bg-gradient-type-select">
+                    <button type="button" data-value="linear">선형</button>
+                    <button type="button" data-value="radial">원형</button>
+                  </div>
+                  <div class="angle-row" data-angle-for="bg">
+                    <span class="sub-label">각도</span>
+                    <input id="bg-gradient-rotation-input" type="range" min="0" max="360" step="5" value="0" aria-label="배경 그라데이션 각도" />
+                    <output class="angle-value">0°</output>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">기본 설정</span>
-                <span class="accordion-icon">▾</span>
+            <div class="panel-group">
+              <h2 class="panel-heading">점 모양</h2>
+              <label class="sr-only">
+                점 모양
+                <select id="dots-type-select" tabindex="-1">
+                  <option value="square" selected>사각형</option>
+                  <option value="rounded">둥근 사각형</option>
+                  <option value="extra-rounded">매우 둥근 사각형</option>
+                  <option value="dots">점 패턴</option>
+                  <option value="classy">클래식</option>
+                  <option value="classy-rounded">둥근 클래식</option>
+                </select>
+              </label>
+              <div class="shape-grid">
+                <button type="button" class="shape-tile" data-dots-type="square"><span class="shape-thumb" style="--r: 0"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>사각형</button>
+                <button type="button" class="shape-tile" data-dots-type="rounded"><span class="shape-thumb" style="--r: 28%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>둥근 사각형</button>
+                <button type="button" class="shape-tile" data-dots-type="extra-rounded"><span class="shape-thumb" style="--r: 42%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>매우 둥글게</button>
+                <button type="button" class="shape-tile" data-dots-type="dots"><span class="shape-thumb is-dots" style="--r: 50%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>점</button>
+                <button type="button" class="shape-tile" data-dots-type="classy"><span class="shape-thumb" style="--r: 0 50% 0 50%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>클래식</button>
+                <button type="button" class="shape-tile" data-dots-type="classy-rounded"><span class="shape-thumb" style="--r: 18% 50% 18% 50%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>둥근 클래식</button>
+              </div>
+            </div>
+
+            <div class="panel-group">
+              <h2 class="panel-heading">모서리 모양</h2>
+              <div class="shape-grid shape-grid-4">
+                <button type="button" class="shape-tile" data-corner-style=""><span class="corner-thumb is-follow" aria-hidden="true"><span></span></span>점 따라가기</button>
+                <button type="button" class="shape-tile" data-corner-style="square"><span class="corner-thumb" style="--r1: 2px; --r2: 0" aria-hidden="true"><span></span></span>사각형</button>
+                <button type="button" class="shape-tile" data-corner-style="rounded"><span class="corner-thumb" style="--r1: 9px; --r2: 3px" aria-hidden="true"><span></span></span>둥글게</button>
+                <button type="button" class="shape-tile" data-corner-style="dot"><span class="corner-thumb" style="--r1: 50%; --r2: 50%" aria-hidden="true"><span></span></span>원형</button>
+              </div>
+            </div>
+
+            <div class="panel-group">
+              <h2 class="panel-heading">QR 모양</h2>
+              <label class="sr-only">
+                QR 전체 모양
+                <select id="shape-select" tabindex="-1">
+                  <option value="square" selected>사각형</option>
+                  <option value="circle">원형</option>
+                </select>
+              </label>
+              <div class="shape-grid shape-grid-2">
+                <button type="button" class="shape-tile shape-tile-row" data-qr-shape="square"><span class="qr-shape-thumb" aria-hidden="true"></span>사각형</button>
+                <button type="button" class="shape-tile shape-tile-row" data-qr-shape="circle"><span class="qr-shape-thumb is-circle" aria-hidden="true"></span>원형</button>
+              </div>
+            </div>
+
+            <div class="panel-group adv">
+              <button type="button" class="adv-toggle" id="adv-toggle" aria-expanded="false" aria-controls="adv-body">
+                <span>고급 설정</span>
+                <span class="adv-hint">크기 · 오류 복원율 · 모서리 색 · 미리보기 크기</span>
+                <svg class="adv-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <label>
-                    모양
-                    <select id="shape-select">
-                      <option value="square" selected>사각형</option>
-                      <option value="circle">원형</option>
-                    </select>
-                  </label>
 
+              <div class="adv-body" id="adv-body" hidden>
+                <fieldset class="adv-section">
+                  <legend>크기 · 오류 복원율</legend>
+                  <div class="field-row">
+                    <label>
+                      너비 (px)
+                      <input id="width-input" type="number" min="50" value="300" />
+                    </label>
+                    <label>
+                      높이 (px)
+                      <input id="height-input" type="number" min="50" value="300" />
+                    </label>
+                  </div>
                   <label>
-                    너비 (px)
-                    <input
-                      id="width-input"
-                      type="number"
-                      min="50"
-                      value="300"
-                    />
-                  </label>
-
-                  <label>
-                    높이 (px)
-                    <input
-                      id="height-input"
-                      type="number"
-                      min="50"
-                      value="300"
-                    />
-                  </label>
-
-                  <label>
-                    전체 여백 (px)
+                    바깥 여백 (px)
                     <input id="margin-input" type="number" min="0" value="0" />
                   </label>
-
                   <label>
                     오류 복원율
                     <select id="error-corr-select">
@@ -719,445 +680,57 @@
                       <option value="H">H (약 30% 복원)</option>
                     </select>
                   </label>
-                </div>
-              </div>
-            </div>
+                  <p class="field-hint">로고를 넣는다면 H를 추천해요. 높을수록 QR이 더 촘촘해져요.</p>
+                </fieldset>
 
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">미리보기 설정</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <div class="logo-source-field">
-                    <span>미리보기 화면 맞춤 기준</span>
-                    <div class="logo-source-options">
-                      <label
-                        ><input
-                          type="radio"
-                          name="preview-view-mode"
-                          value="height"
-                          checked
-                        />
-                        높이 기준</label
-                      >
-                      <label
-                        ><input
-                          type="radio"
-                          name="preview-view-mode"
-                          value="width"
-                        />
-                        너비 기준</label
-                      >
-                      <label
-                        ><input
-                          type="radio"
-                          name="preview-view-mode"
-                          value="manual"
-                        />
-                        직접 조절</label
-                      >
-                    </div>
-                  </div>
-                  <p class="settings-note">
-                    화면에 보이는 미리보기 크기에만 적용됩니다 (내보내기 이미지
-                    해상도는 위 너비/높이(px) 값을 따릅니다). 높이 기준을
-                    선택하면 화면에 남은 공간을 최대한 채우도록 미리보기 높이가
-                    자동으로 계산되고, 직접 조절을 선택하면 미리보기 상자 오른쪽
-                    가장자리를 드래그해 1:1 비율을 유지한 채 크기를 조절할 수
-                    있습니다.
-                  </p>
-
-                  <div class="preview-bg-controls">
-                    <label>
-                      미리보기 배경 표시
-                      <select id="preview-bg-mode-select">
-                        <option value="theme" selected>테마 배경 (기본)</option>
-                        <option value="checkerboard">
-                          체크무늬 (투명 표시용)
-                        </option>
-                        <option value="solid">단색 지정</option>
-                        <option value="gradient">그라데이션 지정</option>
-                      </select>
-                    </label>
-                    <p class="settings-note">
-                      배경색이나 도트를 투명하게 설정한 경우, 미리보기 화면에서
-                      어디가 실제로 비어 보이는지 확인하기 쉽도록 화면상
-                      미리보기의 배경만 바꿔서 보여줍니다. 내보내기 결과물에는
-                      영향을 주지 않습니다.
-                    </p>
-
-                    <label id="preview-bg-solid-field">
-                      미리보기 배경색
-                      <input
-                        id="preview-bg-solid-color-input"
-                        type="color"
-                        value="#f2f2f2"
-                      />
-                    </label>
-
-                    <div id="preview-bg-gradient-fields">
-                      <label>
-                        그라데이션 종류
-                        <select id="preview-bg-gradient-type-select">
-                          <option value="linear" selected>선형</option>
-                          <option value="radial">원형</option>
-                        </select>
-                      </label>
-
-                      <label>
-                        회전 (도)
-                        <input
-                          id="preview-bg-gradient-rotation-input"
-                          type="number"
-                          value="0"
-                        />
-                      </label>
-
-                      <label>
-                        색상 1
-                        <input
-                          id="preview-bg-gradient-color1-input"
-                          type="color"
-                          value="#ffffff"
-                        />
-                      </label>
-
-                      <label>
-                        색상 2
-                        <input
-                          id="preview-bg-gradient-color2-input"
-                          type="color"
-                          value="#000000"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">로고 이미지</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <div class="logo-source-field">
-                    <span>입력 방식</span>
-                    <div class="logo-source-options">
-                      <label
-                        ><input
-                          type="radio"
-                          name="logo-source"
-                          value="url"
-                          checked
-                        />
-                        URL</label
-                      >
-                      <label
-                        ><input
-                          type="radio"
-                          name="logo-source"
-                          value="upload"
-                        />
-                        파일 업로드</label
-                      >
-                    </div>
-                  </div>
-
-                  <div id="logo-url-area">
-                    <label>
-                      로고 이미지 URL
-                      <input
-                        id="logo-url-input"
-                        type="text"
-                        placeholder="https://..."
-                      />
-                    </label>
-                  </div>
-
-                  <div id="logo-upload-area" style="display: none">
-                    <label>
-                      로고 이미지 파일
-                      <input
-                        id="logo-file-input"
-                        type="file"
-                        accept="image/*"
-                      />
-                    </label>
-                    <div id="logo-file-preview" style="display: none">
-                      <img
-                        id="logo-file-thumb"
-                        src=""
-                        alt="업로드한 로고 이미지 미리보기"
-                      />
-                      <button id="logo-file-clear" type="button">제거</button>
-                    </div>
-                  </div>
-
-                  <label>
-                    로고 크기 (0 ~ 0.5)
-                    <input
-                      id="image-size-input"
-                      type="number"
-                      min="0"
-                      max="0.5"
-                      step="0.01"
-                      value="0.4"
-                    />
-                  </label>
-
-                  <label>
-                    로고 마진 (px)
-                    <input
-                      id="image-margin-input"
-                      type="number"
-                      min="0"
-                      value="0"
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">도트(점) 스타일</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <small
-                    >주의: 배경색과 비슷한 밝기의 색을 선택할 경우 인식이 잘 안
-                    될 수도 있습니다.</small
-                  >
-                  <label>
-                    <input id="dots-transparent-toggle" type="checkbox" />
-                    투명 (구멍 뚫기)
-                  </label>
-                  <small
-                    >도트가 있던 픽셀 자리만 정확히 투명해지고, 도트가 없던
-                    나머지 배경은 배경 스타일 설정 그대로 유지됩니다. 주의: QR
-                    코드가 스캔되지 않을 수 있습니다.</small
-                  >
-
-                  <label>
-                    색상
-                    <input id="dots-color-input" type="color" value="#000000" />
-                  </label>
-
-                  <label>
-                    스타일
-                    <select id="dots-type-select">
-                      <option value="square" selected>사각형</option>
-                      <option value="rounded">둥근 사각형</option>
-                      <option value="extra-rounded">매우 둥근 사각형</option>
-                      <option value="dots">점 패턴</option>
-                      <option value="classy">클래식</option>
-                      <option value="classy-rounded">둥근 클래식</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    <input id="dots-gradient-toggle" type="checkbox" />
-                    그라데이션 사용
-                  </label>
-
-                  <div id="dots-gradient-fields">
-                    <label>
-                      그라데이션 종류
-                      <select id="dots-gradient-type-select">
-                        <option value="linear" selected>선형</option>
-                        <option value="radial">원형</option>
-                      </select>
-                    </label>
-
-                    <label>
-                      회전 (도)
-                      <input
-                        id="dots-gradient-rotation-input"
-                        type="number"
-                        value="0"
-                      />
-                    </label>
-
-                    <label>
-                      색상 1
-                      <input
-                        id="dots-gradient-color1-input"
-                        type="color"
-                        value="#000000"
-                      />
-                    </label>
-
-                    <label>
-                      색상 2
-                      <input
-                        id="dots-gradient-color2-input"
-                        type="color"
-                        value="#ffffff"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">배경 스타일</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <label>
-                    <input id="bg-transparent-toggle" type="checkbox" />
-                    배경 없음 (투명 배경으로 내보내기)
-                  </label>
-                  <small
-                    >png·webp·svg로 내보낼 때만 투명 배경이 적용됩니다. jpeg는
-                    투명을 지원하지 않아 흰 배경으로 저장됩니다.</small
-                  >
-
-                  <label>
-                    색상
-                    <input id="bg-color-input" type="color" value="#ffffff" />
-                  </label>
-
-                  <label>
-                    <input id="bg-gradient-toggle" type="checkbox" />
-                    그라데이션 사용
-                  </label>
-
-                  <div id="bg-gradient-fields">
-                    <label>
-                      그라데이션 종류
-                      <select id="bg-gradient-type-select">
-                        <option value="linear" selected>선형</option>
-                        <option value="radial">원형</option>
-                      </select>
-                    </label>
-
-                    <label>
-                      회전 (도)
-                      <input
-                        id="bg-gradient-rotation-input"
-                        type="number"
-                        value="0"
-                      />
-                    </label>
-
-                    <label>
-                      색상 1
-                      <input
-                        id="bg-gradient-color1-input"
-                        type="color"
-                        value="#ffffff"
-                      />
-                    </label>
-
-                    <label>
-                      색상 2
-                      <input
-                        id="bg-gradient-color2-input"
-                        type="color"
-                        value="#000000"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">모서리 사각형 스타일</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <small
-                    >주의: 배경색과 비슷한 밝기의 색을 선택할 경우 인식이 잘 안
-                    될 수도 있습니다.</small
-                  >
+                <fieldset class="adv-section">
+                  <legend>모서리 사각형 (바깥 테두리)</legend>
                   <label>
                     색상
                     <select id="corners-square-color-mode-select">
-                      <option value="follow-dots" selected>
-                        점 스타일 색상 따라가기
-                      </option>
+                      <option value="follow-dots" selected>점 색 따라가기</option>
                       <option value="custom">직접 지정</option>
                       <option value="transparent">투명 (구멍 뚫기)</option>
                     </select>
                   </label>
-                  <small
-                    >"투명"을 선택하면 모서리 사각형이 있던 자리만 정확히 뚫려서
-                    배경이 그대로 비칩니다. 주의: QR 코드가 스캔되지 않을 수
-                    있습니다.</small
-                  >
-
-                  <div id="corners-square-color-fields">
-                    <label>
-                      <input
-                        id="corners-square-color-input"
-                        type="color"
-                        value="#000000"
-                      />
+                  <div id="corners-square-color-fields" class="sub-fields">
+                    <label class="color-row">
+                      <input id="corners-square-color-input" class="coloris-field" type="text" value="#000000" readonly />
                     </label>
-
-                    <label>
-                      <input
-                        id="corners-square-gradient-toggle"
-                        type="checkbox"
-                      />
+                    <label class="check-row">
+                      <input id="corners-square-gradient-toggle" type="checkbox" />
                       그라데이션 사용
                     </label>
-
-                    <div id="corners-square-gradient-fields">
-                      <label>
-                        그라데이션 종류
-                        <select id="corners-square-gradient-type-select">
-                          <option value="linear" selected>선형</option>
-                          <option value="radial">원형</option>
-                        </select>
-                      </label>
-
-                      <label>
-                        회전 (도)
-                        <input
-                          id="corners-square-gradient-rotation-input"
-                          type="number"
-                          value="0"
-                        />
-                      </label>
-
-                      <label>
-                        색상 1
-                        <input
-                          id="corners-square-gradient-color1-input"
-                          type="color"
-                          value="#000000"
-                        />
-                      </label>
-
-                      <label>
-                        색상 2
-                        <input
-                          id="corners-square-gradient-color2-input"
-                          type="color"
-                          value="#ffffff"
-                        />
-                      </label>
+                    <div id="corners-square-gradient-fields" class="sub-fields">
+                      <div class="field-row">
+                        <label>
+                          종류
+                          <select id="corners-square-gradient-type-select">
+                            <option value="linear" selected>선형</option>
+                            <option value="radial">원형</option>
+                          </select>
+                        </label>
+                        <label>
+                          회전 (도)
+                          <input id="corners-square-gradient-rotation-input" type="number" value="0" />
+                        </label>
+                      </div>
+                      <div class="field-row">
+                        <label>
+                          색상 1
+                          <input id="corners-square-gradient-color1-input" class="coloris-field" type="text" value="#000000" readonly />
+                        </label>
+                        <label>
+                          색상 2
+                          <input id="corners-square-gradient-color2-input" class="coloris-field" type="text" value="#ffffff" readonly />
+                        </label>
+                      </div>
                     </div>
                   </div>
-
                   <label>
-                    스타일
+                    모양
                     <select id="corners-square-type-select">
-                      <option value="" selected>(점 스타일 따라가기)</option>
+                      <option value="" selected>(점 모양 따라가기)</option>
                       <option value="square">사각형</option>
                       <option value="dot">원형</option>
                       <option value="dots">점 패턴</option>
@@ -1167,96 +740,57 @@
                       <option value="classy-rounded">둥근 클래식</option>
                     </select>
                   </label>
-                </div>
-              </div>
-            </div>
+                </fieldset>
 
-            <div class="accordion">
-              <button type="button" class="accordion-header">
-                <span class="accordion-title">모서리 도트 스타일</span>
-                <span class="accordion-icon">▾</span>
-              </button>
-              <div class="accordion-body">
-                <div class="accordion-body-inner">
-                  <small
-                    >주의: 배경색과 비슷한 밝기의 색을 선택할 경우 인식이 잘 안
-                    될 수도 있습니다.</small
-                  >
+                <fieldset class="adv-section">
+                  <legend>모서리 도트 (안쪽 네모)</legend>
                   <label>
                     색상
                     <select id="corners-dot-color-mode-select">
-                      <option value="follow-dots" selected>
-                        점 스타일 색상 따라가기
-                      </option>
-                      <option value="follow-corners-square">
-                        모서리 사각형 색상 따라가기
-                      </option>
+                      <option value="follow-dots" selected>점 색 따라가기</option>
+                      <option value="follow-corners-square">모서리 사각형 색 따라가기</option>
                       <option value="custom">직접 지정</option>
                       <option value="transparent">투명 (구멍 뚫기)</option>
                     </select>
                   </label>
-                  <small
-                    >"투명"을 선택하면 모서리 도트가 있던 자리만 정확히 뚫려서
-                    배경이 그대로 비칩니다. 주의: QR 코드가 스캔되지 않을 수
-                    있습니다.</small
-                  >
-
-                  <div id="corners-dot-color-fields">
-                    <label>
-                      <input
-                        id="corners-dot-color-input"
-                        type="color"
-                        value="#000000"
-                      />
+                  <div id="corners-dot-color-fields" class="sub-fields">
+                    <label class="color-row">
+                      <input id="corners-dot-color-input" class="coloris-field" type="text" value="#000000" readonly />
                     </label>
-
-                    <label>
+                    <label class="check-row">
                       <input id="corners-dot-gradient-toggle" type="checkbox" />
                       그라데이션 사용
                     </label>
-
-                    <div id="corners-dot-gradient-fields">
-                      <label>
-                        그라데이션 종류
-                        <select id="corners-dot-gradient-type-select">
-                          <option value="linear" selected>선형</option>
-                          <option value="radial">원형</option>
-                        </select>
-                      </label>
-
-                      <label>
-                        회전 (도)
-                        <input
-                          id="corners-dot-gradient-rotation-input"
-                          type="number"
-                          value="0"
-                        />
-                      </label>
-
-                      <label>
-                        색상 1
-                        <input
-                          id="corners-dot-gradient-color1-input"
-                          type="color"
-                          value="#000000"
-                        />
-                      </label>
-
-                      <label>
-                        색상 2
-                        <input
-                          id="corners-dot-gradient-color2-input"
-                          type="color"
-                          value="#ffffff"
-                        />
-                      </label>
+                    <div id="corners-dot-gradient-fields" class="sub-fields">
+                      <div class="field-row">
+                        <label>
+                          종류
+                          <select id="corners-dot-gradient-type-select">
+                            <option value="linear" selected>선형</option>
+                            <option value="radial">원형</option>
+                          </select>
+                        </label>
+                        <label>
+                          회전 (도)
+                          <input id="corners-dot-gradient-rotation-input" type="number" value="0" />
+                        </label>
+                      </div>
+                      <div class="field-row">
+                        <label>
+                          색상 1
+                          <input id="corners-dot-gradient-color1-input" class="coloris-field" type="text" value="#000000" readonly />
+                        </label>
+                        <label>
+                          색상 2
+                          <input id="corners-dot-gradient-color2-input" class="coloris-field" type="text" value="#ffffff" readonly />
+                        </label>
+                      </div>
                     </div>
                   </div>
-
                   <label>
-                    스타일
+                    모양
                     <select id="corners-dot-type-select">
-                      <option value="" selected>(점 스타일 따라가기)</option>
+                      <option value="" selected>(점 모양 따라가기)</option>
                       <option value="square">사각형</option>
                       <option value="dot">원형</option>
                       <option value="dots">점 패턴</option>
@@ -1266,57 +800,265 @@
                       <option value="classy-rounded">둥근 클래식</option>
                     </select>
                   </label>
+                </fieldset>
+
+                <fieldset class="adv-section">
+                  <legend>미리보기 화면</legend>
+                  <div class="radio-field">
+                    <span class="sub-label">미리보기 크기</span>
+                    <div class="segmented">
+                      <label><input type="radio" name="preview-view-mode" value="height" checked /> 화면에 맞춤</label>
+                      <label><input type="radio" name="preview-view-mode" value="width" /> 작게</label>
+                      <label><input type="radio" name="preview-view-mode" value="manual" /> 직접 조절</label>
+                    </div>
+                  </div>
+                  <p class="field-hint">화면에 보이는 크기만 바뀌어요. 다운로드 이미지 크기는 위의 너비/높이를 따라요. "직접 조절"은 미리보기 오른쪽 아래 모서리를 끌어서 크기를 바꿀 수 있어요.</p>
+                </fieldset>
+              </div>
+            </div>
+
+            <div class="panel-group">
+              <button type="button" class="btn-secondary" id="btn-reset-design">디자인 초기화</button>
+            </div>
+          </section>
+
+          <!-- ---------- 로고 ---------- -->
+          <section class="tab-panel panel-design" data-tab-panel="logo" hidden>
+            <div class="panel-group">
+              <h2 class="panel-heading">로고 넣기</h2>
+              <div class="segmented" role="radiogroup" aria-label="로고 입력 방식">
+                <label><input type="radio" name="logo-source" value="upload" /> 파일 업로드</label>
+                <label><input type="radio" name="logo-source" value="url" checked /> 이미지 주소</label>
+              </div>
+
+              <div id="logo-upload-area" style="display: none">
+                <label class="dropzone">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>
+                  <span class="dropzone-title">클릭해서 이미지 업로드</span>
+                  <span class="dropzone-sub">PNG, JPG, SVG</span>
+                  <input id="logo-file-input" type="file" accept="image/*" />
+                </label>
+                <div id="logo-file-preview" style="display: none">
+                  <img id="logo-file-thumb" src="" alt="업로드한 로고 이미지 미리보기" />
+                  <button id="logo-file-clear" type="button" class="btn-secondary btn-sm">제거</button>
+                </div>
+              </div>
+
+              <div id="logo-url-area">
+                <label>
+                  로고 이미지 주소
+                  <input id="logo-url-input" type="text" placeholder="https://..." />
+                </label>
+              </div>
+            </div>
+
+            <div class="panel-group">
+              <div class="field-row">
+                <label>
+                  로고 크기 (0 ~ 0.5)
+                  <input id="image-size-input" type="number" min="0" max="0.5" step="0.01" value="0.4" />
+                </label>
+                <label>
+                  로고 여백 (px)
+                  <input id="image-margin-input" type="number" min="0" value="0" />
+                </label>
+              </div>
+              <p class="field-hint">로고가 QR 일부를 가리기 때문에, 디자인 › 고급 설정에서 오류 복원율을 H로 올리는 걸 추천해요.</p>
+            </div>
+          </section>
+
+          <!-- ---------- 내 스타일 ---------- -->
+          <section class="tab-panel" data-tab-panel="styles" hidden>
+            <div class="panel-group">
+              <h2 class="panel-heading">지금 디자인 저장하기</h2>
+              <label>
+                스타일 이름
+                <input id="preset-name-input" type="text" placeholder="예: 블루 그라데이션" />
+              </label>
+              <button id="btn-save-preset" type="button" class="btn-primary btn-block">저장</button>
+            </div>
+            <div class="panel-group">
+              <h2 class="panel-heading">저장한 스타일</h2>
+              <label>
+                <span class="sr-only">저장한 스타일 선택</span>
+                <select id="preset-select">
+                  <option value="">저장된 스타일 없음</option>
+                </select>
+              </label>
+              <div class="btn-row">
+                <button id="btn-load-preset" type="button" class="btn-secondary">적용</button>
+                <button id="btn-delete-preset" type="button" class="btn-secondary btn-danger">삭제</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ---------- 기록 ---------- -->
+          <section class="tab-panel" data-tab-panel="history" hidden>
+            <div class="panel-group" id="history-panel">
+              <div class="history-toolbar">
+                <h2 class="panel-heading">최근 만든 QR <small id="history-count-label"></small></h2>
+                <button id="btn-clear-history" type="button" class="text-btn text-danger">전체 삭제</button>
+              </div>
+              <div id="history-list"></div>
+              <div id="history-pagination"></div>
+            </div>
+
+            <div class="panel-group" id="history-settings">
+              <h2 class="panel-heading">기록 설정</h2>
+              <label class="check-row">
+                <input id="history-enabled-toggle" type="checkbox" />
+                만든 QR을 기록에 남기기
+              </label>
+              <label>
+                최대 개수
+                <input id="history-max-input" type="number" min="1" max="500" value="50" />
+              </label>
+              <p class="field-hint">최대 개수를 넘으면 오래된 기록부터 지워져요. 즐겨찾기한 기록은 남겨둬요.</p>
+
+              <h3 class="panel-subheading">개인정보 기록</h3>
+              <p class="field-hint">
+                아래 항목은 기본적으로 기록하지 않아요. 기록은 이 브라우저에만 저장되고 밖으로 전송되지 않지만,
+                여러 명이 같이 쓰는 기기라면 켜지 않는 걸 추천해요.
+              </p>
+              <label class="check-row"><input id="privacy-wifi-password" type="checkbox" data-field="wifi-password" /> 와이파이 비밀번호</label>
+              <label class="check-row"><input id="privacy-vcard-name" type="checkbox" data-field="vcard-name" /> 연락처 이름</label>
+              <label class="check-row"><input id="privacy-vcard-phone" type="checkbox" data-field="vcard-phone" /> 연락처 전화번호</label>
+              <label class="check-row"><input id="privacy-vcard-email" type="checkbox" data-field="vcard-email" /> 연락처 이메일</label>
+              <label class="check-row"><input id="privacy-tel-number" type="checkbox" data-field="tel-number" /> 전화번호(전화)</label>
+              <label class="check-row"><input id="privacy-sms-number" type="checkbox" data-field="sms-number" /> 전화번호(문자)</label>
+              <label class="check-row"><input id="privacy-email-address" type="checkbox" data-field="email-address" /> 이메일 주소</label>
+            </div>
+          </section>
+
+          <footer class="panel-footer">
+            <p>
+              Copyright 2026. <a href="https://minchan.app">김민찬</a> · <a href="mailto:business@minchan.app">business@minchan.app</a>
+            </p>
+            <p>
+              QR 엔진: <a href="https://github.com/kozakdenys/qr-code-styling" target="_blank" rel="noopener">qr-code-styling</a> (MIT) by Denys Kozak ·
+              글꼴: <a href="https://hangeul.naver.com/fonts/search?f=nanum" target="_blank" rel="noopener">나눔스퀘어</a>(네이버),
+              <a href="https://sun.fo/suit/" target="_blank" rel="noopener">SUIT</a>(OFL) ·
+              색상 선택기: <a href="https://github.com/mdbassit/Coloris" target="_blank" rel="noopener">Coloris</a> (MIT)
+            </p>
+          </footer>
+        </aside>
+
+        <!-- ===================== 미리보기 (캔버스) ===================== -->
+        <main class="stage">
+          <button id="btn-fullscreen" type="button" class="stage-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+            전체화면
+          </button>
+
+          <div class="stage-center">
+            <div id="qr-preview">
+              <div class="qr-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 14v7h-7"/></svg>
+                <span>내용을 입력하면 여기에 QR이 바로 나타나요</span>
+              </div>
+            </div>
+
+            <div class="status-chips">
+              <div id="qr-status-chip" class="status-chip status-ok" style="display: none"></div>
+
+              <div id="qr-contrast-warning" style="display: none">
+                <div class="contrast-warning-box">
+                  <span id="contrast-warning-text"></span>
+                  <details class="contrast-tip">
+                    <summary>해결 방법</summary>
+                    <div class="contrast-tip-body">
+                      <ul>
+                        <li>배경은 더 밝게, 점·모서리는 더 어둡게 바꿔 보세요.</li>
+                        <li>반대로 어두운 배경에 밝은 점도 가능해요.</li>
+                        <li>그라데이션을 쓴다면 양 끝 색 모두 배경과 차이가 충분해야 해요.</li>
+                      </ul>
+                    </div>
+                  </details>
+                </div>
+              </div>
+
+              <div id="qr-density-warning" style="display: none">
+                <div class="contrast-warning-box">
+                  <span id="density-warning-text"></span>
+                  <details class="contrast-tip">
+                    <summary>해결 방법</summary>
+                    <div class="contrast-tip-body">
+                      <ul>
+                        <li>담는 내용(특히 한글)을 줄여 보세요.</li>
+                        <li>오류 복원율을 L 또는 M으로 낮춰 보세요.</li>
+                        <li>로고를 빼거나 더 작게 해 보세요.</li>
+                        <li>인쇄하거나 화면에 띄울 때 더 크게 보여주세요.</li>
+                      </ul>
+                    </div>
+                  </details>
                 </div>
               </div>
             </div>
           </div>
-        </aside>
+        </main>
       </div>
     </div>
 
+    <!-- ===================== 다운로드 팝오버 ===================== -->
     <div id="export-modal">
-      <div class="modal-box">
-        <h2>QR 코드 내보내기</h2>
-        <select id="download-ext-select">
-          <option value="png">.png</option>
-          <option value="jpeg">.jpeg</option>
-          <option value="webp">.webp</option>
-          <option value="svg" selected>.svg</option>
-        </select>
-        <small id="export-transparent-note" style="display: none"
-          >※ jpeg는 투명 배경을 지원하지 않아 불투명하게 저장됩니다.
-          png·webp·svg를 이용해주세요.</small
-        >
+      <div class="modal-box export-popover" role="dialog" aria-labelledby="export-title">
+        <div class="popover-head">
+          <h2 id="export-title">다운로드</h2>
+          <button id="modal-close-btn" type="button" class="icon-btn icon-btn-sm" aria-label="닫기">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+        <span class="sub-label">파일 형식</span>
+        <label class="sr-only">
+          파일 형식
+          <select id="download-ext-select" tabindex="-1">
+            <option value="png">.png</option>
+            <option value="jpeg">.jpeg</option>
+            <option value="webp">.webp</option>
+            <option value="svg" selected>.svg</option>
+          </select>
+        </label>
+        <div class="format-grid" role="group" aria-label="파일 형식">
+          <button type="button" class="format-btn" data-ext="png">PNG</button>
+          <button type="button" class="format-btn" data-ext="jpeg">JPEG</button>
+          <button type="button" class="format-btn" data-ext="webp">WEBP</button>
+          <button type="button" class="format-btn" data-ext="svg">SVG</button>
+        </div>
+        <p class="field-hint" id="format-hint"></p>
+        <small id="export-transparent-note" style="display: none">JPEG는 투명을 지원하지 않아서 투명한 부분이 불투명하게 저장돼요. PNG·WEBP·SVG를 써 주세요.</small>
         <div id="export-contrast-warning" style="display: none">
           <div class="contrast-warning-box">
             <span id="export-contrast-warning-text"></span>
-            <details class="contrast-tip">
-              <summary>해결 방법 보기</summary>
-              <div class="contrast-tip-body">
-                <p>
-                  배경색과 도트(점)·모서리 색상 사이의 명도 차이가 부족합니다.
-                </p>
-                <ul>
-                  <li>
-                    배경색을 더 밝게, 도트·모서리 색상을 더 어둡게 디자인하기
-                  </li>
-                  <li>
-                    또는 반대로 어두운 배경에 밝은 도트·모서리로 디자인하기
-                  </li>
-                  <li>
-                    그라데이션 사용 시 양 끝 색상 모두 배경과 충분한 대비
-                    유지하기
-                  </li>
-                </ul>
-              </div>
-            </details>
           </div>
         </div>
         <div class="modal-actions">
-          <button id="btn-download">다운로드</button>
-          <button id="modal-close-btn">닫기</button>
+          <button id="btn-download" type="button" class="btn-primary btn-block">다운로드</button>
         </div>
       </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- ===================== 알림 / 확인 모달 ===================== -->
+    <div id="app-dialog" class="app-dialog" hidden>
+      <div class="app-dialog-box" role="alertdialog" aria-modal="true" aria-labelledby="app-dialog-title" aria-describedby="app-dialog-message">
+        <h2 id="app-dialog-title">알림</h2>
+        <p id="app-dialog-message"></p>
+        <div class="app-dialog-actions">
+          <button id="app-dialog-cancel" type="button" class="btn-secondary" hidden>취소</button>
+          <button id="app-dialog-ok" type="button" class="btn-primary">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== QR 전체화면 ===================== -->
+    <div id="qr-fullscreen" hidden>
+      <div class="qr-fs-box" id="qr-fullscreen-box"></div>
+      <button id="qr-fullscreen-close" type="button" class="qr-fs-close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+        닫기
+      </button>
+      <p class="qr-fs-hint" id="qr-fullscreen-hint">화면을 누르거나 ESC를 누르면 닫혀요</p>
     </div>
 
     <div id="patch-notes-modal">
@@ -1335,6 +1077,47 @@
             </ul>
           </div>
           -->
+          <div class="patch-note-entry">
+            <h3 class="patch-note-version">
+              v. 2.0.0 <span class="patch-note-date">2026. 11. 12.</span>
+            </h3>
+            <p class="patch-note-label">편집 화면 전면 리디자인</p>
+            <ul>
+              <li>왼쪽 아이콘 메뉴(내용·디자인·로고·내 스타일·기록) + 큰 미리보기로 화면 구성 변경</li>
+              <li>QR 종류 선택을 드롭다운에서 아이콘 타일로 변경</li>
+              <li>디자인 설정을 아코디언에서 빠른 스타일·색상 견본·모양 타일로 개편, 세부 항목은 "고급 설정"으로 정리</li>
+              <li>점·배경 색에 단색/그라데이션 전환 추가, 그라데이션 편집기(시작·끝 색, 선형/원형, 각도) 추가</li>
+              <li>점 "투명(구멍 뚫기)"을 색상 견본에서 바로 고를 수 있도록 변경</li>
+              <li>QR 전체 모양(사각형/원형)을 고급 설정 밖으로 이동</li>
+              <li>브라우저 기본 색상 선택기 대신 Coloris 색상 선택기 적용 (모바일에서도 같은 모양)</li>
+              <li>미리보기 배경을 체크무늬로 고정하고, 미리보기 크기를 화면에 맞게 자동 조절</li>
+              <li>"인식 잘 되는 QR이에요" 상태 표시 추가, 대비·조밀도 경고를 미리보기 아래 칩으로 변경</li>
+            </ul>
+            <p class="patch-note-label">새 기능</p>
+            <ul>
+              <li>QR 전체화면 보기 추가 (화면에 꽉 차게 띄워서 바로 스캔)</li>
+              <li>QR 이미지 클립보드 복사 버튼 추가</li>
+              <li>다운로드 창을 상단 팝오버로 변경하고 형식별 설명 추가</li>
+              <li>알림·확인 창을 브라우저 기본 창 대신 사이트 디자인에 맞춘 모달로 변경</li>
+              <li>마지막으로 열었던 편집 메뉴를 다음 방문 시 기억</li>
+            </ul>
+            <p class="patch-note-label">디자인 · 기타</p>
+            <ul>
+              <li>포인트 색상(파랑)과 글꼴(영문·숫자 SUIT, 한글 나눔스퀘어) 변경</li>
+              <li>모바일 하단 탭바 레이아웃 적용</li>
+              <li>파비콘 교체</li>
+              <li>소개 페이지를 새 디자인으로 처음부터 다시 작성</li>
+              <li>링크 공유 미리보기(Open Graph) 이미지 교체</li>
+              <li>가이드 페이지 종료 (기존 주소는 소개 페이지로 이동)</li>
+              <li>안내 문구를 더 쉬운 말투로 정리</li>
+            </ul>
+            <p class="patch-note-label">버그 수정</p>
+            <ul>
+              <li>기록 탭에서 "페이지당 개수"를 5 이상으로 설정하면 값이 이상하게 바뀌던 버그 수정</li>
+              <li>패치노트 안 가이드 페이지 링크가 열리지 않던 버그 수정</li>
+            </ul>
+          </div>
+
           <div class="patch-note-entry">
             <h3 class="patch-note-version">
               v. 1.5.0 <span class="patch-note-date">2026. 07. 30.</span>
@@ -1384,11 +1167,7 @@
             <p class="patch-note-label">가이드 페이지 제작</p>
             <ul>
               <li>
-                여러가지 가이드 페이지 제작 (<a
-                  href="https://qr.minchan.app/wifi-qr"
-                  >와이파이</a
-                >, <a href="https://qr.minchan.app/business-card-qr">명함</a>,
-                <a href="https://qr.minchan.app/menu-qr">메뉴판</a> qr 가이드)
+                여러가지 가이드 페이지 제작 (와이파이, 명함, 메뉴판 qr 가이드 — v2.0.0에서 종료)
               </li>
               <li>자기소개서 페이지 내용 추가</li>
               <li>사소한 버그 픽스</li>
@@ -1450,56 +1229,6 @@
         </div>
       </div>
     </div>
-
-    <footer class="page-footer">
-      <hr />
-      <small
-        >Copyright 2026. <a href="https://minchan.app">김민찬</a> All rights
-        reserved.</small
-      >
-      <small>
-        Contact: <a href="mailto:business@minchan.app">business@minchan.app</a>
-      </small>
-      <small>Created with Claude</small>
-      <br />
-      <small>
-        이 서비스에는 Denys Kozak이 제작한
-        <a
-          href="https://github.com/kozakdenys/qr-code-styling"
-          target="_blank"
-          rel="noopener"
-          >qr-code-styling</a
-        >
-        라이브러리가 사용되었으며, 네이버에서 제공한
-        <a
-          href="https://hangeul.naver.com/fonts/search?f=nanum"
-          target="_blank"
-          rel="noopener"
-          >나눔글꼴</a
-        >(나눔스퀘어)이 적용되어 있습니다.
-      </small>
-      <div class="footer-bar">
-        <span class="site-version">v. 1.5.0</span>
-        <div class="footer-bar-links">
-          <a
-            href="https://qr.minchan.app/"
-            class="footer-btn footer-link-btn"
-            id="link-to-landing"
-            >🏠 소개 페이지</a
-          >
-          <a
-            href="https://forms.gle/BvHiWuuexWZ9Sm5x8"
-            target="_blank"
-            rel="noopener"
-            class="footer-btn footer-link-btn"
-            >💬 의견 보내기</a
-          >
-          <button id="btn-patch-notes" type="button" class="footer-btn">
-            패치노트
-          </button>
-        </div>
-      </div>
-    </footer>
 
     <script>
       // 소개 페이지로 돌아갈 때는 "qrgen-visited" 플래그를 지워서,

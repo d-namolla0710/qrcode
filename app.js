@@ -142,7 +142,7 @@ function buildDataString(type, { silent = false } = {}) {
     case "text": {
       const text = document.getElementById("text-content").value.trim();
       if (!text) {
-        if (!silent) alert("텍스트를 입력해주세요.");
+        if (!silent) showAlert("텍스트를 입력해주세요.");
         return null;
       }
       return text;
@@ -155,7 +155,7 @@ function buildDataString(type, { silent = false } = {}) {
       const hidden = document.getElementById("wifi-hidden").checked;
 
       if (!ssid) {
-        if (!silent) alert("네트워크 이름(SSID)을 입력해주세요.");
+        if (!silent) showAlert("네트워크 이름(SSID)을 입력해주세요.");
         return null;
       }
 
@@ -173,7 +173,7 @@ function buildDataString(type, { silent = false } = {}) {
     case "url": {
       let url = document.getElementById("url-input").value.trim();
       if (!url) {
-        if (!silent) alert("URL을 입력해주세요.");
+        if (!silent) showAlert("URL을 입력해주세요.");
         return null;
       }
       if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(url)) {
@@ -188,7 +188,7 @@ function buildDataString(type, { silent = false } = {}) {
       const body = document.getElementById("email-body").value.trim();
 
       if (!address) {
-        if (!silent) alert("받는 사람 이메일을 입력해주세요.");
+        if (!silent) showAlert("받는 사람 이메일을 입력해주세요.");
         return null;
       }
 
@@ -202,7 +202,7 @@ function buildDataString(type, { silent = false } = {}) {
     case "tel": {
       const number = document.getElementById("tel-number").value.trim();
       if (!number) {
-        if (!silent) alert("전화번호를 입력해주세요.");
+        if (!silent) showAlert("전화번호를 입력해주세요.");
         return null;
       }
       return `tel:${number.replace(/[\s-]/g, "")}`;
@@ -213,7 +213,7 @@ function buildDataString(type, { silent = false } = {}) {
       const message = document.getElementById("sms-message").value.trim();
 
       if (!number) {
-        if (!silent) alert("전화번호를 입력해주세요.");
+        if (!silent) showAlert("전화번호를 입력해주세요.");
         return null;
       }
 
@@ -230,7 +230,7 @@ function buildDataString(type, { silent = false } = {}) {
       const org = document.getElementById("vcard-org").value.trim();
 
       if (!name) {
-        if (!silent) alert("이름을 입력해주세요.");
+        if (!silent) showAlert("이름을 입력해주세요.");
         return null;
       }
 
@@ -263,7 +263,7 @@ function buildDataString(type, { silent = false } = {}) {
         .value.trim();
 
       if (!title || !start) {
-        if (!silent) alert("제목과 시작 일시를 입력해주세요.");
+        if (!silent) showAlert("제목과 시작 일시를 입력해주세요.");
         return null;
       }
 
@@ -293,7 +293,7 @@ function buildDataString(type, { silent = false } = {}) {
       const lng = document.getElementById("geo-lng").value.trim();
 
       if (!lat || !lng) {
-        if (!silent) alert("위도와 경도를 입력해주세요.");
+        if (!silent) showAlert("위도와 경도를 입력해주세요.");
         return null;
       }
 
@@ -383,10 +383,10 @@ function applyContrastWarning(warningEl, textEl, ratio) {
   let msg = "";
   if (ratio < 1.5) {
     level = "severe";
-    msg = `명도 대비 ${ratio.toFixed(1)}:1 — 배경색과 QR 색상이 거의 구별되지 않아 대부분의 기기에서 인식이 불가능합니다.`;
+    msg = `명도 대비 ${ratio.toFixed(1)}:1 — 배경과 QR 색이 거의 구별되지 않아 대부분의 기기에서 인식이 안 돼요.`;
   } else if (ratio < 3) {
     level = "moderate";
-    msg = `명도 대비 ${ratio.toFixed(1)}:1 — 대비가 낮아 일부 기기(구형·저가형·카메라 품질이 낮은 기기)에서 인식이 잘 안 될 수 있습니다.`;
+    msg = `명도 대비 ${ratio.toFixed(1)}:1 — 대비가 낮아서 일부 기기에서 인식이 잘 안 될 수 있어요.`;
   }
   if (level) {
     if (textEl) textEl.textContent = msg;
@@ -421,10 +421,10 @@ function applyDensityWarning(warningEl, textEl, moduleCount, byteLength) {
   let msg = "";
   if (moduleCount >= 97) {
     level = "severe";
-    msg = `입력한 내용이 많아 QR 코드가 매우 조밀합니다 (${moduleCount}×${moduleCount} 모듈, ${byteLength}바이트). 작게 인쇄하거나 카메라 성능이 낮은 기기에서는 스캔이 잘 안 될 수 있습니다.`;
+    msg = `내용이 많아 QR이 매우 촘촘해요 (${moduleCount}×${moduleCount}, ${byteLength}바이트). 작게 인쇄하면 스캔이 어려울 수 있어요.`;
   } else if (moduleCount >= 57) {
     level = "moderate";
-    msg = `입력한 내용이 많아 QR 코드가 다소 조밀합니다 (${moduleCount}×${moduleCount} 모듈, ${byteLength}바이트). 일부 기기에서 카메라 초점이 잘 안 맞을 수 있습니다.`;
+    msg = `내용이 많아 QR이 조금 촘촘해요 (${moduleCount}×${moduleCount}, ${byteLength}바이트). 일부 기기에서 초점이 잘 안 맞을 수 있어요.`;
   }
   if (level) {
     if (textEl) textEl.textContent = msg;
@@ -651,9 +651,36 @@ function renderQrPreviewAuto(data, settings) {
   if (!newEl) return;
   document.getElementById("qr-preview").replaceChildren(newEl);
   currentQrCode = newQrCode;
-  updateContrastWarning();
+  const ratio = updateContrastWarning();
   updateDensityWarning(newQrCode, data);
+  updateStatusChip(ratio, settings);
   updatePreviewSize();
+}
+
+/**
+ * 경고가 하나도 없을 때 "인식 잘 돼요" 상태 칩을 보여준다.
+ * 배경이 투명이면 대비를 계산할 수 없으므로 안내 칩을 대신 보여준다.
+ */
+function updateStatusChip(ratio, settings) {
+  const chip = document.getElementById("qr-status-chip");
+  if (!chip) return;
+  const contrastShown =
+    document.getElementById("qr-contrast-warning").style.display !== "none";
+  const densityShown =
+    document.getElementById("qr-density-warning").style.display !== "none";
+  const bgTransparent = settings?.backgroundOptions?.color === "transparent";
+
+  if (bgTransparent) {
+    chip.className = "status-chip status-info";
+    chip.textContent = "배경 없음 · 붙일 곳의 배경과 대비를 확인해 주세요";
+    chip.style.display = "";
+  } else if (!contrastShown && !densityShown) {
+    chip.className = "status-chip status-ok";
+    chip.textContent = `인식 잘 되는 QR이에요 · 대비 ${ratio.toFixed(1)}:1`;
+    chip.style.display = "";
+  } else {
+    chip.style.display = "none";
+  }
 }
 
 /* ==================== 미리보기 보기 모드 (너비 기준 / 높이 기준 / 직접 조절) ==================== */
@@ -701,31 +728,41 @@ function outerHeight(el) {
 }
 
 /**
- * "높이 기준" 모드에서 #qr-preview의 높이를
- * 100dvh - (미리보기 위/아래에 있는 요소들의 실제 높이 합) 으로 계산해 적용한다.
- * "너비 기준" 모드에서는 인라인 height를 지워 CSS(min(90dvw,360px) 등)가 그대로 적용되게 하고,
- * "직접 조절" 모드에서는 사용자가 드래그로 정한 크기를 건드리지 않는다.
+ * "화면에 맞춤" 모드: 미리보기 영역(.stage-center)에 잘리지 않고 들어가는
+ * 가장 큰 정사각형 크기를 계산해 #qr-preview에 적용한다.
+ * "작게" 모드는 CSS 기본 크기를, "직접 조절" 모드는 사용자가 정한 크기를 쓴다.
  */
 function updatePreviewSize() {
   const previewEl = document.getElementById("qr-preview");
   if (!previewEl) return;
-
   const mode = getPreviewViewMode();
   if (mode === "manual") return;
-
   if (mode !== "height") {
+    previewEl.style.removeProperty("width");
     previewEl.style.removeProperty("height");
     return;
   }
-
-  const spaceAbove = previewEl.offsetTop;
-  const spaceBelow =
-    outerHeight(document.getElementById("btn-export")) +
-    parseFloat(getComputedStyle(document.body).paddingBottom || "0") +
-    parseFloat(getComputedStyle(previewEl).marginBottom || "0");
-
-  const reserved = Math.round(spaceAbove + spaceBelow);
-  previewEl.style.height = `max(160px, calc(100dvh - ${reserved}px))`;
+  const stage = previewEl.closest(".stage-center");
+  if (!stage) return;
+  const cs = getComputedStyle(stage);
+  const gap = parseFloat(cs.rowGap) || 0;
+  const availW =
+    stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  let othersH = 0;
+  [...stage.children].forEach((child) => {
+    if (child === previewEl) return;
+    othersH += outerHeight(child) + gap;
+  });
+  const isMobile = window.matchMedia("(max-width: 899px)").matches;
+  const availH = isMobile
+    ? window.innerHeight * 0.55
+    : stage.clientHeight -
+      parseFloat(cs.paddingTop) -
+      parseFloat(cs.paddingBottom) -
+      othersH;
+  const size = Math.max(160, Math.floor(Math.min(availW, availH)));
+  previewEl.style.width = `${size}px`;
+  previewEl.style.height = `${size}px`;
 }
 
 let previewSizeRaf = null;
@@ -794,101 +831,11 @@ function initPreviewViewMode() {
 }
 
 /**
- * 미리보기 화면 전용 배경(테마 배경/체크무늬/단색/그라데이션) 설정.
- * QR 자체의 배경(backgroundOptions)과는 완전히 별개이며, 내보내기 결과물에는
- * 영향을 주지 않는다. 투명 배경·투명 도트를 화면에서 알아보기 쉽게 하기 위한
- * 화면 표시용 설정.
+ * 미리보기 배경은 투명한 부분을 바로 알아볼 수 있도록 체크무늬로 고정한다.
+ * (화면 표시용이라 다운로드 결과에는 영향이 없다)
  */
-const PREVIEW_BG_KEY = "qr-preview-bg-v1";
-
-function getPreviewBgSettings() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(PREVIEW_BG_KEY));
-    if (raw && typeof raw === "object") return raw;
-  } catch {
-    // 저장된 값이 손상된 경우 기본값 사용
-  }
-  return { mode: "theme" };
-}
-
-function savePreviewBgSettings(settings) {
-  localStorage.setItem(PREVIEW_BG_KEY, JSON.stringify(settings));
-}
-
-function readPreviewBgSettingsFromForm() {
-  return {
-    mode: document.getElementById("preview-bg-mode-select").value,
-    solidColor: document.getElementById("preview-bg-solid-color-input").value,
-    gradientType: document.getElementById("preview-bg-gradient-type-select")
-      .value,
-    gradientRotation: Number(
-      document.getElementById("preview-bg-gradient-rotation-input").value,
-    ),
-    gradientColor1: document.getElementById("preview-bg-gradient-color1-input")
-      .value,
-    gradientColor2: document.getElementById("preview-bg-gradient-color2-input")
-      .value,
-  };
-}
-
-function applyPreviewBgSettingsToForm(settings) {
-  document.getElementById("preview-bg-mode-select").value =
-    settings.mode ?? "theme";
-  document.getElementById("preview-bg-solid-color-input").value =
-    settings.solidColor ?? "#f2f2f2";
-  document.getElementById("preview-bg-gradient-type-select").value =
-    settings.gradientType ?? "linear";
-  document.getElementById("preview-bg-gradient-rotation-input").value =
-    settings.gradientRotation ?? 0;
-  document.getElementById("preview-bg-gradient-color1-input").value =
-    settings.gradientColor1 ?? "#ffffff";
-  document.getElementById("preview-bg-gradient-color2-input").value =
-    settings.gradientColor2 ?? "#000000";
-}
-
-function applyPreviewBgSettings(settings) {
-  const previewEl = document.getElementById("qr-preview");
-  if (!previewEl) return;
-  const mode = settings.mode ?? "theme";
-
-  previewEl.classList.toggle("preview-bg-checkerboard", mode === "checkerboard");
-  previewEl.style.removeProperty("background-color");
-  previewEl.style.removeProperty("background-image");
-
-  document.getElementById("preview-bg-solid-field").style.display =
-    mode === "solid" ? "" : "none";
-  document.getElementById("preview-bg-gradient-fields").style.display =
-    mode === "gradient" ? "" : "none";
-
-  if (mode === "solid") {
-    previewEl.style.backgroundColor = settings.solidColor ?? "#f2f2f2";
-  } else if (mode === "gradient") {
-    const type = settings.gradientType ?? "linear";
-    const rotation = settings.gradientRotation ?? 0;
-    const color1 = settings.gradientColor1 ?? "#ffffff";
-    const color2 = settings.gradientColor2 ?? "#000000";
-    previewEl.style.backgroundImage =
-      type === "radial"
-        ? `radial-gradient(circle, ${color1}, ${color2})`
-        : `linear-gradient(${rotation}deg, ${color1}, ${color2})`;
-  }
-  // mode === "theme"이면 클래스/인라인 스타일을 모두 제거한 상태로 두어
-  // 기존처럼 페이지 테마 배경이 그대로 비쳐 보이게 한다.
-}
-
 function initPreviewBgSettings() {
-  const saved = getPreviewBgSettings();
-  applyPreviewBgSettingsToForm(saved);
-  applyPreviewBgSettings(saved);
-
-  document.querySelectorAll(".preview-bg-controls input, .preview-bg-controls select")
-    .forEach((el) => {
-      el.addEventListener("input", () => {
-        const settings = readPreviewBgSettingsFromForm();
-        savePreviewBgSettings(settings);
-        applyPreviewBgSettings(settings);
-      });
-    });
+  document.getElementById("qr-preview")?.classList.add("preview-bg-checkerboard");
 }
 
 /**
@@ -1187,6 +1134,7 @@ function syncTypeFields() {
     const section = document.getElementById(`type-fields-${type}`);
     section.style.display = type === selectedType ? "" : "none";
   });
+  syncTypeTiles(selectedType);
 }
 
 /**
@@ -1194,6 +1142,7 @@ function syncTypeFields() {
  * 2000ms 후 히스토리에 기록한다.
  */
 function scheduleAutoPreview() {
+  syncDesignUi();
   clearTimeout(autoPreviewTimer);
   clearTimeout(autoHistoryTimer);
 
@@ -1252,6 +1201,7 @@ function openExportModal() {
     ratio,
   );
   updateExportTransparentNote();
+  syncFormatButtons();
 
   document.getElementById("export-modal").style.display = "flex";
 }
@@ -1333,7 +1283,7 @@ async function downloadMaskedSvg({ el, width, height }, extension) {
 
 function downloadQrCode() {
   if (!currentQrCode) {
-    alert("먼저 QR 코드를 생성해주세요.");
+    showAlert("먼저 QR 코드를 생성해주세요.");
     return;
   }
 
@@ -1386,7 +1336,7 @@ function saveCurrentStylePreset() {
   const name = nameInput.value.trim();
 
   if (!name) {
-    alert("저장할 스타일 이름을 입력해주세요.");
+    showAlert("저장할 스타일 이름을 입력해주세요.");
     return;
   }
 
@@ -1396,14 +1346,14 @@ function saveCurrentStylePreset() {
   refreshPresetSelect();
   document.getElementById("preset-select").value = name;
   nameInput.value = "";
-  alert(`"${name}" 스타일을 저장했습니다.`);
+  showToast(`"${name}" 스타일을 저장했어요.`);
 }
 
 function loadSelectedStylePreset() {
   const name = document.getElementById("preset-select").value;
 
   if (!name) {
-    alert("불러올 스타일을 선택해주세요.");
+    showAlert("불러올 스타일을 선택해주세요.");
     return;
   }
 
@@ -1415,15 +1365,20 @@ function loadSelectedStylePreset() {
   scheduleAutoPreview();
 }
 
-function deleteSelectedStylePreset() {
+async function deleteSelectedStylePreset() {
   const name = document.getElementById("preset-select").value;
 
   if (!name) {
-    alert("삭제할 스타일을 선택해주세요.");
+    showAlert("삭제할 스타일을 선택해주세요.");
     return;
   }
 
-  if (!confirm(`"${name}" 스타일을 삭제할까요?`)) return;
+  const ok = await showConfirm(`"${name}" 스타일을 삭제할까요?`, {
+    title: "스타일 삭제",
+    confirmText: "삭제",
+    danger: true,
+  });
+  if (!ok) return;
 
   const presets = getStylePresets();
   delete presets[name];
@@ -1462,6 +1417,7 @@ function initTheme() {
 
 function applyTheme(theme, save = true) {
   document.documentElement.setAttribute("data-theme", theme);
+  if (typeof Coloris !== "undefined") Coloris({ themeMode: theme });
   if (save) {
     localStorage.setItem(THEME_KEY, theme);
   }
@@ -1471,13 +1427,14 @@ function applyTheme(theme, save = true) {
 function updateThemeBtn(theme) {
   const btn = document.getElementById("theme-toggle");
   if (!btn) return;
-  if (theme === "dark") {
-    btn.textContent = "☀️";
-    btn.title = "라이트 모드로 전환";
-  } else {
-    btn.textContent = "🌙";
-    btn.title = "다크 모드로 전환";
-  }
+  const SUN =
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  const MOON =
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+  const label = theme === "dark" ? "라이트 모드로 전환" : "다크 모드로 전환";
+  btn.innerHTML = theme === "dark" ? SUN : MOON;
+  btn.title = label;
+  btn.setAttribute("aria-label", label);
 }
 
 function toggleTheme() {
@@ -1496,7 +1453,7 @@ function setHistoryMaxItems(value) {
 }
 
 function getHistoryPageSize() {
-  const v = parseInt(localStorage.getItem(HISTORY_PAGE_SIZE_KEY), 5);
+  const v = parseInt(localStorage.getItem(HISTORY_PAGE_SIZE_KEY), 10);
   return isNaN(v) || v < 1 ? HISTORY_PAGE_SIZE_DEFAULT : v;
 }
 
@@ -1627,8 +1584,13 @@ function toggleFavorite(id) {
   renderHistoryList();
 }
 
-function clearHistory() {
-  if (!confirm("모든 히스토리를 삭제할까요?")) return;
+async function clearHistory() {
+  const ok = await showConfirm("만든 QR 기록을 모두 지울까요? 즐겨찾기한 기록도 함께 지워져요.", {
+    title: "기록 전체 삭제",
+    confirmText: "모두 삭제",
+    danger: true,
+  });
+  if (!ok) return;
   saveHistory([]);
   renderHistoryList();
 }
@@ -1676,8 +1638,8 @@ function loadHistoryEntry(id) {
 
   const hasRedacted = entry.fields.some((field) => field.redacted);
   if (hasRedacted) {
-    alert(
-      "개인정보 보호 설정으로 기록되지 않은 항목은 비워져 있습니다. 직접 입력해 주세요.",
+    showAlert(
+      "개인정보 보호 설정 때문에 기록되지 않은 항목은 비워져 있어요. 직접 입력해 주세요.",
     );
   }
 }
@@ -1699,7 +1661,7 @@ function renderHistoryList() {
 
   if (sorted.length === 0) {
     container.innerHTML =
-      '<p class="history-empty">아직 생성 기록이 없습니다.</p>';
+      '<p class="history-empty">아직 만든 QR이 없어요.</p>';
     if (paginationEl) paginationEl.innerHTML = "";
     return;
   }
@@ -1850,7 +1812,7 @@ function renderHistoryList() {
   pageSizeInput.min = 1;
   pageSizeInput.max = 100;
   pageSizeInput.addEventListener("change", (e) => {
-    const v = parseInt(e.target.value, 5);
+    const v = parseInt(e.target.value, 10);
     if (!isNaN(v) && v >= 1) {
       setHistoryPageSize(v);
       historyCurrentPage = 1;
@@ -2284,4 +2246,694 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("logo-file-preview").style.display = "none";
     scheduleAutoPreview();
   });
+
+  // 새 편집 화면(레일 메뉴, 타일, 견본, 전체화면 등)
+  initEditorUi();
+});
+
+/* ==================== 새 편집 화면 UI (v2 레이아웃) ==================== */
+/*
+ * 기존 입력칸(select, color input, checkbox 등)은 그대로 두고, 그 위에
+ * 타일·견본·탭 같은 "보기 좋은 버튼"을 얹는 방식이다. 버튼을 누르면 기존
+ * 입력칸의 값을 바꾸고 change 이벤트를 발생시켜서, 미리보기·히스토리·
+ * 스타일 저장 등 기존 로직이 그대로 동작하게 한다.
+ */
+
+const EDITOR_TAB_KEY = "qrgen-editor-tab";
+
+const TYPE_FIELD_TITLES = {
+  url: "주소 입력",
+  wifi: "와이파이 정보",
+  text: "텍스트 입력",
+  email: "이메일 정보",
+  tel: "전화번호",
+  sms: "문자 보내기",
+  vcard: "연락처 정보",
+  event: "일정 정보",
+  geo: "위치 (좌표)",
+};
+
+const QUICK_PRESETS = {
+  basic: { dots: "#000000", bg: "#ffffff", dotsType: "square", corner: "" },
+  soft: { dots: "#1e3a8a", bg: "#e8f0fe", dotsType: "rounded", corner: "rounded" },
+  dots: { dots: "#2563eb", bg: "#ffffff", dotsType: "dots", corner: "dot" },
+  classy: { dots: "#14532d", bg: "#f5f0e6", dotsType: "classy-rounded", corner: "rounded" },
+};
+
+// 모서리 모양 타일 → [모서리 사각형 타입, 모서리 도트 타입]
+const CORNER_STYLES = {
+  "": ["", ""],
+  square: ["square", "square"],
+  rounded: ["extra-rounded", "dot"],
+  dot: ["dot", "dot"],
+};
+
+const FORMAT_HINTS = {
+  png: "가장 무난해요. 투명 배경도 지원해요.",
+  jpeg: "용량이 작아요. 투명은 지원하지 않아요.",
+  webp: "용량이 작고 투명도 지원해요.",
+  svg: "확대해도 안 깨져요. 인쇄용으로 추천해요.",
+};
+
+/** 입력칸 값을 바꾸고, 기존 리스너들이 반응하도록 change 이벤트를 보낸다. */
+function setFieldValue(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.type === "checkbox") {
+    if (el.checked === value) return;
+    el.checked = value;
+  } else {
+    if (el.value === value) return;
+    el.value = value;
+  }
+  el.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+/* ---------- 탭(왼쪽 아이콘 메뉴) ---------- */
+function switchEditorTab(tab, { scroll = false } = {}) {
+  document.querySelectorAll(".rail-btn").forEach((btn) => {
+    const on = btn.dataset.tab === tab;
+    btn.classList.toggle("is-active", on);
+    btn.setAttribute("aria-pressed", String(on));
+  });
+  document.querySelectorAll("[data-tab-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.tabPanel !== tab;
+  });
+  try {
+    localStorage.setItem(EDITOR_TAB_KEY, tab);
+  } catch {
+    // 저장 못 해도 동작에는 문제 없음
+  }
+  const panel = document.getElementById("side-panel");
+  if (panel) panel.scrollTop = 0;
+  if (scroll && window.matchMedia("(max-width: 899px)").matches) {
+    panel?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+/* ---------- QR 종류 타일 ---------- */
+function syncTypeTiles(type) {
+  document.querySelectorAll(".type-tile").forEach((tile) => {
+    const on = tile.dataset.type === type;
+    tile.classList.toggle("is-active", on);
+    tile.setAttribute("aria-pressed", String(on));
+  });
+  const title = document.getElementById("type-fields-title");
+  if (title) title.textContent = TYPE_FIELD_TITLES[type] || "내용 입력";
+}
+
+/* ---------- 디자인 타일/견본 상태 동기화 ---------- */
+function syncDesignUi() {
+  const dotsColor = document.getElementById("dots-color-input")?.value.toLowerCase();
+  const bgColor = document.getElementById("bg-color-input")?.value.toLowerCase();
+  const bgTransparent = document.getElementById("bg-transparent-toggle")?.checked;
+  const dotsTransparent = document.getElementById("dots-transparent-toggle")?.checked;
+  const dotsGradient = document.getElementById("dots-gradient-toggle")?.checked;
+  const bgGradient = document.getElementById("bg-gradient-toggle")?.checked;
+
+  document.querySelectorAll('[data-swatch-target="dots"] .swatch[data-color]').forEach((sw) => {
+    sw.classList.toggle(
+      "is-active",
+      !dotsTransparent && !dotsGradient && sw.dataset.color === dotsColor,
+    );
+  });
+  document.querySelectorAll('[data-swatch-target="bg"] .swatch[data-color]').forEach((sw) => {
+    const on =
+      sw.dataset.color === "transparent"
+        ? bgTransparent
+        : !bgTransparent && !bgGradient && sw.dataset.color === bgColor;
+    sw.classList.toggle("is-active", on);
+  });
+
+  document.querySelectorAll('[data-swatch-target="dots"] .swatch[data-color="transparent"]').forEach((sw) => {
+    sw.classList.toggle("is-active", Boolean(dotsTransparent));
+  });
+  const holeHint = document.getElementById("dots-hole-hint");
+  if (holeHint) holeHint.hidden = !dotsTransparent;
+
+  // 단색 / 그라데이션 버튼
+  document.querySelectorAll(".mode-toggle[data-mode-for]").forEach((group) => {
+    const prefix = group.dataset.modeFor;
+    const gradientOn = document.getElementById(`${prefix}-gradient-toggle`)?.checked;
+    const transparent = document.getElementById(`${prefix}-transparent-toggle`)?.checked;
+    group.hidden = Boolean(transparent);
+    group.querySelectorAll("button[data-mode]").forEach((btn) => {
+      const on = (btn.dataset.mode === "gradient") === Boolean(gradientOn);
+      btn.classList.toggle("is-active", on);
+      btn.setAttribute("aria-pressed", String(on));
+    });
+  });
+
+  // QR 전체 모양
+  const qrShape = document.getElementById("shape-select")?.value;
+  document.querySelectorAll(".shape-tile[data-qr-shape]").forEach((tile) => {
+    tile.classList.toggle("is-active", tile.dataset.qrShape === qrShape);
+  });
+
+  // 그라데이션 편집기 (종류 버튼, 각도 표시, 미리보기 막대)
+  document.querySelectorAll(".seg-buttons[data-seg-target]").forEach((group) => {
+    const value = document.getElementById(group.dataset.segTarget)?.value;
+    group.querySelectorAll("button[data-value]").forEach((btn) => {
+      const on = btn.dataset.value === value;
+      btn.classList.toggle("is-active", on);
+      btn.setAttribute("aria-pressed", String(on));
+    });
+  });
+  ["dots", "bg"].forEach((prefix) => {
+    const editor = document.querySelector(`.gradient-editor[data-gradient="${prefix}"]`);
+    if (!editor) return;
+    const type = document.getElementById(`${prefix}-gradient-type-select`).value;
+    const deg = Number(document.getElementById(`${prefix}-gradient-rotation-input`).value) || 0;
+    const c1 = document.getElementById(`${prefix}-gradient-color1-input`).value;
+    const c2 = document.getElementById(`${prefix}-gradient-color2-input`).value;
+    const preview = editor.querySelector(".gradient-preview");
+    // qr-code-styling의 회전 0은 왼쪽→오른쪽 = CSS의 90deg
+    if (preview) {
+      preview.style.background =
+        type === "radial"
+          ? `radial-gradient(circle, ${c1}, ${c2})`
+          : `linear-gradient(${deg + 90}deg, ${c1}, ${c2})`;
+    }
+    const angleRow = editor.querySelector(".angle-row");
+    if (angleRow) {
+      angleRow.hidden = type === "radial";
+      const out = angleRow.querySelector(".angle-value");
+      if (out) out.textContent = `${deg}°`;
+    }
+  });
+
+  // Coloris 미리보기 칸 색 맞추기 (값을 코드로 바꾼 경우 대비)
+  document.querySelectorAll(".clr-field").forEach((wrap) => {
+    const input = wrap.querySelector("input");
+    if (input) wrap.style.color = input.value;
+  });
+
+  const dotsType = document.getElementById("dots-type-select")?.value;
+  document.querySelectorAll(".shape-tile[data-dots-type]").forEach((tile) => {
+    tile.classList.toggle("is-active", tile.dataset.dotsType === dotsType);
+  });
+
+  const cornerSquareType = document.getElementById("corners-square-type-select")?.value;
+  const cornerDotType = document.getElementById("corners-dot-type-select")?.value;
+  document.querySelectorAll(".shape-tile[data-corner-style]").forEach((tile) => {
+    const [sq, dot] = CORNER_STYLES[tile.dataset.cornerStyle] || [];
+    tile.classList.toggle("is-active", sq === cornerSquareType && dot === cornerDotType);
+  });
+}
+
+function applyQuickPreset(key) {
+  const p = QUICK_PRESETS[key];
+  if (!p) return;
+  setFieldValue("dots-transparent-toggle", false);
+  setFieldValue("dots-gradient-toggle", false);
+  setFieldValue("bg-transparent-toggle", false);
+  setFieldValue("bg-gradient-toggle", false);
+  setFieldValue("corners-square-color-mode-select", "follow-dots");
+  setFieldValue("corners-dot-color-mode-select", "follow-dots");
+  setFieldValue("dots-color-input", p.dots);
+  setFieldValue("bg-color-input", p.bg);
+  setFieldValue("dots-type-select", p.dotsType);
+  const [sq, dot] = CORNER_STYLES[p.corner];
+  setFieldValue("corners-square-type-select", sq);
+  setFieldValue("corners-dot-type-select", dot);
+  scheduleAutoPreview();
+}
+
+async function resetDesignToDefaults() {
+  const ok = await showConfirm("색상, 모양, 고급 설정까지 디자인을 모두 처음 상태로 되돌릴까요?", {
+    title: "디자인 초기화",
+    confirmText: "초기화",
+    danger: true,
+  });
+  if (!ok) return;
+  Object.entries(DESIGN_DEFAULTS).forEach(([id, value]) => setFieldValue(id, value));
+  scheduleAutoPreview();
+}
+
+/* ---------- 다운로드 형식 버튼 ---------- */
+function syncFormatButtons() {
+  const ext = document.getElementById("download-ext-select").value;
+  document.querySelectorAll(".format-btn").forEach((btn) => {
+    const on = btn.dataset.ext === ext;
+    btn.classList.toggle("is-active", on);
+    btn.setAttribute("aria-pressed", String(on));
+  });
+  const hint = document.getElementById("format-hint");
+  if (hint) hint.textContent = FORMAT_HINTS[ext] || "";
+  const dl = document.getElementById("btn-download");
+  if (dl) dl.textContent = `${ext.toUpperCase()}로 다운로드`;
+}
+
+/* ---------- QR 전체화면 ---------- */
+function openQrFullscreen() {
+  const type = document.getElementById("qr-type-select").value;
+  const data = buildDataString(type);
+  if (!data) return;
+  const settings = collectSettingsFromForm();
+
+  const holePunch = {
+    dots: settings.dotsOptions?.color === "transparent",
+    cornersSquare: settings.cornersSquareOptions?.color === "transparent",
+    cornersDot: settings.cornersDotOptions?.color === "transparent",
+  };
+  // 전체화면은 크게 확대되므로 깨지지 않는 svg로 그린다
+  const qr = generate(data, settings, "svg");
+  const temp = document.createElement("div");
+  qr.append(temp);
+  const svgEl = temp.querySelector("svg");
+  if (svgEl && (holePunch.dots || holePunch.cornersSquare || holePunch.cornersDot)) {
+    applyQrHolePunch(svgEl, holePunch);
+  }
+  makeQrSvgResponsive(temp);
+  const el = temp.firstElementChild;
+  if (!el) return;
+
+  const overlay = document.getElementById("qr-fullscreen");
+  const box = document.getElementById("qr-fullscreen-box");
+  box.replaceChildren(el);
+
+  // 화면 배경을 QR 배경색과 맞춰서, QR 바깥 여백(quiet zone)이 자연스럽게 생기게 한다
+  const bg = settings.backgroundOptions;
+  let fsBg = "#ffffff";
+  if (bg?.gradient) fsBg = bg.gradient.colorStops?.[0]?.color || "#ffffff";
+  else if (bg?.color && bg.color !== "transparent") fsBg = bg.color;
+  overlay.style.background = fsBg;
+  let isDark = false;
+  try {
+    isDark = getRelativeLuminance(fsBg) < 0.4;
+  } catch {
+    isDark = false;
+  }
+  overlay.classList.toggle("is-dark", isDark);
+
+  overlay.hidden = false;
+  if (overlay.requestFullscreen) {
+    overlay.requestFullscreen().catch(() => {
+      // 전체화면 API가 막힌 환경(iOS Safari 등)에서는 화면 위 오버레이로만 보여준다
+    });
+  }
+}
+
+function closeQrFullscreen() {
+  const overlay = document.getElementById("qr-fullscreen");
+  if (overlay.hidden) return;
+  overlay.hidden = true;
+  document.getElementById("qr-fullscreen-box").replaceChildren();
+  if (document.fullscreenElement) {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
+/* ---------- 초기화 ---------- */
+function initEditorUi() {
+  // 탭
+  document.querySelectorAll(".rail-btn").forEach((btn) => {
+    btn.addEventListener("click", () => switchEditorTab(btn.dataset.tab, { scroll: true }));
+  });
+  let savedTab = "content";
+  try {
+    savedTab = localStorage.getItem(EDITOR_TAB_KEY) || "content";
+  } catch {
+    savedTab = "content";
+  }
+  if (!document.querySelector(`[data-tab-panel="${savedTab}"]`)) savedTab = "content";
+  switchEditorTab(savedTab);
+
+  // QR 종류 타일
+  document.querySelectorAll(".type-tile").forEach((tile) => {
+    tile.addEventListener("click", () => {
+      setFieldValue("qr-type-select", tile.dataset.type);
+      const firstInput = document.querySelector(
+        `#type-fields-${tile.dataset.type} input, #type-fields-${tile.dataset.type} textarea`,
+      );
+      if (firstInput && !window.matchMedia("(max-width: 899px)").matches) {
+        firstInput.focus();
+      }
+    });
+  });
+  syncTypeTiles(document.getElementById("qr-type-select").value);
+
+  // 색상 견본
+  document.querySelectorAll('[data-swatch-target="dots"] .swatch[data-color]').forEach((sw) => {
+    sw.addEventListener("click", () => {
+      if (sw.dataset.color === "transparent") {
+        setFieldValue("dots-transparent-toggle", true);
+      } else {
+        setFieldValue("dots-transparent-toggle", false);
+        setFieldValue("dots-gradient-toggle", false);
+        setFieldValue("dots-color-input", sw.dataset.color);
+      }
+      scheduleAutoPreview();
+    });
+  });
+  document.querySelectorAll('[data-swatch-target="bg"] .swatch[data-color]').forEach((sw) => {
+    sw.addEventListener("click", () => {
+      if (sw.dataset.color === "transparent") {
+        setFieldValue("bg-transparent-toggle", true);
+      } else {
+        setFieldValue("bg-transparent-toggle", false);
+        setFieldValue("bg-gradient-toggle", false);
+        setFieldValue("bg-color-input", sw.dataset.color);
+      }
+      scheduleAutoPreview();
+    });
+  });
+  // "직접 고르기"로 색을 고르면 투명/그라데이션은 끈다
+  document.getElementById("dots-color-input").addEventListener("input", () => {
+    setFieldValue("dots-transparent-toggle", false);
+    setFieldValue("dots-gradient-toggle", false);
+  });
+  document.getElementById("bg-color-input").addEventListener("input", () => {
+    setFieldValue("bg-transparent-toggle", false);
+    setFieldValue("bg-gradient-toggle", false);
+  });
+
+  // 빠른 스타일
+  document.querySelectorAll("[data-quick-preset]").forEach((card) => {
+    card.addEventListener("click", () => applyQuickPreset(card.dataset.quickPreset));
+  });
+
+  // 점 모양 / 모서리 모양 타일
+  document.querySelectorAll(".shape-tile[data-dots-type]").forEach((tile) => {
+    tile.addEventListener("click", () => {
+      setFieldValue("dots-type-select", tile.dataset.dotsType);
+      scheduleAutoPreview();
+    });
+  });
+  document.querySelectorAll(".shape-tile[data-corner-style]").forEach((tile) => {
+    tile.addEventListener("click", () => {
+      const [sq, dot] = CORNER_STYLES[tile.dataset.cornerStyle] || ["", ""];
+      setFieldValue("corners-square-type-select", sq);
+      setFieldValue("corners-dot-type-select", dot);
+      scheduleAutoPreview();
+    });
+  });
+
+  // QR 전체 모양 타일
+  document.querySelectorAll(".shape-tile[data-qr-shape]").forEach((tile) => {
+    tile.addEventListener("click", () => {
+      setFieldValue("shape-select", tile.dataset.qrShape);
+      scheduleAutoPreview();
+    });
+  });
+
+  // 그라데이션 종류 버튼
+  document.querySelectorAll(".seg-buttons[data-seg-target]").forEach((group) => {
+    group.querySelectorAll("button[data-value]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        setFieldValue(group.dataset.segTarget, btn.dataset.value);
+        scheduleAutoPreview();
+      });
+    });
+  });
+
+  // 단색 / 그라데이션 전환
+  document.querySelectorAll(".mode-toggle[data-mode-for]").forEach((group) => {
+    const prefix = group.dataset.modeFor;
+    group.querySelectorAll("button[data-mode]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const toGradient = btn.dataset.mode === "gradient";
+        const toggle = document.getElementById(`${prefix}-gradient-toggle`);
+        if (toggle.checked === toGradient) return;
+        if (toGradient) {
+          // 시작 색을 지금 단색으로 맞춰서 자연스럽게 이어지게 한다
+          const solid = document.getElementById(`${prefix}-color-input`).value;
+          setFieldValue(`${prefix}-gradient-color1-input`, solid);
+        }
+        setFieldValue(`${prefix}-gradient-toggle`, toGradient);
+        scheduleAutoPreview();
+      });
+    });
+  });
+
+  // 복사 버튼
+  document.getElementById("btn-copy").addEventListener("click", copyQrToClipboard);
+
+  initColorPickers();
+
+  // 고급 설정 펼치기
+  const advToggle = document.getElementById("adv-toggle");
+  const advBody = document.getElementById("adv-body");
+  advToggle.addEventListener("click", () => {
+    const open = advToggle.getAttribute("aria-expanded") !== "true";
+    advToggle.setAttribute("aria-expanded", String(open));
+    advBody.hidden = !open;
+  });
+
+  // 디자인 초기화
+  document.getElementById("btn-reset-design").addEventListener("click", resetDesignToDefaults);
+
+  // 다운로드 형식 버튼
+  document.querySelectorAll(".format-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setFieldValue("download-ext-select", btn.dataset.ext);
+      syncFormatButtons();
+    });
+  });
+  syncFormatButtons();
+
+  // 전체화면
+  document.getElementById("btn-fullscreen").addEventListener("click", openQrFullscreen);
+  document.getElementById("qr-fullscreen").addEventListener("click", closeQrFullscreen);
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) closeQrFullscreen();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    closeQrFullscreen();
+    if (document.getElementById("export-modal").style.display === "flex") {
+      closeExportModal();
+    }
+  });
+
+  syncDesignUi();
+  schedulePreviewSizeUpdate();
+}
+
+/* ---------- 색상 선택기 (Coloris) ---------- */
+/*
+ * 브라우저 기본 <input type="color">는 모바일에서 OS마다 모양이 제각각이라
+ * Coloris(https://github.com/mdbassit/Coloris, MIT)로 바꿨다.
+ * - .coloris-field : 이름표 옆 일반 색 입력칸 (왼쪽에 색 미리보기 버튼이 붙음)
+ * - .coloris-swatch: 견본 줄 끝의 "직접 고르기" 동그라미
+ */
+function initColorPickers() {
+  if (typeof Coloris === "undefined") return;
+  const theme = document.documentElement.getAttribute("data-theme") || "light";
+  Coloris({
+    el: ".coloris-field, .coloris-swatch",
+    wrap: false,
+    theme: "large",
+    themeMode: theme,
+    format: "hex",
+    alpha: false,
+    focusInput: false,
+    closeButton: true,
+    closeLabel: "확인",
+    margin: 6,
+    swatches: [
+      "#000000",
+      "#ffffff",
+      "#1e3a8a",
+      "#2563eb",
+      "#14532d",
+      "#7f1d1d",
+      "#7c3aed",
+      "#b45309",
+      "#f5f0e6",
+      "#fde68a",
+    ],
+    a11y: {
+      open: "색상 선택기 열기",
+      close: "색상 선택기 닫기",
+      clear: "색 지우기",
+      marker: "채도: {s}. 밝기: {v}.",
+      hueSlider: "색상 슬라이더",
+      alphaSlider: "투명도 슬라이더",
+      input: "색상 값",
+      format: "색상 형식",
+      swatch: "색 견본",
+      instruction: "채도와 밝기를 고르는 영역이에요. 방향키로도 고를 수 있어요.",
+    },
+  });
+  Coloris.wrap(".coloris-field");
+}
+
+/* ---------- 클립보드 복사 / 알림 ---------- */
+let toastTimer = null;
+function showToast(message) {
+  const el = document.getElementById("toast");
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
+  requestAnimationFrame(() => el.classList.add("is-shown"));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.classList.remove("is-shown");
+    setTimeout(() => {
+      el.hidden = true;
+    }, 200);
+  }, 2000);
+}
+
+/** 지금 설정 그대로의 QR을 PNG Blob으로 만든다 (구멍 뚫기 반영 포함). */
+async function getCurrentQrPngBlob() {
+  if (currentHolePunchedSvg) {
+    const { el, width, height } = currentHolePunchedSvg;
+    const svgString = new XMLSerializer().serializeToString(el);
+    const svgUrl = URL.createObjectURL(new Blob([svgString], { type: "image/svg+xml" }));
+    try {
+      const img = await loadImageFromUrl(svgUrl);
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      return await new Promise((resolve, reject) =>
+        canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("toBlob 실패"))), "image/png"),
+      );
+    } finally {
+      URL.revokeObjectURL(svgUrl);
+    }
+  }
+  return currentQrCode.getRawData("png");
+}
+
+async function copyQrToClipboard() {
+  const type = document.getElementById("qr-type-select").value;
+  const data = buildDataString(type);
+  if (!data) return;
+  renderQrPreviewAuto(data, collectSettingsFromForm());
+
+  if (!window.isSecureContext) {
+    // 브라우저는 https 또는 localhost에서만 클립보드 쓰기를 허용한다
+    showAlert(
+      `이미지 복사는 https 주소나 localhost에서만 쓸 수 있어요.\n지금은 http 주소(${location.host})로 열려 있어서 브라우저가 막고 있어요. 실제 사이트(https://qr.minchan.app)에서는 정상적으로 동작해요.`,
+      "복사할 수 없어요",
+    );
+    return;
+  }
+  if (!navigator.clipboard || typeof ClipboardItem === "undefined") {
+    showAlert("이 브라우저에서는 이미지 복사를 지원하지 않아요. 다운로드를 이용해 주세요.");
+    return;
+  }
+  try {
+    // Safari는 클릭 직후 바로 write를 불러야 해서 Blob 대신 Promise를 넘긴다
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": getCurrentQrPngBlob() }),
+    ]);
+    showToast("QR 이미지를 복사했어요. 원하는 곳에 붙여넣기 하세요.");
+  } catch (err) {
+    console.error(err);
+    showAlert("복사하지 못했어요. 브라우저의 클립보드 권한을 확인하거나 다운로드를 이용해 주세요.");
+  }
+}
+
+/* ---------- 알림 / 확인 모달 (alert, confirm 대신) ---------- */
+let dialogResolve = null;
+let dialogLastFocus = null;
+
+/**
+ * 사이트 디자인에 맞춘 모달 창. 확인을 누르면 true, 취소·ESC·바깥 클릭이면 false.
+ * @returns {Promise<boolean>}
+ */
+function showDialog({ title = "알림", message = "", confirmText = "확인", cancelText = null, danger = false } = {}) {
+  const dialog = ensureDialogElement();
+  if (dialogResolve) closeDialog(false); // 이전 창이 열려 있으면 취소로 닫기
+
+  document.getElementById("app-dialog-title").textContent = title;
+  document.getElementById("app-dialog-message").textContent = message;
+  const okBtn = document.getElementById("app-dialog-ok");
+  const cancelBtn = document.getElementById("app-dialog-cancel");
+  okBtn.textContent = confirmText;
+  okBtn.classList.toggle("is-danger", danger);
+  cancelBtn.hidden = !cancelText;
+  if (cancelText) cancelBtn.textContent = cancelText;
+
+  dialogLastFocus = document.activeElement;
+  dialog.hidden = false;
+  requestAnimationFrame(() => dialog.classList.add("is-open"));
+  okBtn.focus();
+
+  return new Promise((resolve) => {
+    dialogResolve = resolve;
+  });
+}
+
+function closeDialog(result) {
+  const dialog = document.getElementById("app-dialog");
+  if (!dialog || dialog.hidden) return;
+  dialog.classList.remove("is-open");
+  dialog.hidden = true;
+  const resolve = dialogResolve;
+  dialogResolve = null;
+  if (dialogLastFocus && typeof dialogLastFocus.focus === "function") {
+    dialogLastFocus.focus({ preventScroll: true });
+  }
+  if (resolve) resolve(result);
+}
+
+function showAlert(message, title = "확인해 주세요") {
+  return showDialog({ title, message, confirmText: "확인" });
+}
+
+function showConfirm(message, { title = "확인", confirmText = "확인", cancelText = "취소", danger = false } = {}) {
+  return showDialog({ title, message, confirmText, cancelText, danger });
+}
+
+/**
+ * 모달 마크업이 페이지에 없으면(예: 옛 app.html이 캐시된 경우) 직접 만들어 붙인다.
+ * 브라우저 기본 alert 창으로 돌아가지 않게 하기 위함.
+ */
+function ensureDialogElement() {
+  let dialog = document.getElementById("app-dialog");
+  if (dialog) return dialog;
+  dialog = document.createElement("div");
+  dialog.id = "app-dialog";
+  dialog.className = "app-dialog";
+  dialog.hidden = true;
+  dialog.innerHTML = `
+    <div class="app-dialog-box" role="alertdialog" aria-modal="true" aria-labelledby="app-dialog-title" aria-describedby="app-dialog-message">
+      <h2 id="app-dialog-title">알림</h2>
+      <p id="app-dialog-message"></p>
+      <div class="app-dialog-actions">
+        <button id="app-dialog-cancel" type="button" class="btn-secondary" hidden>취소</button>
+        <button id="app-dialog-ok" type="button" class="btn-primary">확인</button>
+      </div>
+    </div>`;
+  document.body.appendChild(dialog);
+  bindDialogEvents(dialog);
+  return dialog;
+}
+
+function bindDialogEvents(dialog) {
+  if (dialog.dataset.bound) return;
+  dialog.dataset.bound = "true";
+  document.getElementById("app-dialog-ok").addEventListener("click", () => closeDialog(true));
+  document.getElementById("app-dialog-cancel").addEventListener("click", () => closeDialog(false));
+  dialog.addEventListener("click", (e) => {
+    if (e.target === dialog) closeDialog(false);
+  });
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (dialog.hidden) return;
+      if (e.key === "Escape") {
+        e.stopImmediatePropagation();
+        closeDialog(false);
+      } else if (e.key === "Tab") {
+        // 모달 안에서만 포커스가 돌도록
+        const buttons = [...dialog.querySelectorAll("button:not([hidden])")];
+        const i = buttons.indexOf(document.activeElement);
+        e.preventDefault();
+        const next = e.shiftKey ? (i <= 0 ? buttons.length - 1 : i - 1) : (i + 1) % buttons.length;
+        buttons[next].focus();
+      }
+    },
+    true,
+  );
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const dialog = document.getElementById("app-dialog");
+  if (dialog) bindDialogEvents(dialog);
 });

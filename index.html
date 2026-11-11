@@ -3,15 +3,13 @@
  * Licensed under the MIT License. See LICENSE file for details.
 -->
 
-
 <!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- 재방문자 즉시 리다이렉트: "사용해보기"를 눌러본 적 있으면
-         소개 페이지를 그릴 필요 없이 바로 서비스 화면으로 보냄.
-         렌더링 전에 최대한 빨리 실행되도록 head 맨 앞에 둠. -->
+    <!-- 재방문자: "QR 만들기"를 한 번 누른 적 있으면 소개 페이지를 건너뛰고 바로 /app으로 -->
     <script>
       (function () {
         try {
@@ -23,135 +21,88 @@
         }
       })();
     </script>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- 테마 FOUC 방지: 메인 페이지와 동일한 로직 -->
+    <!-- 테마 FOUC 방지: CSS 로드 전에 data-theme 속성을 즉시 적용 -->
     <script>
       (function () {
         var t =
           localStorage.getItem("qrgen-theme") ||
-          (window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light");
+          (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
         document.documentElement.setAttribute("data-theme", t);
       })();
     </script>
-    <title>
-      QR 코드 생성기 소개 | 와이파이·연락처·일정 QR코드 무료 생성 도구
-    </title>
 
+    <title>QR 코드 생성기 | 와이파이·연락처·일정 QR코드 무료로 만들기</title>
+
+    <!-- 외부 도메인 미리 연결 + 편집 화면 미리 받아두기 -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
-
-    <!-- "사용해보기"를 누르면 이동할 app.html을 미리 백그라운드에서
-         받아둠. 실제로 열릴 때는 이미 캐시돼 있어 체감 로딩이 거의 없음. -->
     <link rel="prefetch" href="/app" />
-    <link rel="preload" href="/app.css" as="style" />
-    <link rel="preload" href="/app.js" as="script" />
-    <link
-      rel="preload"
-      href="https://unpkg.com/qr-code-styling@1.9.2/lib/qr-code-styling.js"
-      as="script"
-      crossorigin
-    />
-    <meta name="google-site-verification" content="Ge5zR8PkB5BJEG0lM5TRUcnj31PpbzLp6Neb5Iu9744" />
-
-    <!-- Speculation Rules API: 크로미움 계열 브라우저에서는 버튼에
-         마우스를 올리는 순간 app.html을 미리 렌더링해둠(프리렌더).
-         지원하지 않는 브라우저는 이 태그를 그냥 무시하므로 안전함. -->
+    <link rel="prefetch" href="/editor.css" />
+    <link rel="prefetch" href="/app.js" />
     <script type="speculationrules">
       {
-        "prerender": [
-          {
-            "source": "list",
-            "urls": ["/app"],
-            "eagerness": "moderate"
-          }
-        ]
+        "prerender": [{ "source": "list", "urls": ["/app"], "eagerness": "moderate" }]
       }
     </script>
 
+    <!-- 인증 관련 -->
+    <meta name="google-site-verification" content="Ge5zR8PkB5BJEG0lM5TRUcnj31PpbzLp6Neb5Iu9744" />
+    <!-- 인증 관련 END -->
+
+    <!-- 검색엔진 메타데이터 -->
     <meta
       name="description"
-      content="QR Code 생성기는 URL, 와이파이, 연락처, 일정 등 9가지 유형의 QR 코드를 무료로 만들 수 있는 웹 서비스입니다. 색상·로고·모양을 자유롭게 커스터마이징하고, 개인정보는 브라우저 밖으로 나가지 않습니다. 어떤 기능이 있는지, 어떻게 사용하는지 소개합니다."
+      content="URL, 와이파이, 연락처, 일정 등 9가지 QR 코드를 무료로 만들 수 있어요. 회원가입 없이 색·모양·로고까지 꾸미고 PNG·SVG로 저장하세요. 입력한 내용은 브라우저 밖으로 나가지 않아요."
     />
     <meta name="author" content="김민찬" />
     <meta name="language" content="Korean" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://qr.minchan.app/" />
+    <!-- 검색엔진 메타데이터 END -->
 
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="QR Code 생성기" />
-    <meta
-      property="og:title"
-      content="QR Code 생성기 소개 | 와이파이·연락처·일정 QR코드 무료 생성 도구"
-    />
+    <meta property="og:site_name" content="QR 코드 생성기" />
+    <meta property="og:title" content="QR 코드 생성기 | 찍으면 바로 연결되는 QR, 무료로 10초 만에" />
     <meta
       property="og:description"
-      content="9가지 유형의 QR 코드를 무료로 만들고, 색상·로고·모양까지 자유롭게 꾸밀 수 있는 웹 서비스를 소개합니다."
+      content="와이파이·URL·연락처·일정 등 9가지 QR을 무료로. 색·모양·로고까지 꾸미고, 인식이 잘 되는지도 바로 확인하세요."
     />
     <meta property="og:url" content="https://qr.minchan.app/" />
     <meta property="og:image" content="https://qr.minchan.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="QR 생성기 — 찍으면 바로 연결되는 QR 코드를 10초 만에 무료로" />
     <meta property="og:locale" content="ko_KR" />
-
     <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="QR Code 생성기 소개 | 와이파이·연락처·일정 QR코드 무료 생성 도구"
-    />
+    <meta name="twitter:title" content="QR 코드 생성기 | 찍으면 바로 연결되는 QR, 무료로 10초 만에" />
     <meta
       name="twitter:description"
-      content="9가지 유형의 QR 코드를 무료로 만들고, 색상·로고·모양까지 자유롭게 꾸밀 수 있는 웹 서비스를 소개합니다."
+      content="와이파이·URL·연락처·일정 등 9가지 QR을 무료로. 색·모양·로고까지 꾸미고, 인식이 잘 되는지도 바로 확인하세요."
     />
     <meta name="twitter:image" content="https://qr.minchan.app/og-image.png" />
+    <!-- Open Graph END -->
 
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="/favicon/favicon-32x32.png"
-    />
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png" />
     <link rel="manifest" href="/favicon/manifest.json" />
     <meta name="theme-color" content="#ffffff" />
+    <!-- Favicon END -->
 
-    <style>
-      @font-face {
-        font-family: "NanumSquare";
-        font-weight: 400;
-        font-display: swap;
-        src:
-          local("☺"),
-          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2")
-            format("woff2");
-      }
-      @font-face {
-        font-family: "NanumSquare";
-        font-weight: 700;
-        font-display: swap;
-        src:
-          local("☺"),
-          url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2")
-            format("woff2");
-      }
-    </style>
-
-    <link rel="stylesheet" href="/app.css" />
-    <link rel="stylesheet" href="/landing.css" />
-
+    <!-- 구조화 데이터 -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "QR 코드 생성기",
         "url": "https://qr.minchan.app/app",
-        "description": "URL, 와이파이, 연락처, 일정 등 9가지 유형의 QR 코드를 무료로 생성하고 색상·로고·모양을 커스터마이징할 수 있는 웹 애플리케이션입니다.",
+        "description": "URL, 와이파이, 연락처, 일정 등 9가지 유형의 QR 코드를 무료로 만들고 색상·모양·로고를 꾸밀 수 있는 웹 애플리케이션입니다.",
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "Any",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "KRW"
-        },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" },
         "inLanguage": "ko"
       }
     </script>
@@ -162,839 +113,430 @@
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "QR 코드 생성기는 무료인가요?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "네, 회원가입이나 결제 없이 모든 기능을 무료로 사용할 수 있습니다."
-            }
+            "name": "정말 무료인가요?",
+            "acceptedAnswer": { "@type": "Answer", "text": "네. 회원가입이나 결제 없이 모든 기능을 무료로 쓸 수 있어요." }
           },
           {
             "@type": "Question",
             "name": "만든 QR 코드에 유효기간이 있나요?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "없습니다. QR 코드에는 입력한 정보가 그대로 인코딩되므로, 서버에 만료 처리를 요청하는 방식이 아니라 반영구적으로 동일하게 인식됩니다."
-            }
+            "acceptedAnswer": { "@type": "Answer", "text": "없어요. 입력한 정보가 QR 안에 그대로 담기는 방식이라, 이 사이트가 없어져도 QR은 계속 인식돼요. 다만 URL QR은 연결된 사이트가 사라지면 열리지 않아요." }
           },
           {
             "@type": "Question",
-            "name": "로고를 넣으면 QR 코드 인식이 안 되나요?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "대부분의 경우에는 안정적으로 인식됩니다. 로고 사이즈는 조정 할 수 있으며, 만약 크게 설정했더라도 '오류복원레벨'을 높게 설정하여 안정적으로 인식되게 할 수 있습니다."
-            }
+            "name": "로고를 넣으면 인식이 안 되지 않나요?",
+            "acceptedAnswer": { "@type": "Answer", "text": "대부분 잘 인식돼요. QR은 일부가 가려져도 읽을 수 있게 정보를 겹쳐 담아두거든요. 로고를 크게 넣는다면 고급 설정에서 오류 복원율을 H로 올리는 걸 추천해요." }
           },
           {
             "@type": "Question",
-            "name": "입력한 와이파이 비밀번호나 연락처 정보가 저장되나요?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "히스토리 기능을 사용하더라도 와이파이 비밀번호, 연락처 이름·전화번호·이메일 같은 민감한 항목은 기본적으로 기록되지 않습니다. 모든 기록은 서버로 전송되지 않고 사용하는 브라우저에만 저장됩니다."
-            }
+            "name": "입력한 와이파이 비밀번호나 연락처가 저장되나요?",
+            "acceptedAnswer": { "@type": "Answer", "text": "서버로는 아무것도 전송되지 않아요. 기록 기능을 켜도 와이파이 비밀번호, 연락처 이름·전화번호·이메일 같은 민감한 항목은 기본적으로 남기지 않고, 기록은 쓰는 브라우저 안에만 저장돼요." }
+          },
+          {
+            "@type": "Question",
+            "name": "인쇄할 때는 어떤 파일로 받아야 하나요?",
+            "acceptedAnswer": { "@type": "Answer", "text": "SVG를 추천해요. 아무리 크게 인쇄해도 깨지지 않아요. 문서나 메신저에 바로 쓰려면 PNG나 복사 버튼이 편해요." }
+          },
+          {
+            "@type": "Question",
+            "name": "휴대폰에서도 만들 수 있나요?",
+            "acceptedAnswer": { "@type": "Answer", "text": "네. 앱 설치 없이 휴대폰 브라우저에서 그대로 만들고 저장할 수 있어요." }
           }
         ]
       }
     </script>
+
+    <!-- 글꼴: 영문·숫자·특수문자는 SUIT, 한글은 나눔스퀘어 -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      @font-face { font-family: "SUIT"; font-weight: 400; font-display: swap; src: url("https://cdn.jsdelivr.net/npm/@sun-typeface/suit@2.0.5/fonts/static/woff2/SUIT-Regular.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-205E, U+20A9, U+2190-2193; }
+      @font-face { font-family: "SUIT"; font-weight: 700; font-display: swap; src: url("https://cdn.jsdelivr.net/npm/@sun-typeface/suit@2.0.5/fonts/static/woff2/SUIT-Bold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-205E, U+20A9, U+2190-2193; }
+      @font-face { font-family: "SUIT"; font-weight: 800; font-display: swap; src: url("https://cdn.jsdelivr.net/npm/@sun-typeface/suit@2.0.5/fonts/static/woff2/SUIT-ExtraBold.woff2") format("woff2"); unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-205E, U+20A9, U+2190-2193; }
+      @font-face { font-family: "NanumSquare"; font-weight: 400; font-display: swap; src: url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareR.woff2") format("woff2"); }
+      @font-face { font-family: "NanumSquare"; font-weight: 700; font-display: swap; src: url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareB.woff2") format("woff2"); }
+      @font-face { font-family: "NanumSquare"; font-weight: 800; font-display: swap; src: url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@master/NanumSquareEB.woff2") format("woff2"); }
+    </style>
+
+    <link rel="stylesheet" href="/landing.css" />
   </head>
+
   <body>
-    <div class="about-page">
-      <!-- ===================== 상단 바 ===================== -->
-      <header class="about-topbar">
-        <a href="/" class="about-brand">QR 코드 생성기</a>
-        <div class="about-topbar-actions">
-          <button
-            id="theme-toggle"
-            type="button"
-            class="theme-toggle-btn"
-            title="다크 모드로 전환"
-          >
-            🌙
-          </button>
-          <a href="/app" class="about-cta-small">사용해보기</a>
-        </div>
-      </header>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 
+    <!-- ===================== 상단바 ===================== -->
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="/" class="brand" aria-label="QR 생성기 홈">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 14v7h-7"/></svg>
+          </span>
+          <span class="brand-name">QR 생성기</span>
+        </a>
+        <nav class="header-nav" aria-label="소개 페이지 메뉴">
+          <a href="#types">QR 종류</a>
+          <a href="#features">기능</a>
+          <a href="#how">사용 방법</a>
+          <a href="#faq">자주 묻는 질문</a>
+        </nav>
+        <div class="header-actions">
+          <button id="theme-toggle" type="button" class="icon-btn" aria-label="다크 모드로 전환" title="다크 모드로 전환"></button>
+          <a href="/app" class="btn btn-primary btn-sm">QR 만들기</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
       <!-- ===================== 히어로 ===================== -->
-      <section class="about-hero">
-        <div class="about-hero-text">
-          <p class="about-eyebrow">무료 · 설치 없음 · 개인정보 보호 설계</p>
-          <h1>
-            네모 칸들이 모여 만드는<br />
-            QR 코드 속 여러가지 정보들
-          </h1>
-          <p class="about-hero-desc">
-            QR 코드 생성기는 URL부터 와이파이, 연락처, 일정까지 9가지 유형의 QR
-            코드를 브라우저에서 바로 만들 수 있는 무료 웹서비스입니다. 색상,
-            모양 그리고 로고를 원하는 대로 꾸미고, PNG·SVG 등 원하는 형식으로
-            내려받으세요.
-          </p>
-          <a href="/app" class="about-cta-large">사용해보기</a>
-        </div>
-
-        <div class="about-hero-grid" aria-hidden="true">
-          <div class="qr-module-grid" id="qr-module-grid"></div>
-        </div>
-      </section>
-
-      <!-- ===================== 왜 QR인가 ===================== -->
-      <section class="about-section">
-        <h2>이럴 때 QR 코드가 편해요!</h2>
-        <p>
-          QR 코드는 카메라만 있으면 누구나 즉시 읽을 수 있는 가장 단순한 정보
-          전달 수단입니다. 긴 와이파이 비밀번호를 직접 타이핑하게 하는 대신 QR
-          코드 한 장을 붙여두면 되고, 명함에 적힌 전화번호를 손으로 저장하는
-          대신 QR 코드 하나로 연락처 앱에 바로 등록할 수 있습니다. QR 코드
-          생성기는 이런 상황 외에도 여러 상황에 적합한 QR 코드를 누구나 몇 초
-          안에 만들 수 있도록 만든 도구입니다.
-        </p>
-      </section>
-
-      <!-- ===================== 9가지 유형 ===================== -->
-      <section class="about-section">
-        <h2>9가지 QR 코드 유형</h2>
-        <p class="about-section-lead">
-          단순 텍스트부터 스캔 즉시 동작이 실행되는 유형까지, 상황에 맞는 QR
-          코드를 선택할 수 있습니다.
-        </p>
-
-        <div class="type-card-grid">
-          <article class="type-card">
-            <h3>텍스트</h3>
-            <p>
-              메모, 안내 문구 등 어떤 내용이든 그대로 담습니다. 한글도 깨지지
-              않도록 별도로 처리했습니다.
+      <section class="hero">
+        <div class="container hero-inner">
+          <div class="hero-text">
+            <p class="eyebrow">무료 · 회원가입 없음 · 설치 없음</p>
+            <h1>찍으면 바로 연결되는<br /><span class="accent">QR 코드</span>를 10초 만에</h1>
+            <p class="hero-desc">
+              와이파이, 링크, 연락처, 일정까지 휴대폰 카메라가 바로 알아듣는 QR을 만들어요.
+              색과 모양, 로고까지 꾸미고 인식이 잘 되는지도 그 자리에서 확인할 수 있어요.
             </p>
-          </article>
-
-          <article class="type-card">
-            <h3>URL</h3>
-            <p>
-              웹사이트 주소를 입력하면 스캔 즉시 브라우저가 열립니다.
-              <code>https://</code>를 생략해도 자동으로 붙여줍니다.
-            </p>
-          </article>
-
-          <article class="type-card">
-            <h3>와이파이</h3>
-            <p>
-              네트워크 이름(SSID)과 비밀번호를 입력하면, 스캔한 사람의 기기가
-              비밀번호를 직접 입력하지 않아도 자동으로 접속합니다.
-              카페·매장·게스트룸 안내판에 자주 쓰입니다.
-            </p>
-          </article>
-
-          <article class="type-card">
-            <h3>이메일</h3>
-            <p>
-              받는 사람 주소는 물론, 제목과 본문까지 미리 채워진 메일 작성
-              화면을 바로 띄울 수 있습니다.
-            </p>
-          </article>
-
-          <article class="type-card">
-            <h3>전화번호(전화)</h3>
-            <p>스캔하면 바로 전화 걸기 화면으로 연결됩니다.</p>
-          </article>
-
-          <article class="type-card">
-            <h3>전화번호(문자)</h3>
-            <p>
-              받는 번호와 미리 작성된 문자 내용까지 채운 채로 문자 앱을 엽니다.
-            </p>
-          </article>
-
-          <article class="type-card">
-            <h3>연락처</h3>
-            <p>
-              이름, 전화번호, 이메일, 소속을 입력하면 스캔한 사람의 연락처 앱에
-              바로 저장할 수 있는 전자명함이 됩니다.
-            </p>
-          </article>
-
-          <article class="type-card">
-            <h3>일정</h3>
-            <p>
-              제목, 시작·종료 일시, 장소를 입력하면 스캔한 사람이 자신의 캘린더
-              앱에 바로 등록할 수 있습니다. 초대장, 포스터에 활용하기 좋습니다.
-            </p>
-          </article>
-
-          <article class="type-card">
-            <h3>위치</h3>
-            <p>
-              위도·경도를 입력하면 스캔 즉시 지도 앱에서 해당 위치를 보여줍니다.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <!-- ===================== 디자인 ===================== -->
-      <section class="about-section">
-        <h2>자유롭게 꾸미고, 인식 실패는 미리 막고</h2>
-        <p class="about-section-lead">
-          QR 코드는 정보만 정확하면 그만이 아니라, 스캔이 되어야 의미가
-          있습니다. 디자인과 인식률, 두 가지를 함께 관리할 수 있습니다.
-        </p>
-
-        <div class="feature-row">
-          <div class="feature-text">
-            <h3>모양, 색상, 로고까지</h3>
-            <p>
-              QR 코드를 이루는 도트, 모서리 사각형, 모서리 도트를 각각 다른
-              색상과 스타일로 지정할 수 있고, 단색뿐 아니라 선형·원형
-              그라데이션도 적용됩니다. 중앙에 로고 이미지를 넣어 브랜드나 프로필
-              사진이 담긴 QR 코드를 만들 수도 있습니다.
-            </p>
+            <div class="hero-cta">
+              <a href="/app" class="btn btn-primary btn-lg">
+                지금 QR 만들기
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+              <a href="#features" class="btn btn-ghost btn-lg">기능 살펴보기</a>
+            </div>
+            <ul class="hero-trust">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>9가지 QR 종류</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>PNG · SVG · 복사</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>입력한 내용은 내 브라우저에만</li>
+            </ul>
           </div>
-          <div class="feature-visual" aria-hidden="true">
-            <div class="mini-qr-demo mini-qr-demo-styled"></div>
-          </div>
-        </div>
 
-        <div class="feature-row">
-          <div class="feature-text">
-            <h3>로고를 넣어도 인식되는 이유</h3>
-            <p>
-              QR 코드는 오류 복원율을 높이면 일부가 가려져도 나머지 정보만으로
-              복구할 수 있는 여유 데이터를 함께 담습니다. 로고 없이 정보만 담을
-              때는 복원율 L(약 7% 손상까지 복구)로도 충분하지만, 중앙에 로고를
-              얹으면 그만큼 가려지는 영역이 늘어나므로 Q(약 25%) 이상으로 올리면
-              대부분 안정적으로 스캔됩니다.
-            </p>
-          </div>
-          <div class="feature-visual" aria-hidden="true">
-            <div class="logo-demo">
-              <div class="logo-demo-item">
-                <div class="mini-qr-demo mini-qr-demo-plain"></div>
-                <span class="logo-demo-label">로고 없음 · 복원율 L</span>
+          <!-- 편집 화면 미니 미리보기 (실제 QR: qr.minchan.app/app으로 연결돼요) -->
+          <div class="hero-visual" aria-hidden="true">
+            <div class="mock">
+              <div class="mock-bar">
+                <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
+                <span class="mock-url">qr.minchan.app/app</span>
               </div>
-              <div class="logo-demo-item">
-                <div class="mini-qr-demo mini-qr-demo-with-logo"></div>
-                <span class="logo-demo-label"
-                  >로고 삽입 · 복원율 Q 이상 권장</span
-                >
+              <div class="mock-body">
+                <div class="mock-rail">
+                  <span class="is-on"></span><span></span><span></span><span></span><span></span>
+                </div>
+                <div class="mock-panel">
+                  <span class="mock-label"></span>
+                  <div class="mock-tiles">
+                    <span class="is-on"></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                  </div>
+                  <span class="mock-label short"></span>
+                  <div class="mock-swatches">
+                    <i style="--c: #16181d"></i><i style="--c: #1d4ed8" class="is-on"></i><i style="--c: #14532d"></i><i style="--c: #7c3aed"></i>
+                  </div>
+                  <span class="mock-input"></span>
+                </div>
+                <div class="mock-stage">
+                  <img src="/assets/hero-qr.png" width="720" height="720" alt="" />
+                  <span class="mock-chip">✓ 인식 잘 되는 QR이에요</span>
+                </div>
               </div>
             </div>
+            <p class="hero-visual-note">진짜 QR이에요. 찍어 보면 이 사이트가 열려요.</p>
           </div>
         </div>
+      </section>
 
-        <div class="feature-row feature-row-reverse">
-          <div class="feature-text">
-            <h3>
-              QR이 잘 보이는지, 실시간으로 검사
-              <button
-                type="button"
-                class="info-btn"
-                data-term="contrast"
-                aria-label="명도 대비가 뭔지 설명 보기"
-              >
-                ?
-              </button>
-            </h3>
-            <p>
-              배경색과 QR 색상이 너무 비슷하면 스캔이 잘 안 되는데, 디자인을
-              바꾸는 즉시 밝기 차이를 계산해서 경고를 보여줍니다. 예쁘게
-              꾸미다가 스캔되지 않는 QR 코드를 만드는 실수를 줄여줍니다.
-            </p>
+      <!-- ===================== QR 종류 ===================== -->
+      <section class="section" id="types">
+        <div class="container">
+          <div class="section-head reveal">
+            <p class="section-kicker">9가지 QR 종류</p>
+            <h2>휴대폰 카메라가 바로 알아듣는 형식으로 만들어요</h2>
+            <p class="section-desc">내용만 입력하면 표준 형식으로 자동 변환돼요. 찍는 사람은 아무것도 따로 입력할 필요가 없어요.</p>
           </div>
-          <div class="feature-visual">
-            <div class="contrast-demo">
-              <div class="contrast-demo-row">
-                <div class="contrast-demo-swatch contrast-demo-bad">
-                  <span class="contrast-demo-dot"></span>
-                </div>
-                <span class="contrast-demo-label contrast-demo-label-bad">
-                  대비 부족 · 인식 어려움
-                </span>
-              </div>
-              <div class="contrast-demo-row">
-                <div class="contrast-demo-swatch contrast-demo-good">
-                  <span class="contrast-demo-dot"></span>
-                </div>
-                <span class="contrast-demo-label contrast-demo-label-good">
-                  충분한 대비 · 안정적 인식
-                </span>
-              </div>
-            </div>
-          </div>
+
+          <ul class="type-cards">
+            <li class="type-card reveal">
+              <span class="type-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 9a12 12 0 0 1 16 0"/><path d="M7 12.5a7.5 7.5 0 0 1 10 0"/><path d="M10 16a3 3 0 0 1 4 0"/><circle cx="12" cy="19" r="0.8"/></svg></span>
+              <h3>와이파이</h3>
+              <p>찍으면 비밀번호 입력 없이 바로 연결돼요.</p>
+            </li>
+            <li class="type-card reveal">
+              <span class="type-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>
+              <h3>URL</h3>
+              <p>사이트, 설문지, 메뉴판 링크를 바로 열어요.</p>
+            </li>
+            <li class="type-card reveal">
+              <span class="type-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg></span>
+              <h3>연락처</h3>
+              <p>이름·전화번호·이메일이 연락처에 바로 저장돼요.</p>
+            </li>
+            <li class="type-card reveal">
+              <span class="type-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+              <h3>일정</h3>
+              <p>날짜·장소가 채워진 채로 캘린더에 추가돼요.</p>
+            </li>
+            <li class="type-card reveal">
+              <span class="type-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+              <h3>이메일</h3>
+              <p>받는 사람·제목·내용이 채워진 메일 화면을 열어요.</p>
+            </li>
+            <li class="type-card reveal">
+              <span class="type-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
+              <h3>전화</h3>
+              <p>번호가 입력된 전화 걸기 화면으로 바로 가요.</p>
+            </li>
+            <li class="type-card reveal">
+              <span class="type-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg></span>
+              <h3>문자</h3>
+              <p>번호와 내용이 채워진 문자 작성 화면을 열어요.</p>
+            </li>
+            <li class="type-card reveal">
+              <span class="type-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></span>
+              <h3>위치</h3>
+              <p>지도 앱에서 정확한 좌표를 바로 보여줘요.</p>
+            </li>
+            <li class="type-card reveal">
+              <span class="type-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 6h14M12 6v13"/></svg></span>
+              <h3>텍스트</h3>
+              <p>짧은 안내문이나 메모를 그대로 보여줘요.</p>
+            </li>
+          </ul>
         </div>
+      </section>
 
-        <p>
-          완성한 디자인은 PNG, JPEG, WEBP, SVG 형식으로 내려받을 수 있고, 자주
-          쓰는 스타일은 이름을 붙여 저장해두었다가 다음에 바로 불러올 수도
-          있습니다.
-        </p>
+      <!-- ===================== 기능 ===================== -->
+      <section class="section section-alt" id="features">
+        <div class="container">
+          <div class="section-head reveal">
+            <p class="section-kicker">기능</p>
+            <h2>예쁘게 꾸며도, 인식은 확실하게</h2>
+            <p class="section-desc">디자인 툴처럼 편하게 꾸미고, 휴대폰이 못 읽을 것 같으면 미리 알려줘요.</p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card reveal">
+              <div class="feature-visual feature-visual-style" aria-hidden="true">
+                <span class="fv-preset" style="--dot: #16181d; --bg: #ffffff; --r: 0"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="fv-preset" style="--dot: #1e3a8a; --bg: #e8f0fe; --r: 30%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="fv-preset" style="--dot: #2563eb; --bg: #ffffff; --r: 50%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="fv-preset" style="--dot: #14532d; --bg: #f5f0e6; --r: 0 50% 0 50%"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="fv-gradient"></span>
+              </div>
+              <h3>원하는 대로 꾸미기</h3>
+              <p>빠른 스타일 한 번이면 끝. 색 견본, 단색·그라데이션, 점과 모서리 모양, 원형 QR, 가운데 로고까지 자유롭게 바꿀 수 있어요.</p>
+            </article>
+
+            <article class="feature-card reveal">
+              <div class="feature-visual feature-visual-check" aria-hidden="true">
+                <span class="fv-chip fv-ok">✓ 인식 잘 되는 QR이에요 · 대비 21:1</span>
+                <span class="fv-chip fv-warn">대비가 낮아서 일부 기기에서 인식이 잘 안 될 수 있어요</span>
+                <span class="fv-chip fv-bad">내용이 많아 QR이 매우 촘촘해요</span>
+              </div>
+              <h3>인식 실패 미리 막기</h3>
+              <p>배경과 점 색의 밝기 차이, 내용이 너무 많아 빽빽해지는지를 실시간으로 검사해서 바로 알려주고 해결 방법도 보여줘요.</p>
+            </article>
+
+            <article class="feature-card reveal">
+              <div class="feature-visual feature-visual-export" aria-hidden="true">
+                <span class="fv-btn">PNG</span><span class="fv-btn">SVG</span><span class="fv-btn">WEBP</span><span class="fv-btn">JPEG</span>
+                <span class="fv-btn fv-btn-copy">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>복사
+                </span>
+                <span class="fv-btn fv-btn-full">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>전체화면
+                </span>
+              </div>
+              <h3>저장 · 복사 · 전체화면</h3>
+              <p>인쇄용 SVG부터 PNG·WEBP·JPEG까지 저장하고, 복사해서 바로 붙여넣거나 화면에 크게 띄워 그 자리에서 스캔하게 할 수 있어요.</p>
+            </article>
+          </div>
+
+          <ul class="mini-features">
+            <li class="reveal"><strong>내 스타일 저장</strong><span>자주 쓰는 디자인에 이름 붙여 두고 한 번에 다시 적용</span></li>
+            <li class="reveal"><strong>만든 기록</strong><span>최근 만든 QR을 즐겨찾기하고 그대로 다시 불러오기</span></li>
+            <li class="reveal"><strong>투명 배경 · 구멍 뚫기</strong><span>사진이나 색지 위에 자연스럽게 얹히는 QR</span></li>
+            <li class="reveal"><strong>다크 모드 · 모바일</strong><span>밤에도 눈 편하게, 휴대폰에서도 앱처럼</span></li>
+          </ul>
+        </div>
       </section>
 
       <!-- ===================== 개인정보 ===================== -->
-      <section class="about-section about-section-privacy">
-        <h2>개인정보는 브라우저 밖으로 나가지 않습니다</h2>
-        <p>
-          QR 코드 생성기는 입력한 내용을 브라우저 안에서 곧바로 QR 이미지로
-          인코딩합니다. 서버에 내용을 보내 QR을 만들어 돌려받는 방식이 아니라
-          처음부터 끝까지 사용하는 기기 안에서만 처리가 끝나기 때문에, 와이파이
-          비밀번호나 연락처 같은 정보가 네트워크를 타고 어딘가로 전송될 구간
-          자체가 없습니다. 만든 QR 코드를 기록해두는 히스토리 기능도 마찬가지로
-          브라우저의 로컬 저장소에만 저장되며, 어떤 서버로도 전송되지 않습니다.
-        </p>
-        <p>
-          이 방식이 특히 중요해지는 순간은
-          <strong>QR 코드 자체에 민감한 정보가 그대로 담길 때</strong>입니다.
-          예를 들어 와이파이 QR 코드에는 비밀번호가 그대로 인코딩되고, 전자명함
-          QR 코드에는 이름·전화번호·이메일이 그대로 담깁니다. 서버를 거쳐 QR을
-          생성해주는 서비스라면 이 정보가 최소한 한 번은 서버 로그나 네트워크
-          구간을 지나가지만, 브라우저에서 바로 인코딩하는 방식에서는 그 구간
-          자체가 존재하지 않습니다.
-        </p>
-        <ul class="privacy-list">
-          <li>
-            와이파이 비밀번호, 연락처 이름·전화번호·이메일처럼 민감한 항목은
-            사용자가 설정에서 직접 켜지 않는 한 기본적으로 기록되지 않습니다.
-          </li>
-          <li>
-            기록되지 않은 민감 항목이 하나라도 있으면, 스캔 시 정보가 노출될 수
-            있는 QR 이미지와 데이터 자체도 함께 저장하지 않고 🔒 표시로
-            남깁니다.
-          </li>
-          <li>
-            히스토리 최대 개수, 즐겨찾기, 항목별 기록 여부를 모두 직접 설정할 수
-            있습니다.
-          </li>
-        </ul>
+      <section class="section" id="privacy">
+        <div class="container privacy">
+          <div class="privacy-icon reveal" aria-hidden="true">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <div class="privacy-text reveal">
+            <p class="section-kicker">개인정보</p>
+            <h2>입력한 내용은 브라우저 밖으로 나가지 않아요</h2>
+            <p>
+              이 사이트에는 서버가 없어요. QR은 지금 쓰는 브라우저 안에서 바로 만들어지고, 와이파이 비밀번호나 연락처 같은 내용은 어디로도 전송되지 않아요.
+            </p>
+            <ul class="check-list">
+              <li>기록 기능을 켜도 <strong>비밀번호·연락처·전화번호·이메일은 기본적으로 남기지 않아요.</strong></li>
+              <li>민감한 정보가 담긴 QR은 이미지조차 기록에 저장하지 않아요. 이미지만 있어도 스캔하면 내용이 보이니까요.</li>
+              <li>기록과 저장한 스타일은 내 브라우저에만 있어서, 브라우저 데이터를 지우면 함께 사라져요.</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <!-- ===================== 사용 방법 ===================== -->
-      <section class="about-section">
-        <h2>사용 방법</h2>
-        <ol class="howto-list">
-          <li>
-            <strong>유형 선택</strong>
-            <span
-              >URL, 와이파이, 연락처 등 9가지 중 원하는 QR 코드 유형을
-              고릅니다.</span
-            >
-          </li>
-          <li>
-            <strong>내용 입력</strong>
-            <span
-              >선택한 유형에 맞는 정보를 입력합니다. 입력과 동시에 미리보기가
-              갱신됩니다.</span
-            >
-          </li>
-          <li>
-            <strong>디자인 조정</strong>
-            <span
-              >색상, 모양, 로고, 그라데이션 등을 원하는 대로 바꿉니다. 스캔에
-              영향을 줄 수 있는 디자인일 경우 바로 알려줍니다.</span
-            >
-          </li>
-          <li>
-            <strong>다운로드</strong>
-            <span>원하는 파일 형식을 선택해 QR 코드를 내려받습니다.</span>
-          </li>
-        </ol>
+      <section class="section section-alt" id="how">
+        <div class="container">
+          <div class="section-head reveal">
+            <p class="section-kicker">사용 방법</p>
+            <h2>세 단계면 끝나요</h2>
+          </div>
+          <ol class="steps">
+            <li class="step reveal">
+              <span class="step-num">1</span>
+              <h3>종류 고르고 입력하기</h3>
+              <p>와이파이, URL 같은 종류를 누르고 내용을 입력하면 QR이 바로 나타나요.</p>
+            </li>
+            <li class="step reveal">
+              <span class="step-num">2</span>
+              <h3>마음에 들게 꾸미기</h3>
+              <p>디자인 메뉴에서 색과 모양을 고르고, 필요하면 로고도 넣어요. 인식 상태는 아래에서 계속 확인돼요.</p>
+            </li>
+            <li class="step reveal">
+              <span class="step-num">3</span>
+              <h3>저장하거나 바로 쓰기</h3>
+              <p>다운로드하거나 복사해서 붙여넣고, 전체화면으로 띄워 바로 보여줄 수도 있어요.</p>
+            </li>
+          </ol>
+          <div class="center reveal">
+            <a href="/app" class="btn btn-primary btn-lg">QR 만들러 가기</a>
+          </div>
+        </div>
       </section>
 
-      <!-- ===================== 실전 가이드 ===================== -->
-      <section class="about-section">
-        <h2>상황별 QR 코드 제작 가이드</h2>
-        <p class="about-section-lead">
-          실제로 QR 코드를 인쇄해 쓸 때 자주 막히는 지점을 정리했습니다.
+      <!-- ===================== 자주 묻는 질문 ===================== -->
+      <section class="section" id="faq">
+        <div class="container faq-wrap">
+          <div class="section-head reveal">
+            <p class="section-kicker">자주 묻는 질문</p>
+            <h2>궁금한 점이 있나요?</h2>
+          </div>
+          <div class="faq-list">
+            <details class="faq reveal">
+              <summary>정말 무료인가요?</summary>
+              <p>네. 회원가입이나 결제 없이 모든 기능을 무료로 쓸 수 있어요.</p>
+            </details>
+            <details class="faq reveal">
+              <summary>만든 QR 코드에 유효기간이 있나요?</summary>
+              <p>없어요. 입력한 정보가 QR 안에 그대로 담기는 방식이라, 이 사이트가 없어져도 QR은 계속 인식돼요. 다만 URL QR은 연결된 사이트가 사라지면 열리지 않아요.</p>
+            </details>
+            <details class="faq reveal">
+              <summary>로고를 넣으면 인식이 안 되지 않나요?</summary>
+              <p>대부분 잘 인식돼요. QR은 일부가 가려져도 읽을 수 있게 정보를 겹쳐 담아두거든요. 로고를 크게 넣는다면 고급 설정에서 오류 복원율을 H로 올리는 걸 추천해요.</p>
+            </details>
+            <details class="faq reveal">
+              <summary>입력한 와이파이 비밀번호나 연락처가 저장되나요?</summary>
+              <p>서버로는 아무것도 전송되지 않아요. 기록 기능을 켜도 와이파이 비밀번호, 연락처 이름·전화번호·이메일 같은 민감한 항목은 기본적으로 남기지 않고, 기록은 쓰는 브라우저 안에만 저장돼요.</p>
+            </details>
+            <details class="faq reveal">
+              <summary>인쇄할 때는 어떤 파일로 받아야 하나요?</summary>
+              <p>SVG를 추천해요. 아무리 크게 인쇄해도 깨지지 않아요. 문서나 메신저에 바로 쓰려면 PNG나 복사 버튼이 편해요.</p>
+            </details>
+            <details class="faq reveal">
+              <summary>휴대폰에서도 만들 수 있나요?</summary>
+              <p>네. 앱 설치 없이 휴대폰 브라우저에서 그대로 만들고 저장할 수 있어요.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== 마지막 CTA ===================== -->
+      <section class="cta-band">
+        <div class="container cta-inner reveal">
+          <h2>지금 바로 첫 QR을 만들어 보세요</h2>
+          <p>회원가입도, 설치도 필요 없어요.</p>
+          <a href="/app" class="btn btn-white btn-lg">QR 만들기</a>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===================== 푸터 ===================== -->
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 14v7h-7"/></svg>
+          </span>
+          <span>QR 생성기</span>
+        </div>
+        <nav class="footer-links" aria-label="푸터 메뉴">
+          <a href="/app">QR 만들기</a>
+          <a href="https://forms.gle/BvHiWuuexWZ9Sm5x8" target="_blank" rel="noopener">의견 보내기</a>
+          <a href="mailto:business@minchan.app">business@minchan.app</a>
+        </nav>
+        <p class="footer-note">
+          Copyright 2026. <a href="https://minchan.app">김민찬</a> ·
+          QR 엔진 <a href="https://github.com/kozakdenys/qr-code-styling" target="_blank" rel="noopener">qr-code-styling</a> (MIT) by Denys Kozak ·
+          글꼴 <a href="https://hangeul.naver.com/fonts/search?f=nanum" target="_blank" rel="noopener">나눔스퀘어</a>(네이버),
+          <a href="https://sun.fo/suit/" target="_blank" rel="noopener">SUIT</a>(OFL)
         </p>
-
-        <div class="type-card-grid">
-          <a href="/guides/wifi-qr" class="type-card">
-            <h3>와이파이 QR코드가 원활하게 작동하지 않을 때 체크리스트</h3>
-            <p>
-              암호화 방식, 숨김 네트워크, 특수문자, 인쇄 크기까지 접속 실패 원인
-              9가지.
-            </p>
-          </a>
-          <a href="/guides/business-card-qr" class="type-card">
-            <h3>명함 QR코드에 로고 넣는 법과 주의사항</h3>
-            <p>
-              오류 복원율, 로고 크기, 여백까지 인식률을 지키며 로고를 넣는 방법.
-            </p>
-          </a>
-          <a href="/guides/menu-qr" class="type-card">
-            <h3>메뉴판·안내판용 QR코드 제작 가이드</h3>
-            <p>스캔 거리별 크기 계산법부터 색상, URL 구조까지 실전 기준.</p>
-          </a>
-        </div>
-      </section>
-
-      <!-- ===================== FAQ ===================== -->
-      <section class="about-section">
-        <h2>자주 묻는 질문</h2>
-
-        <details class="faq-item">
-          <summary>QR 코드 생성기는 무료인가요?</summary>
-          <div class="faq-body">
-            <p>
-              네, 회원가입이나 결제 없이 모든 기능을 무료로 사용할 수 있습니다.
-            </p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>만든 QR 코드에 유효기간이 있나요?</summary>
-          <div class="faq-body">
-            <p>
-              없습니다. 입력한 정보가 QR 코드 안에 그대로 담기기 때문에, 서버
-              만료 처리 없이 반영구적으로 동일하게 인식됩니다.
-            </p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>로고를 넣으면 QR 코드 인식이 안 되나요?</summary>
-          <div class="faq-body">
-            <p>
-              로고를 넣어도 대부분의 경우에는 안정적으로 인식됩니다. 로고
-              사이즈는 조정 할 수 있으며, 만약 크게 설정했더라도
-              오류복원률<button
-                type="button"
-                class="info-btn"
-                data-term="ecc"
-                aria-label="오류 복원율이 뭔지 설명 보기"
-              >
-                ?</button
-              >을 높게 설정하여 안정적으로 인식되게 할 수 있습니다.
-            </p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>
-            히스토리에 입력한 와이파이 비밀번호나 연락처 정보가 저장되나요?
-          </summary>
-          <div class="faq-body">
-            <p>
-              히스토리 기능을 사용하더라도 와이파이 비밀번호, 연락처
-              이름·전화번호·이메일 같은 민감한 항목은 기본적으로 기록되지
-              않습니다. 또한 모든 기록은 서버로 전송되지 않고 사용하는
-              브라우저에만 저장됩니다.
-            </p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>다른 QR코드 생성기들과의 차별점이 뭔가요?</summary>
-          <div class="faq-body">
-            <p>
-              첫 번째 차별점은 데이터를 그대로 집어넣어 <b>영구적인 QR코드</b>를
-              생성해준다는 점 입니다.<br />다른 QR코드 생성기들의 대부분은 "단축
-              URL"에 데이터를 담고, QR코드에 단축 URL을 넣는 경우가 있습니다. 이
-              때 보통 단축 URL에 유효기간이 있어서 유효기간이 지나면 QR코드를
-              사용하지 못하게 됩니다. <br />두 번째 차별점은 자유로운
-              커스터마이징 기능으로 <b>나만의 특별한 QR코드</b>를 제작 할 수
-              있다는 점 입니다. <br />다른 QR코드 생성기는 배경색, 점 모양, 점
-              색깔, 로고 삽입, 원형 QR코드 등과 같은 커스터마이징 기능을 전부
-              지원하지 않습니다. 이 QR코드 생성기는 최대한 많은 커스터마이징
-              요소들을 지원하기에 다양하게 QR코드를 꾸밀 수 있습니다. <br />세
-              번째 차별점은 한 사이트에서 <b>여러 종류의 QR코드</b>를 생성 할 수
-              있다는 점입니다. <br />다른 대부분의 QR코드 생성기들은 유형이
-              정해져있습니다. 하지만 이 생성기는 텍스트, URL, Wifi, 전화번호 외
-              5개 유형의 QR코드를 생성 할 수 있습니다.<br /><br />
-              이 QR코드 생성기는 다른 QR코드 생성기를 사용하다 불편해서 만들게
-              된 것 입니다. 위에 설명한
-              <b>다른 생성기들과의 차별점들은 이 생성기를 만들게 된 계기</b
-              >입니다.
-            </p>
-          </div>
-        </details>
-      </section>
-
-      <div class="about-bottom-cta">
-        <a href="/app" class="about-cta-large">지금 사용해보기</a>
       </div>
-    </div>
-
-    <div id="term-modal">
-      <div class="modal-box">
-        <h2 id="term-modal-title"></h2>
-        <div id="term-modal-body"></div>
-        <div class="modal-actions">
-          <button id="term-modal-close-btn" type="button">닫기</button>
-        </div>
-      </div>
-    </div>
-
-    <footer class="page-footer about-footer">
-      <hr />
-      <small
-        >Copyright 2026. <a href="https://minchan.app">김민찬</a> All rights
-        reserved.</small
-      >
-      <small>
-        Contact: <a href="mailto:business@minchan.app">business@minchan.app</a>
-      </small>
-      <small> Created by Claude </small>
     </footer>
 
     <script>
-      // "사용해보기" 클릭 기록: 다음 방문부터는 소개 페이지를 건너뛰고
-      // 바로 app.html로 이동시키기 위한 플래그. GSAP 로드 여부와
-      // 무관하게 항상 동작해야 하므로 별도 스크립트로 분리함.
-      (function () {
-        document.querySelectorAll('a[href="/app"]').forEach(function (link) {
-          link.addEventListener("click", function () {
-            try {
-              localStorage.setItem("qrgen-visited", "true");
-            } catch (e) {
-              // localStorage를 못 쓰는 환경이면 그냥 넘어감 (다음에도 소개 페이지가 보임)
-            }
-          });
+      // "QR 만들기" 클릭 기록: 다음 방문부터는 소개 페이지를 건너뛰고 바로 /app으로 이동
+      document.querySelectorAll('a[href="/app"]').forEach(function (link) {
+        link.addEventListener("click", function () {
+          try {
+            localStorage.setItem("qrgen-visited", "true");
+          } catch (e) {
+            // localStorage를 못 쓰는 환경이면 그냥 넘어감
+          }
         });
-      })();
-    </script>
+      });
 
-    <script>
-      // 용어 설명 모달: 물음표 버튼을 누르면 쉬운 말로 설명을 보여줌
+      // 다크 모드 토글 (편집 화면과 같은 localStorage 키 공유)
       (function () {
-        var TERMS = {
-          contrast: {
-            title: "밝기 차이(명도 대비)가 뭔가요?",
-            body: "<p>QR 코드는 결국 카메라가 밝은 칸과 어두운 칸을 구분해서 읽는 방식이에요. 그래서 배경색과 QR 색상의 밝기 차이가 너무 작으면, 사람 눈에는 괜찮아 보여도 카메라는 두 색을 잘 구분하지 못해서 스캔이 안 될 수 있어요.</p><p>이 밝기 차이를 재는 국제 기준을 'WCAG 명도 대비'라고 부르는데, 원래는 시각장애가 있는 분들도 화면 글씨를 잘 읽을 수 있도록 만든 웹 접근성 기준이에요. QR 코드에도 같은 원리가 적용돼서, 이 기준으로 배경색과 QR 색상의 차이를 계산해 미리 알려드리는 거예요.</p>",
-          },
-          ecc: {
-            title: "오류 복원율이 뭔가요?",
-            body: "<p>QR 코드는 일부러 정보를 조금 중복해서 담아둬서, 코드의 일부가 가려지거나 지저분해져도 나머지 정보만으로 원래 내용을 복구할 수 있어요. 이 '여유분'의 비율을 오류 복원율이라고 불러요.</p><p>여유분을 많이 둘수록(L → M → Q → H 순으로 높아짐) 더 많이 가려져도 인식되지만, 그만큼 QR 코드 무늬가 조금 더 촘촘하고 복잡해져요. 로고를 넣을 계획이라면 Q 이상으로 설정하는 걸 추천해요.</p>",
-          },
-        };
-
-        var modal = document.getElementById("term-modal");
-        var titleEl = document.getElementById("term-modal-title");
-        var bodyEl = document.getElementById("term-modal-body");
-        var closeBtn = document.getElementById("term-modal-close-btn");
-
-        function openTermModal(key) {
-          var term = TERMS[key];
-          if (!term || !modal) return;
-          titleEl.textContent = term.title;
-          bodyEl.innerHTML = term.body;
-          modal.style.display = "flex";
-        }
-
-        function closeTermModal() {
-          if (modal) modal.style.display = "none";
-        }
-
-        document
-          .querySelectorAll(".info-btn[data-term]")
-          .forEach(function (btn) {
-            btn.addEventListener("click", function () {
-              openTermModal(btn.getAttribute("data-term"));
-            });
-          });
-
-        if (closeBtn) closeBtn.addEventListener("click", closeTermModal);
-        if (modal) {
-          modal.addEventListener("click", function (e) {
-            if (e.target.id === "term-modal") closeTermModal();
-          });
-        }
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape") closeTermModal();
-        });
-      })();
-    </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-    <script>
-      // 다크모드 토글 (메인 페이지와 동일한 localStorage 키 공유)
-      (function () {
-        var THEME_KEY = "qrgen-theme";
+        var KEY = "qrgen-theme";
         var btn = document.getElementById("theme-toggle");
-
-        function updateBtn(theme) {
-          if (theme === "dark") {
-            btn.textContent = "☀️";
-            btn.title = "라이트 모드로 전환";
-          } else {
-            btn.textContent = "🌙";
-            btn.title = "다크 모드로 전환";
-          }
+        var SUN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+        var MOON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+        function render(theme) {
+          var label = theme === "dark" ? "라이트 모드로 전환" : "다크 모드로 전환";
+          btn.innerHTML = theme === "dark" ? SUN : MOON;
+          btn.title = label;
+          btn.setAttribute("aria-label", label);
         }
-
-        updateBtn(
-          document.documentElement.getAttribute("data-theme") || "light",
-        );
-
+        render(document.documentElement.getAttribute("data-theme") || "light");
         btn.addEventListener("click", function () {
-          var current =
-            document.documentElement.getAttribute("data-theme") || "light";
-          var next = current === "dark" ? "light" : "dark";
+          var next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
           document.documentElement.setAttribute("data-theme", next);
-          localStorage.setItem(THEME_KEY, next);
-          updateBtn(next);
+          try {
+            localStorage.setItem(KEY, next);
+          } catch (e) {}
+          render(next);
         });
       })();
 
-      // 히어로 장식용 QR 모듈 그리드 (실제 QR 코드가 아닌 순수 장식 요소)
+      // 스크롤하면 부드럽게 나타나기 ("동작 줄이기" 설정이면 바로 보여줌)
       (function () {
-        var container = document.getElementById("qr-module-grid");
-        if (!container) return;
-
-        var size = 11;
-        var finder = new Set();
-        // 좌상단, 우상단, 좌하단 파인더 패턴(7x7) 위치를 표시용으로 표기
-        [
-          [0, 0],
-          [0, 6],
-          [6, 0],
-          [6, 6],
-        ].forEach(function (corner) {
-          for (var dr = 0; dr < 7; dr++) {
-            for (var dc = 0; dc < 7; dc++) {
-              var r = corner[0] + dr;
-              var c = corner[1] + dc;
-              if (r < size && c < size) {
-                var isBorder = dr === 0 || dr === 6 || dc === 0 || dc === 6;
-                var isCore = dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4;
-                if (isBorder || isCore) finder.add(r + "-" + c);
-              }
-            }
-          }
-        });
-
-        var cells = [];
-        for (var row = 0; row < size; row++) {
-          for (var col = 0; col < size; col++) {
-            var cell = document.createElement("span");
-            var key = row + "-" + col;
-            var isFinder = finder.has(key);
-            var on = isFinder || Math.random() > 0.55;
-            cell.className =
-              "qr-cell" + (on ? " on" : "") + (isFinder ? " finder" : "");
-            container.appendChild(cell);
-            if (on) cells.push(cell);
-          }
-        }
-
-        var reduceMotion = window.matchMedia(
-          "(prefers-reduced-motion: reduce)",
-        ).matches;
-
-        if (typeof gsap === "undefined" || reduceMotion) {
-          cells.forEach(function (c) {
-            c.style.opacity = "1";
-            c.style.transform = "scale(1)";
+        var items = document.querySelectorAll(".reveal");
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduce || !("IntersectionObserver" in window)) {
+          items.forEach(function (el) {
+            el.classList.add("is-visible");
           });
           return;
         }
-
-        gsap.set(cells, { opacity: 0, scale: 0.3, transformOrigin: "50% 50%" });
-        gsap.to(cells, {
-          opacity: 1,
-          scale: 1,
-          duration: 0.6,
-          ease: "elastic.out(1, 0.55)",
-          delay: 0.15,
-          stagger: { each: 0.018, from: "random" },
-        });
-      })();
-    </script>
-
-    <script>
-      // ===== 여기부터는 GSAP으로 만드는 "말랑말랑한" 인터랙션들 =====
-      (function () {
-        if (typeof gsap === "undefined") return;
-
-        var reduceMotion = window.matchMedia(
-          "(prefers-reduced-motion: reduce)",
-        ).matches;
-
-        if (reduceMotion) return; // 모션 최소화 환경에서는 아래 애니메이션을 전부 건너뜀
-
-        gsap.registerPlugin(ScrollTrigger);
-
-        /* ---------- 히어로 텍스트: 통통 튀며 등장 ---------- */
-        gsap.from(
-          [
-            ".about-topbar",
-            ".about-eyebrow",
-            ".about-hero-text h1",
-            ".about-hero-desc",
-            ".about-cta-large",
-          ],
-          {
-            y: 26,
-            opacity: 0,
-            duration: 0.7,
-            ease: "back.out(1.7)",
-            stagger: 0.1,
+        document.documentElement.classList.add("js-reveal");
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                io.unobserve(entry.target);
+              }
+            });
           },
+          { rootMargin: "0px 0px -8% 0px" },
         );
-
-        /* ---------- 스크롤에 맞춰 섹션이 말랑하게 떠오름 ---------- */
-        gsap.utils
-          .toArray(".about-section, .about-bottom-cta")
-          .forEach(function (section) {
-            gsap.from(section, {
-              y: 36,
-              opacity: 0,
-              scale: 0.96,
-              duration: 0.7,
-              ease: "back.out(1.6)",
-              scrollTrigger: {
-                trigger: section,
-                start: "top 85%",
-              },
-            });
-          });
-
-        /* ---------- 9가지 유형 카드: 순서대로 팝업 ---------- */
-        gsap.from(".type-card", {
-          y: 24,
-          opacity: 0,
-          scale: 0.85,
-          duration: 0.6,
-          ease: "back.out(2)",
-          stagger: 0.06,
-          scrollTrigger: {
-            trigger: ".type-card-grid",
-            start: "top 85%",
-          },
-        });
-
-        /* ---------- 사용 방법 번호: 하나씩 통통 튀며 등장 ---------- */
-        gsap.from(".howto-list li", {
-          x: -20,
-          opacity: 0,
-          duration: 0.5,
-          ease: "back.out(2.2)",
-          stagger: 0.12,
-          scrollTrigger: {
-            trigger: ".howto-list",
-            start: "top 85%",
-          },
-        });
-
-        /* ---------- 명도 대비 데모: 순서대로 통통 등장 ---------- */
-        gsap.from(".contrast-demo-row", {
-          x: 24,
-          opacity: 0,
-          duration: 0.5,
-          ease: "back.out(2.2)",
-          stagger: 0.15,
-          scrollTrigger: {
-            trigger: ".contrast-demo",
-            start: "top 85%",
-          },
-        });
-
-        /* ---------- 미니 QR 데모: 숨 쉬듯 은은하게 부풀었다 줄었다 ---------- */
-        gsap.to(".mini-qr-demo", {
-          scale: 1.06,
-          duration: 1.8,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-        });
-
-        /* ---------- 버튼: 누르면 쏙 들어갔다 탱글 튀어나옴 ---------- */
-        document
-          .querySelectorAll(".about-cta-large, .about-cta-small")
-          .forEach(function (btn) {
-            gsap.set(btn, { transformOrigin: "50% 50%" });
-
-            btn.addEventListener("mouseenter", function () {
-              gsap.to(btn, { scale: 1.06, duration: 0.3, ease: "back.out(3)" });
-            });
-            btn.addEventListener("mouseleave", function () {
-              gsap.to(btn, {
-                scale: 1,
-                duration: 0.4,
-                ease: "elastic.out(1, 0.4)",
-              });
-            });
-            btn.addEventListener("mousedown", function () {
-              gsap.to(btn, { scale: 0.9, duration: 0.12, ease: "power2.out" });
-            });
-            ["mouseup", "mouseleave"].forEach(function (evt) {
-              btn.addEventListener(evt, function () {
-                gsap.to(btn, {
-                  scale: 1,
-                  duration: 0.5,
-                  ease: "elastic.out(1, 0.35)",
-                });
-              });
-            });
-          });
-
-        /* ---------- 유형 카드: 마우스 올리면 살짝 씰룩 ---------- */
-        document.querySelectorAll(".type-card").forEach(function (card) {
-          gsap.set(card, { transformOrigin: "50% 100%" });
-          var wobble = gsap.utils.random(-2.5, 2.5);
-
-          card.addEventListener("mouseenter", function () {
-            gsap.to(card, {
-              y: -6,
-              scale: 1.04,
-              rotate: wobble,
-              duration: 0.35,
-              ease: "back.out(3)",
-            });
-          });
-          card.addEventListener("mouseleave", function () {
-            gsap.to(card, {
-              y: 0,
-              scale: 1,
-              rotate: 0,
-              duration: 0.5,
-              ease: "elastic.out(1, 0.4)",
-            });
-          });
-        });
-
-        /* ---------- FAQ: 열고 닫힐 때 말랑하게 늘어났다 줄어듦 ---------- */
-        document.querySelectorAll(".faq-item").forEach(function (item) {
-          var summary = item.querySelector("summary");
-          var body = item.querySelector(".faq-body");
-          if (!summary || !body) return;
-
-          gsap.set(body, { height: 0, overflow: "hidden" });
-
-          summary.addEventListener("click", function (e) {
-            e.preventDefault();
-
-            var isOpen = item.classList.contains("is-open");
-
-            if (!isOpen) {
-              item.setAttribute("open", "");
-              item.classList.add("is-open");
-              gsap.fromTo(
-                body,
-                { height: 0 },
-                {
-                  height: body.scrollHeight,
-                  duration: 0.5,
-                  ease: "back.out(1.7)",
-                  onComplete: function () {
-                    gsap.set(body, { height: "auto" });
-                  },
-                },
-              );
-            } else {
-              var currentHeight = body.scrollHeight;
-              gsap.fromTo(
-                body,
-                { height: currentHeight },
-                {
-                  height: 0,
-                  duration: 0.35,
-                  ease: "power2.inOut",
-                  onComplete: function () {
-                    item.classList.remove("is-open");
-                    item.removeAttribute("open");
-                  },
-                },
-              );
-            }
-          });
+        items.forEach(function (el) {
+          io.observe(el);
         });
       })();
     </script>
