@@ -8,7 +8,7 @@
 > 비개발자도 읽을 수 있는 자세한 설명은 [`PROJECT_OVERVIEW.md`](./PROJECT_OVERVIEW.md)를 참고하세요.
 
 - **현재 버전**: v2.0.0 (2026. 11. 12.)
-- **배포**: Cloudflare (Workers 정적 에셋)
+- **배포**: 자체 배포툴
 
 ---
 
@@ -201,7 +201,7 @@ assets/hero-qr.png     소개 페이지 히어로용 실제 QR 이미지 (qr.min
 favicon/               기기별 아이콘, manifest.json, favicon-source.svg(원본 그림)
 favicon.ico            브라우저 탭 아이콘
 og-image.png           SNS 공유 미리보기 이미지 (1200×630)
-_redirects             종료된 가이드 페이지 주소 → 소개 페이지 301 이동 (Cloudflare)
+_redirects             종료된 가이드 페이지 주소 → 소개 페이지 301 이동
 robots.txt             크롤러 규칙 (AI 학습 크롤러 차단)
 sitemap.xml            사이트맵
 wrangler.jsonc         Cloudflare 배포 설정
@@ -220,8 +220,6 @@ python -m http.server 8000
 
 브라우저에서 `http://localhost:8000/app.html` 을 엽니다.
 
-`.html` 없는 경로(`/app`)와 `_redirects`까지 실제 배포와 똑같이 확인하려면 Cloudflare Wrangler를 사용합니다.
-
 ```powershell
 # 실행 위치: 노트북 PowerShell, qrcode 폴더 안
 npx wrangler dev
@@ -233,12 +231,7 @@ npx wrangler dev
 
 ## 13. 배포
 
-Cloudflare Workers의 정적 에셋 기능으로 배포합니다. `wrangler.jsonc`에서 프로젝트 폴더 전체(`.`)를 에셋 디렉터리로 지정하고 있으며, 서버 측 코드는 없습니다.
-
-```powershell
-# 실행 위치: 노트북 PowerShell, qrcode 폴더 안
-npx wrangler deploy
-```
+- 자체 배포툴을 사용합니다.
 
 ---
 
