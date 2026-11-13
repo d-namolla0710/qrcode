@@ -269,4 +269,8 @@ npx wrangler dev
 
 ## License
 
-MIT © 2026 김민찬 — 자세한 내용은 [LICENSE](./LICENSE)를 참고하세요.
+GPL-3.0-or-later © 2026 김민찬 — 자세한 내용은 [LICENSE](./LICENSE)를 참고하세요.
+
+이 프로젝트를 수정하거나 재배포할 때는 같은 GPL-3.0-or-later 라이선스로 소스 코드를 함께 공개해야 합니다.
+
+> 라이선스 변경 이력: 2026년 11월부터 MIT에서 GPL-3.0-or-later로 변경되었습니다. 변경 이전에 배포된 버전은 기존 MIT 라이선스가 그대로 적용됩니다.
