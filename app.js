@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2026 김민찬
- * Licensed under the MIT License. See LICENSE file for details.
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ * Licensed under the GNU General Public License v3.0 or later. See LICENSE file for details.
  */
 
 
